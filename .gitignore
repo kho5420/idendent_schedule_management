@@ -51,4 +51,5 @@ dist/
 /.cursor/
 /.claude/settings.local.json
 /.claude/secrets.md
-/docs/superpowers/
+.superpowers/
+/sample_data/
