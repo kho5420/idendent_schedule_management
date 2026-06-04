@@ -121,9 +121,7 @@ export function GoogleSheetPicker({ token, sheetId, onTokenChange, onSheetIdChan
                             width: '100%',
                         }}
                     />
-                    {urlError && (
-                        <div style={{ fontSize: 10, color: '#f87171' }}>{urlError}</div>
-                    )}
+                    {urlError && <div style={{ fontSize: 10, color: '#f87171' }}>{urlError}</div>}
                     <button
                         onClick={handleUrlSubmit}
                         style={{

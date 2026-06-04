@@ -37,7 +37,14 @@ function Card({ isSelected, onClick, icon, title, description, children }: CardP
             }}
         >
             <div style={{ fontSize: 28, marginBottom: 8 }}>{icon}</div>
-            <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text)', marginBottom: 4 }}>
+            <h3
+                style={{
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: 'var(--color-text)',
+                    marginBottom: 4,
+                }}
+            >
                 {title}
             </h3>
             <p style={{ fontSize: 11, color: 'var(--color-text-sub)', marginBottom: 12 }}>
