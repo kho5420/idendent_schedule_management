@@ -28,3 +28,12 @@ export type GeneratedSchedule = {
     month: number;
     weeks: WeekRow[];
 };
+
+export type StaffMember = {
+    name: string;
+    isOrtho: boolean;
+};
+
+export type StaffConfig = {
+    staff: StaffMember[];
+};
