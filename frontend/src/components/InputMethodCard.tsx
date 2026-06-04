@@ -7,6 +7,7 @@ interface Props {
     uploadedFile: File | null;
     googleToken: string | null;
     sheetId: string | null;
+    isLoading?: boolean;
     onMethodSelect: (method: InputMethod) => void;
     onFileChange: (file: File | null) => void;
     onTokenChange: (token: string | null) => void;
@@ -60,6 +61,7 @@ export function InputMethodCard({
     uploadedFile,
     googleToken,
     sheetId,
+    isLoading,
     onMethodSelect,
     onFileChange,
     onTokenChange,
@@ -74,7 +76,11 @@ export function InputMethodCard({
                 title="엑셀 파일 업로드"
                 description="로컬 .xlsx 파일을 직접 업로드합니다"
             >
-                <ExcelUploader file={uploadedFile} onFileChange={onFileChange} />
+                <ExcelUploader
+                    file={uploadedFile}
+                    onFileChange={onFileChange}
+                    isLoading={isLoading}
+                />
             </Card>
             <Card
                 isSelected={selected === 'google'}

@@ -1,12 +1,9 @@
 import { useState } from 'react';
-import type { ScheduleMonth, InputMethod, ScheduleData, GeneratedSchedule } from './types';
+import type { ScheduleMonth, InputMethod, GeneratedSchedule } from './types';
 import { MonthSelector } from './components/MonthSelector';
 import { InputMethodCard } from './components/InputMethodCard';
 import { GenerateButton } from './components/GenerateButton';
 import { SchedulePreview } from './components/SchedulePreview';
-import { parseScheduleExcel } from './lib/excelParser';
-import { fetchSheetData } from './lib/sheetsApi';
-import { generateSchedule } from './lib/scheduleGenerator';
 import './index.css';
 
 function getDefaultMonth(): ScheduleMonth {
@@ -21,9 +18,10 @@ function App() {
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
     const [googleToken, setGoogleToken] = useState<string | null>(null);
     const [sheetId, setSheetId] = useState<string | null>(null);
-    const [generatedSchedule, setGeneratedSchedule] = useState<GeneratedSchedule | null>(null);
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [generatedSchedule] = useState<GeneratedSchedule | null>(null);
+    const [isGenerating] = useState(false);
+    const [error] = useState<string | null>(null);
+    const [comingSoon, setComingSoon] = useState(false);
 
     const isReady =
         inputMethod === 'excel'
@@ -34,25 +32,8 @@ function App() {
 
     async function handleGenerate() {
         if (!isReady || !inputMethod) return;
-        setIsGenerating(true);
-        setError(null);
-        try {
-            let data: ScheduleData;
-            if (inputMethod === 'excel' && uploadedFile) {
-                const buf = await uploadedFile.arrayBuffer();
-                data = await parseScheduleExcel(buf, selectedMonth);
-            } else if (inputMethod === 'google' && googleToken && sheetId) {
-                data = await fetchSheetData(sheetId, googleToken, selectedMonth);
-            } else {
-                throw new Error('입력 데이터가 준비되지 않았습니다.');
-            }
-            const result = generateSchedule(data, selectedMonth);
-            setGeneratedSchedule(result);
-        } catch (e) {
-            setError(e instanceof Error ? e.message : '알 수 없는 오류가 발생했습니다.');
-        } finally {
-            setIsGenerating(false);
-        }
+        setComingSoon(true);
+        setTimeout(() => setComingSoon(false), 2000);
     }
 
     return (
@@ -73,7 +54,7 @@ function App() {
                         marginBottom: 10,
                     }}
                 >
-                    EDEN
+                    언제나이든치과
                 </div>
                 <h1 style={{ fontSize: 26, fontWeight: 700, color: 'white', marginBottom: 6 }}>
                     진료실 스케줄 관리
@@ -102,6 +83,7 @@ function App() {
                 uploadedFile={uploadedFile}
                 googleToken={googleToken}
                 sheetId={sheetId}
+                isLoading={isGenerating}
                 onMethodSelect={setInputMethod}
                 onFileChange={setUploadedFile}
                 onTokenChange={setGoogleToken}
@@ -114,6 +96,20 @@ function App() {
                 isLoading={isGenerating}
                 onClick={handleGenerate}
             />
+
+            {comingSoon && (
+                <div
+                    style={{
+                        textAlign: 'center',
+                        fontSize: 13,
+                        color: 'var(--color-text-sub)',
+                        marginTop: -16,
+                        marginBottom: 16,
+                    }}
+                >
+                    🚧 준비 중입니다
+                </div>
+            )}
 
             {error && (
                 <div

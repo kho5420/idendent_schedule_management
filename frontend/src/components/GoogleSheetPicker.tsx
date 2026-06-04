@@ -35,6 +35,7 @@ function extractSheetId(input: string): string | null {
 export function GoogleSheetPicker({ token, sheetId, onTokenChange, onSheetIdChange }: Props) {
     const [urlInput, setUrlInput] = useState('');
     const [urlError, setUrlError] = useState('');
+    const [comingSoon, setComingSoon] = useState(false);
 
     useEffect(() => {
         const saved = localStorage.getItem(TOKEN_KEY);
@@ -43,7 +44,11 @@ export function GoogleSheetPicker({ token, sheetId, onTokenChange, onSheetIdChan
 
     function login() {
         const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-        if (!clientId || !window.google) return;
+        if (!clientId || !window.google) {
+            setComingSoon(true);
+            setTimeout(() => setComingSoon(false), 2000);
+            return;
+        }
         const client = window.google.accounts.oauth2.initTokenClient({
             client_id: clientId,
             scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
@@ -76,25 +81,39 @@ export function GoogleSheetPicker({ token, sheetId, onTokenChange, onSheetIdChan
 
     if (!token) {
         return (
-            <button
-                onClick={login}
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 8,
-                    background: 'var(--color-border)',
-                    border: '1px solid var(--color-border-hover)',
-                    borderRadius: 6,
-                    padding: '8px 12px',
-                    fontSize: 12,
-                    color: 'var(--color-text)',
-                    cursor: 'pointer',
-                    width: '100%',
-                }}
-            >
-                🔑 Google로 로그인
-            </button>
+            <div>
+                <button
+                    onClick={login}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                        background: 'var(--color-border)',
+                        border: '1px solid var(--color-border-hover)',
+                        borderRadius: 6,
+                        padding: '8px 12px',
+                        fontSize: 12,
+                        color: 'var(--color-text)',
+                        cursor: 'pointer',
+                        width: '100%',
+                    }}
+                >
+                    🔑 Google로 로그인
+                </button>
+                {comingSoon && (
+                    <div
+                        style={{
+                            fontSize: 11,
+                            color: 'var(--color-text-sub)',
+                            textAlign: 'center',
+                            marginTop: 6,
+                        }}
+                    >
+                        🚧 준비 중입니다
+                    </div>
+                )}
+            </div>
         );
     }
 
