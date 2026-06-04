@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
     plugins: [react(), tailwindcss()],
-    base: '/eden_schedule_management/',
+    base: '/iden_schedule_management/',
     test: {
         environment: 'jsdom',
         globals: true,
