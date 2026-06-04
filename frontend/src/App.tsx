@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import type { ScheduleMonth, InputMethod, GeneratedSchedule } from './types';
+import type { ScheduleMonth, InputMethod, GeneratedSchedule, StaffConfig } from './types';
 import { MonthSelector } from './components/MonthSelector';
 import { InputMethodCard } from './components/InputMethodCard';
 import { GenerateButton } from './components/GenerateButton';
 import { SchedulePreview } from './components/SchedulePreview';
+import { loadStaffConfig, saveStaffConfig } from './lib/staffConfig';
+import { StaffConfigModal } from './components/StaffConfigModal';
 import './index.css';
 
 function getDefaultMonth(): ScheduleMonth {
@@ -22,6 +24,8 @@ function App() {
     const [isGenerating] = useState(false);
     const [error] = useState<string | null>(null);
     const [comingSoon, setComingSoon] = useState(false);
+    const [staffConfig, setStaffConfig] = useState<StaffConfig>(loadStaffConfig);
+    const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
 
     const isReady =
         inputMethod === 'excel'
@@ -36,10 +40,32 @@ function App() {
         setTimeout(() => setComingSoon(false), 2000);
     }
 
+    function handleStaffChange(config: StaffConfig) {
+        setStaffConfig(config);
+        saveStaffConfig(config);
+    }
+
     return (
         <div className="app-container">
             {/* 헤더 */}
-            <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <div style={{ position: 'relative', textAlign: 'center', marginBottom: 32 }}>
+                <button
+                    onClick={() => setIsStaffModalOpen(true)}
+                    style={{
+                        position: 'absolute',
+                        right: 0,
+                        top: 0,
+                        background: 'none',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: 8,
+                        padding: '6px 10px',
+                        fontSize: 12,
+                        color: 'var(--color-text-sub)',
+                        cursor: 'pointer',
+                    }}
+                >
+                    ⚙ 직원 설정
+                </button>
                 <div
                     style={{
                         display: 'inline-block',
@@ -128,6 +154,12 @@ function App() {
             )}
 
             {generatedSchedule && <SchedulePreview schedule={generatedSchedule} />}
+            <StaffConfigModal
+                isOpen={isStaffModalOpen}
+                config={staffConfig}
+                onChange={handleStaffChange}
+                onClose={() => setIsStaffModalOpen(false)}
+            />
         </div>
     );
 }
