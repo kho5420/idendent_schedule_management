@@ -1,7 +1,15 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
-// https://vite.dev/config/
 export default defineConfig({
-    plugins: [react()],
+    plugins: [react(), tailwindcss()],
+    base: '/eden_schedule_management/',
+    test: {
+        environment: 'jsdom',
+        globals: true,
+        setupFiles: ['./src/test-setup.ts'],
+        passWithNoTests: true,
+    },
 });
