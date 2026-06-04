@@ -37,7 +37,7 @@ function App() {
     }
 
     return (
-        <div style={{ padding: '32px 24px', maxWidth: 820, margin: '0 auto' }}>
+        <div className="app-container">
             {/* 헤더 */}
             <div style={{ textAlign: 'center', marginBottom: 32 }}>
                 <div

@@ -24,21 +24,26 @@ export function MonthSelector({ selected, onChange }: Props) {
 
     return (
         <div
+            className="month-selector-wrap"
             style={{
                 background: 'var(--color-card)',
                 border: '1px solid var(--color-border)',
                 borderRadius: 12,
                 padding: '14px 20px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 16,
                 marginBottom: 20,
             }}
         >
-            <span style={{ fontSize: 13, color: 'var(--color-text-sub)', whiteSpace: 'nowrap' }}>
-                📅 대상 월 선택
+            <span
+                style={{
+                    fontSize: 12,
+                    color: 'var(--color-text-sub)',
+                    whiteSpace: 'nowrap',
+                    letterSpacing: '0.04em',
+                }}
+            >
+                대상 월 선택
             </span>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div className="month-chips">
                 {months.map((m) => {
                     const isSelected = m.year === selected.year && m.month === selected.month;
                     return (

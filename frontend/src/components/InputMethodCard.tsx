@@ -68,7 +68,7 @@ export function InputMethodCard({
     onSheetIdChange,
 }: Props) {
     return (
-        <div style={{ display: 'flex', gap: 14, marginBottom: 20 }}>
+        <div className="input-method-grid">
             <Card
                 isSelected={selected === 'excel'}
                 onClick={() => onMethodSelect('excel')}
