@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import type { ScheduleMonth, InputMethod, GeneratedSchedule, StaffConfig } from './types';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import type { ScheduleMonth, InputMethod, GeneratedSchedule } from './types';
 import { MonthSelector } from './components/MonthSelector';
 import { InputMethodCard } from './components/InputMethodCard';
 import { GenerateButton } from './components/GenerateButton';
 import { SchedulePreview } from './components/SchedulePreview';
-import { loadStaffConfig, saveStaffConfig } from './lib/staffConfig';
-import { StaffConfigModal } from './components/StaffConfigModal';
 import { ChangelogModal } from './components/ChangelogModal';
+import { StaffSettingsPage } from './components/StaffSettingsPage';
 import { hasNewVersion, markAsSeen } from './lib/changelog';
 import './index.css';
 
@@ -16,7 +16,8 @@ function getDefaultMonth(): ScheduleMonth {
     return { year: d.getFullYear(), month: d.getMonth() + 1 };
 }
 
-function App() {
+function MainPage() {
+    const navigate = useNavigate();
     const [selectedMonth, setSelectedMonth] = useState<ScheduleMonth>(getDefaultMonth);
     const [inputMethod, setInputMethod] = useState<InputMethod | null>(null);
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -26,8 +27,6 @@ function App() {
     const [isGenerating] = useState(false);
     const [error] = useState<string | null>(null);
     const [comingSoon, setComingSoon] = useState(false);
-    const [staffConfig, setStaffConfig] = useState<StaffConfig>(loadStaffConfig);
-    const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
     const [isChangelogOpen, setIsChangelogOpen] = useState(false);
     const [showBadge, setShowBadge] = useState(() => hasNewVersion());
 
@@ -44,16 +43,9 @@ function App() {
         setTimeout(() => setComingSoon(false), 2000);
     }
 
-    function handleStaffChange(config: StaffConfig) {
-        setStaffConfig(config);
-        saveStaffConfig(config);
-    }
-
     return (
         <div className="app-container">
-            {/* 헤더 */}
             <div style={{ marginBottom: 32 }}>
-                {/* 버튼 행 */}
                 <div
                     style={{
                         display: 'flex',
@@ -100,7 +92,7 @@ function App() {
                         )}
                     </button>
                     <button
-                        onClick={() => setIsStaffModalOpen(true)}
+                        onClick={() => navigate('/staff')}
                         style={{
                             background: 'none',
                             border: '1px solid var(--color-border)',
@@ -114,7 +106,6 @@ function App() {
                         ⚙ 직원 설정
                     </button>
                 </div>
-                {/* 타이틀 영역 */}
                 <div style={{ textAlign: 'center' }}>
                     <div
                         style={{
@@ -222,14 +213,18 @@ function App() {
             )}
 
             {generatedSchedule && <SchedulePreview schedule={generatedSchedule} />}
-            <StaffConfigModal
-                isOpen={isStaffModalOpen}
-                config={staffConfig}
-                onChange={handleStaffChange}
-                onClose={() => setIsStaffModalOpen(false)}
-            />
+
             <ChangelogModal isOpen={isChangelogOpen} onClose={() => setIsChangelogOpen(false)} />
         </div>
+    );
+}
+
+function App() {
+    return (
+        <Routes>
+            <Route path="/" element={<MainPage />} />
+            <Route path="/staff" element={<StaffSettingsPage />} />
+        </Routes>
     );
 }
 

@@ -37,3 +37,43 @@ export type StaffMember = {
 export type StaffConfig = {
     staff: StaffMember[];
 };
+
+export type EmployeeType = {
+    id: number;
+    name: string;
+};
+
+export type CareerLevel = '고' | '중' | '저' | '신규';
+
+export type StaffRow = {
+    id: number;
+    name: string;
+    use_yn: 'Y' | 'N';
+    employee_type_id: number | null;
+    career: CareerLevel | null;
+    team_no: number | null;
+    is_ortho: boolean;
+    is_team_leader: boolean;
+    is_night_fixed: boolean;
+    is_weekday_fixed: boolean;
+    is_on_leave: boolean;
+    is_head_dentist_pick: boolean;
+    notes: string | null;
+};
+
+export type StaffUpdateData = Partial<
+    Pick<
+        StaffRow,
+        | 'name'
+        | 'employee_type_id'
+        | 'career'
+        | 'team_no'
+        | 'is_ortho'
+        | 'is_team_leader'
+        | 'is_night_fixed'
+        | 'is_weekday_fixed'
+        | 'is_on_leave'
+        | 'is_head_dentist_pick'
+        | 'notes'
+    >
+>;
