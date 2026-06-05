@@ -1,14 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#16a34a"/>
-  <path fill="white" d="
-    M 10 8
-    C 10 5 13 4 16 4
-    C 19 4 22 5 22 8
-    L 22 18
-    C 22 19 20.5 20 19.5 26
-    C 19 23 17.5 21 16 21
-    C 14.5 21 13 23 12.5 26
-    C 11.5 20 10 19 10 18
-    Z
-  "/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- 배경 원 -->
+  <circle cx="64" cy="64" r="60" fill="#7DE2D1"></circle>
+
+  <!-- 반짝이 -->
+  <g fill="#FFD84D">
+    <path d="M28 26 L32 18 L36 26 L44 30 L36 34 L32 42 L28 34 L20 30 Z"></path>
+  </g>
+
+  <!-- 치아 -->
+  <path d="M42 28
+       C30 28 24 38 24 50
+       C24 63 30 72 35 80
+       C39 87 42 99 51 99
+       C57 99 59 92 64 92
+       C69 92 71 99 77 99
+       C86 99 89 87 93 80
+       C98 72 104 63 104 50
+       C104 38 98 28 86 28
+       C79 28 73 33 64 33
+       C55 33 49 28 42 28 Z" fill="#FFFFFF" stroke="#163A70" stroke-width="5" stroke-linejoin="round"></path>
+
+  <!-- 눈 -->
+  <circle cx="52" cy="58" r="6" fill="#163A70"></circle>
+  <circle cx="76" cy="58" r="6" fill="#163A70"></circle>
+
+  <!-- 눈 하이라이트 -->
+  <circle cx="54" cy="56" r="2" fill="#FFFFFF"></circle>
+  <circle cx="78" cy="56" r="2" fill="#FFFFFF"></circle>
+
+  <!-- 웃는 입 -->
+  <path d="M54 74 Q64 82 74 74" fill="none" stroke="#163A70" stroke-width="4" stroke-linecap="round"></path>
+
+  <!-- 볼터치 -->
+  <circle cx="42" cy="70" r="4" fill="#FFB6C1" opacity="0.8"></circle>
+  <circle cx="86" cy="70" r="4" fill="#FFB6C1" opacity="0.8"></circle>
 </svg>

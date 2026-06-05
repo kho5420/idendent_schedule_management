@@ -88,8 +88,17 @@ function App() {
                         fontWeight: 700,
                         color: 'var(--color-text)',
                         marginBottom: 6,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 2,
                     }}
                 >
+                    <img
+                        src={`${import.meta.env.BASE_URL}favicon.png`}
+                        alt=""
+                        style={{ width: 48, height: 48 }}
+                    />
                     진료실 스케줄 관리
                 </h1>
                 <p style={{ fontSize: 13, color: 'var(--color-text-sub)' }}>
