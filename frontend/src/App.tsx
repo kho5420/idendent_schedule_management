@@ -6,6 +6,8 @@ import { GenerateButton } from './components/GenerateButton';
 import { SchedulePreview } from './components/SchedulePreview';
 import { loadStaffConfig, saveStaffConfig } from './lib/staffConfig';
 import { StaffConfigModal } from './components/StaffConfigModal';
+import { ChangelogModal } from './components/ChangelogModal';
+import { hasNewVersion, markAsSeen } from './lib/changelog';
 import './index.css';
 
 function getDefaultMonth(): ScheduleMonth {
@@ -26,6 +28,8 @@ function App() {
     const [comingSoon, setComingSoon] = useState(false);
     const [staffConfig, setStaffConfig] = useState<StaffConfig>(loadStaffConfig);
     const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
+    const [isChangelogOpen, setIsChangelogOpen] = useState(false);
+    const [showBadge, setShowBadge] = useState(() => hasNewVersion());
 
     const isReady =
         inputMethod === 'excel'
@@ -48,62 +52,109 @@ function App() {
     return (
         <div className="app-container">
             {/* 헤더 */}
-            <div style={{ position: 'relative', textAlign: 'center', marginBottom: 32 }}>
-                <button
-                    onClick={() => setIsStaffModalOpen(true)}
-                    style={{
-                        position: 'absolute',
-                        right: 0,
-                        top: 0,
-                        background: 'none',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: 8,
-                        padding: '6px 10px',
-                        fontSize: 12,
-                        color: 'var(--color-text-sub)',
-                        cursor: 'pointer',
-                    }}
-                >
-                    ⚙ 직원 설정
-                </button>
+            <div style={{ marginBottom: 32 }}>
+                {/* 버튼 행 */}
                 <div
                     style={{
-                        display: 'inline-block',
-                        background:
-                            'linear-gradient(135deg, var(--color-accent-from), var(--color-accent-to))',
-                        color: 'white',
-                        fontSize: 12,
-                        fontWeight: 600,
-                        letterSpacing: 1,
-                        padding: '4px 14px',
-                        borderRadius: 20,
-                        marginBottom: 10,
-                    }}
-                >
-                    언제나이든치과
-                </div>
-                <h1
-                    style={{
-                        fontSize: 26,
-                        fontWeight: 700,
-                        color: 'var(--color-text)',
-                        marginBottom: 6,
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 2,
+                        justifyContent: 'flex-end',
+                        gap: 6,
+                        marginBottom: 16,
                     }}
                 >
-                    <img
-                        src={`${import.meta.env.BASE_URL}favicon.png`}
-                        alt=""
-                        style={{ width: 48, height: 48 }}
-                    />
-                    진료실 스케줄 관리
-                </h1>
-                <p style={{ fontSize: 13, color: 'var(--color-text-sub)' }}>
-                    엑셀 또는 구글 스프레드시트를 업로드하여 월별 스케줄을 자동 생성합니다
-                </p>
+                    <button
+                        onClick={() => {
+                            setIsChangelogOpen(true);
+                            setShowBadge(false);
+                            markAsSeen();
+                        }}
+                        style={{
+                            position: 'relative',
+                            background: 'none',
+                            border: '1px solid var(--color-border)',
+                            borderRadius: 8,
+                            padding: '6px 10px',
+                            fontSize: 12,
+                            color: 'var(--color-text-sub)',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        📋 업데이트
+                        {showBadge && (
+                            <span
+                                style={{
+                                    position: 'absolute',
+                                    top: -6,
+                                    right: -6,
+                                    background: '#ef4444',
+                                    color: 'white',
+                                    fontSize: 9,
+                                    fontWeight: 700,
+                                    borderRadius: 8,
+                                    padding: '2px 5px',
+                                    lineHeight: 1,
+                                }}
+                            >
+                                NEW
+                            </span>
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setIsStaffModalOpen(true)}
+                        style={{
+                            background: 'none',
+                            border: '1px solid var(--color-border)',
+                            borderRadius: 8,
+                            padding: '6px 10px',
+                            fontSize: 12,
+                            color: 'var(--color-text-sub)',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        ⚙ 직원 설정
+                    </button>
+                </div>
+                {/* 타이틀 영역 */}
+                <div style={{ textAlign: 'center' }}>
+                    <div
+                        style={{
+                            display: 'inline-block',
+                            background:
+                                'linear-gradient(135deg, var(--color-accent-from), var(--color-accent-to))',
+                            color: 'white',
+                            fontSize: 12,
+                            fontWeight: 600,
+                            letterSpacing: 1,
+                            padding: '4px 14px',
+                            borderRadius: 20,
+                            marginBottom: 10,
+                        }}
+                    >
+                        언제나이든치과
+                    </div>
+                    <h1
+                        style={{
+                            fontSize: 26,
+                            fontWeight: 700,
+                            color: 'var(--color-text)',
+                            marginBottom: 6,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 2,
+                        }}
+                    >
+                        <img
+                            src={`${import.meta.env.BASE_URL}favicon.png`}
+                            alt=""
+                            style={{ width: 48, height: 48 }}
+                        />
+                        진료실 스케줄 관리
+                    </h1>
+                    <p style={{ fontSize: 13, color: 'var(--color-text-sub)' }}>
+                        엑셀 또는 구글 스프레드시트를 업로드하여 월별 스케줄을 자동 생성합니다
+                    </p>
+                </div>
             </div>
 
             <MonthSelector selected={selectedMonth} onChange={setSelectedMonth} />
@@ -177,6 +228,7 @@ function App() {
                 onChange={handleStaffChange}
                 onClose={() => setIsStaffModalOpen(false)}
             />
+            <ChangelogModal isOpen={isChangelogOpen} onClose={() => setIsChangelogOpen(false)} />
         </div>
     );
 }
