@@ -46,7 +46,7 @@ export function downloadExcel(schedule: GeneratedSchedule): void {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `eden_schedule_${schedule.year}_${String(schedule.month).padStart(2, '0')}.xlsx`;
+    a.download = `언제나이든치과_스케줄_${schedule.year}_${String(schedule.month).padStart(2, '0')}.xlsx`;
     a.click();
     URL.revokeObjectURL(url);
 }

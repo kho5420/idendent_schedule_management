@@ -1,4 +1,4 @@
-# Eden Schedule Management
+# Idendent Schedule Management
 
 엑셀 파일을 업로드하면 조건에 맞게 가공하여 새 엑셀 파일로 제공하는 웹 앱.
 React SPA(`frontend/`)로 구성되며, 모든 처리는 브라우저에서 실행된다.
