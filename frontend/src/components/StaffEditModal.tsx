@@ -425,21 +425,16 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                         marginBottom: 5,
                                     }}
                                 >
-                                    팀 번호
+                                    팀
                                 </div>
                                 <select
                                     value={form.team_no ?? ''}
-                                    onChange={(e) =>
-                                        set(
-                                            'team_no',
-                                            e.target.value ? Number(e.target.value) : null
-                                        )
-                                    }
+                                    onChange={(e) => set('team_no', e.target.value || null)}
                                     style={selectStyle}
                                 >
                                     <option value="">없음</option>
-                                    <option value="1">1팀</option>
-                                    <option value="2">2팀</option>
+                                    <option value="A">A팀</option>
+                                    <option value="B">B팀</option>
                                 </select>
                             </div>
                         </div>

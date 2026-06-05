@@ -123,7 +123,7 @@ function SortableStaffRow({
                 {s.career ?? '—'}
             </div>
             <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--color-text-sub)' }}>
-                {s.team_no ?? '—'}
+                {s.team_no ? `${s.team_no}팀` : '—'}
             </div>
             <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
                 {BADGES.filter((b) => s[b.key]).map((b) => (

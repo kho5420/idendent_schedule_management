@@ -51,7 +51,7 @@ export type StaffRow = {
     use_yn: 'Y' | 'N';
     employee_type_id: number | null;
     career: CareerLevel | null;
-    team_no: number | null;
+    team_no: string | null;
     is_ortho: boolean;
     is_team_leader: boolean;
     is_night_fixed: boolean;

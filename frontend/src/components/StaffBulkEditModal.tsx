@@ -19,7 +19,7 @@ type BulkKey =
 
 type BulkValues = {
     career: CareerLevel;
-    team_no: number | null;
+    team_no: string | null;
     is_ortho: boolean;
     is_night_fixed: boolean;
     is_weekday_fixed: boolean;
@@ -233,19 +233,17 @@ export function StaffBulkEditModal({ selectedStaff, onSave, onClose }: Props) {
                             style={{ accentColor: '#6366f1', cursor: 'pointer' }}
                         />
                         <span style={{ flex: 1, fontSize: 13, color: 'var(--color-text)' }}>
-                            팀 번호
+                            팀
                         </span>
                         <select
                             value={values.team_no ?? ''}
-                            onChange={(e) =>
-                                setValue('team_no', e.target.value ? Number(e.target.value) : null)
-                            }
+                            onChange={(e) => setValue('team_no', e.target.value || null)}
                             disabled={!enabled.has('team_no')}
                             style={{ ...selectStyle, opacity: enabled.has('team_no') ? 1 : 0.35 }}
                         >
                             <option value="">없음</option>
-                            <option value="1">1팀</option>
-                            <option value="2">2팀</option>
+                            <option value="A">A팀</option>
+                            <option value="B">B팀</option>
                         </select>
                     </div>
 
