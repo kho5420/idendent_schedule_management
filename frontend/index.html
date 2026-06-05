@@ -2,6 +2,15 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // 404.html에서 인코딩된 경로를 복원해 React Router가 처리할 수 있도록 함
+      (function () {
+        var p = window.location.search.match(/[?&]p=([^&]*)/);
+        if (p) {
+          history.replaceState(null, null, '/' + decodeURIComponent(p[1]) + window.location.hash);
+        }
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>진료실 스케줄 관리 | 언제나이든치과</title>
