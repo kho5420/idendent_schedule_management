@@ -11,7 +11,7 @@ type Props = {
 
 const CAREER_LEVELS: CareerLevel[] = ['고', '중', '저', '신규'];
 
-type FormData = Omit<StaffRow, 'id'>;
+type FormData = Omit<StaffRow, 'id' | 'sort_order'>;
 
 const EMPTY: FormData = {
     name: '',
@@ -284,7 +284,14 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                         </button>
 
                         {/* 아바타 + 이름 */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 16,
+                                paddingRight: 44,
+                            }}
+                        >
                             <div
                                 style={{
                                     width: 54,
