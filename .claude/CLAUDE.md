@@ -48,6 +48,10 @@ cd frontend && npx prettier --write "src/**/*.{ts,tsx,css}"  # 포맷
 ## 환경변수
 Google Sheets 연동 시 `frontend/.env` 필요: `VITE_GOOGLE_CLIENT_ID=<OAuth 클라이언트 ID>`
 
+## DB 접속 (Supabase PostgreSQL)
+- 접속 방식: psql / DB명 `postgres` / 접속정보 → `.claude/secrets.md` 참조 (gitignore됨, 로컬 전용)
+- 허용: `SELECT`, `\d`, `\dt` / 금지: `INSERT`, `UPDATE`, `DELETE`, DDL (명시 요청 없는 한)
+
 ## UI 작업 규칙
 - 모든 UI 작업은 모바일 환경(반응형)을 염두에 두고 작업한다
 - 반응형 분기점: 640px 이하를 모바일로 간주
