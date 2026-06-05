@@ -59,6 +59,7 @@ export type StaffRow = {
     is_on_leave: boolean;
     is_head_dentist_pick: boolean;
     notes: string | null;
+    sort_order: number;
 };
 
 export type StaffUpdateData = Partial<
@@ -75,5 +76,6 @@ export type StaffUpdateData = Partial<
         | 'is_on_leave'
         | 'is_head_dentist_pick'
         | 'notes'
+        | 'sort_order'
     >
 >;
