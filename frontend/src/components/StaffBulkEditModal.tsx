@@ -135,7 +135,7 @@ export function StaffBulkEditModal({ selectedStaff, onSave, onClose }: Props) {
                     padding: 20,
                     width: '100%',
                     maxWidth: 360,
-                    maxHeight: '90vh',
+                    maxHeight: '90dvh',
                     overflowY: 'auto',
                 }}
             >

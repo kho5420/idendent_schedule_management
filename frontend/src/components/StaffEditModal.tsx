@@ -245,7 +245,7 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                         borderRadius: 22,
                         width: '100%',
                         maxWidth: 420,
-                        maxHeight: '92vh',
+                        maxHeight: '92dvh',
                         overflowY: 'auto',
                         boxShadow: '0 24px 64px rgba(0,0,0,0.2)',
                     }}
