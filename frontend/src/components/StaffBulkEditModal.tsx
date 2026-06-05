@@ -60,7 +60,7 @@ export function StaffBulkEditModal({ selectedStaff, onSave, onClose }: Props) {
     const [enabled, setEnabled] = useState<Set<BulkKey>>(new Set());
     const [values, setValues] = useState<BulkValues>({
         career: '중',
-        team_no: 1,
+        team_no: null,
         is_ortho: false,
         is_night_fixed: false,
         is_weekday_fixed: false,
