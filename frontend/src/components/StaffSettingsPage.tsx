@@ -1,7 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+    DndContext,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
+    closestCenter,
+    type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    SortableContext,
+    useSortable,
+    arrayMove,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import type { StaffRow, EmployeeType } from '../types';
-import { fetchStaff, fetchEmployeeTypes } from '../lib/staffApi';
+import { fetchStaff, fetchEmployeeTypes, updateSortOrders } from '../lib/staffApi';
 import { StaffEditModal } from './StaffEditModal';
 import { StaffBulkEditModal } from './StaffBulkEditModal';
 
@@ -31,11 +47,131 @@ const BADGES = [
     { key: 'is_on_leave' as const, label: '휴직', bg: '#fee2e2', color: '#dc2626' },
 ];
 
+type SortableRowProps = {
+    s: StaffRow;
+    dragEnabled: boolean;
+    selected: boolean;
+    getTypeName: (id: number | null) => string;
+    onEdit: (s: StaffRow) => void;
+    onToggleSelect: (id: number) => void;
+};
+
+function SortableStaffRow({
+    s,
+    dragEnabled,
+    selected,
+    getTypeName,
+    onEdit,
+    onToggleSelect,
+}: SortableRowProps) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+        id: s.id,
+        disabled: !dragEnabled,
+    });
+
+    const style: React.CSSProperties = {
+        display: 'grid',
+        gridTemplateColumns: LIST_GRID,
+        gap: 6,
+        alignItems: 'center',
+        padding: '8px',
+        borderRadius: 10,
+        background: selected ? '#eef2ff' : 'var(--color-card)',
+        border: `1px solid ${selected ? '#c7d2fe' : 'var(--color-border)'}`,
+        opacity: isDragging ? 0.4 : s.is_on_leave ? 0.6 : 1,
+        cursor: 'pointer',
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 1 : undefined,
+        position: 'relative',
+    };
+
+    return (
+        <div ref={setNodeRef} style={style} onClick={() => onEdit(s)}>
+            <input
+                type="checkbox"
+                checked={selected}
+                onChange={() => onToggleSelect(s.id)}
+                onClick={(e) => e.stopPropagation()}
+                style={{ accentColor: '#6366f1', cursor: 'pointer' }}
+            />
+            <div
+                style={{
+                    width: 24,
+                    height: 24,
+                    background: avatarGradient(s.name),
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: 10,
+                    fontWeight: 700,
+                }}
+            >
+                {s.name[0]}
+            </div>
+            <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text)' }}>
+                    {s.name}
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--color-text-sub)' }}>
+                    {getTypeName(s.employee_type_id)}
+                </div>
+            </div>
+            <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, color: '#6366f1' }}>
+                {s.career ?? '—'}
+            </div>
+            <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--color-text-sub)' }}>
+                {s.team_no ?? '—'}
+            </div>
+            <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                {BADGES.filter((b) => s[b.key]).map((b) => (
+                    <span
+                        key={b.key}
+                        style={{
+                            fontSize: 9,
+                            background: b.bg,
+                            color: b.color,
+                            borderRadius: 4,
+                            padding: '1px 4px',
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        {b.label}
+                    </span>
+                ))}
+            </div>
+            {dragEnabled ? (
+                <div
+                    {...attributes}
+                    {...listeners}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                        fontSize: 16,
+                        color: 'var(--color-text-sub)',
+                        textAlign: 'right',
+                        cursor: 'grab',
+                        userSelect: 'none',
+                        lineHeight: 1,
+                    }}
+                >
+                    ≡
+                </div>
+            ) : (
+                <div style={{ fontSize: 14, color: 'var(--color-text-sub)', textAlign: 'right' }}>
+                    ›
+                </div>
+            )}
+        </div>
+    );
+}
+
 export function StaffSettingsPage() {
     const navigate = useNavigate();
     const [staff, setStaff] = useState<StaffRow[]>([]);
     const [employeeTypes, setEmployeeTypes] = useState<EmployeeType[]>([]);
-    const [loading, setLoading] = useState(true); // 초기 로드 시 true로 시작
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [filter, setFilter] = useState<Filter>('all');
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -43,6 +179,11 @@ export function StaffSettingsPage() {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isNewOpen, setIsNewOpen] = useState(false);
     const [isBulkOpen, setIsBulkOpen] = useState(false);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
+    );
 
     async function load() {
         setLoading(true);
@@ -59,7 +200,6 @@ export function StaffSettingsPage() {
     }
 
     useEffect(() => {
-        // 비동기 래퍼로 감싸 effect 본문에서 동기 setState를 피한다 (최초 1회 실행)
         void (async () => {
             await load();
         })();
@@ -71,14 +211,26 @@ export function StaffSettingsPage() {
         return true;
     });
 
+    const dragEnabled = filter === 'all' && selectedIds.size === 0;
+
+    function handleDragEnd(event: DragEndEvent) {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
+
+        const oldIndex = staff.findIndex((s) => s.id === active.id);
+        const newIndex = staff.findIndex((s) => s.id === over.id);
+        const reordered = arrayMove(staff, oldIndex, newIndex);
+        setStaff(reordered);
+
+        const updates = reordered.map((s, i) => ({ id: s.id, sort_order: i + 1 }));
+        updateSortOrders(updates).catch(() => void load());
+    }
+
     function toggleSelect(id: number) {
         setSelectedIds((prev) => {
             const next = new Set(prev);
-            if (next.has(id)) {
-                next.delete(id);
-            } else {
-                next.add(id);
-            }
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
             return next;
         });
     }
@@ -343,125 +495,55 @@ export function StaffSettingsPage() {
                 <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-sub)' }}>
                     속성
                 </div>
-                <div />
+                <div
+                    style={{
+                        fontSize: 9,
+                        fontWeight: 700,
+                        color: dragEnabled ? 'var(--color-accent-to)' : 'transparent',
+                        textAlign: 'right',
+                    }}
+                >
+                    순서
+                </div>
             </div>
 
             {/* 직원 목록 */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {filtered.map((s) => (
-                    <div
-                        key={s.id}
-                        onClick={() => openEdit(s)}
-                        style={{
-                            display: 'grid',
-                            gridTemplateColumns: LIST_GRID,
-                            gap: 6,
-                            alignItems: 'center',
-                            padding: '8px',
-                            borderRadius: 10,
-                            background: selectedIds.has(s.id) ? '#eef2ff' : 'var(--color-card)',
-                            border: `1px solid ${selectedIds.has(s.id) ? '#c7d2fe' : 'var(--color-border)'}`,
-                            opacity: s.is_on_leave ? 0.6 : 1,
-                            cursor: 'pointer',
-                        }}
-                    >
-                        <input
-                            type="checkbox"
-                            checked={selectedIds.has(s.id)}
-                            onChange={() => toggleSelect(s.id)}
-                            onClick={(e) => e.stopPropagation()}
-                            style={{ accentColor: '#6366f1', cursor: 'pointer' }}
-                        />
-                        <div
-                            style={{
-                                width: 24,
-                                height: 24,
-                                background: avatarGradient(s.name),
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white',
-                                fontSize: 10,
-                                fontWeight: 700,
-                            }}
-                        >
-                            {s.name[0]}
-                        </div>
-                        <div>
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+            >
+                <SortableContext
+                    items={staff.map((s) => s.id)}
+                    strategy={verticalListSortingStrategy}
+                >
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {filtered.map((s) => (
+                            <SortableStaffRow
+                                key={s.id}
+                                s={s}
+                                dragEnabled={dragEnabled}
+                                selected={selectedIds.has(s.id)}
+                                getTypeName={getTypeName}
+                                onEdit={openEdit}
+                                onToggleSelect={toggleSelect}
+                            />
+                        ))}
+                        {filtered.length === 0 && (
                             <div
                                 style={{
+                                    textAlign: 'center',
+                                    padding: 40,
+                                    color: 'var(--color-text-sub)',
                                     fontSize: 13,
-                                    fontWeight: 700,
-                                    color: 'var(--color-text)',
                                 }}
                             >
-                                {s.name}
+                                표시할 직원이 없습니다
                             </div>
-                            <div style={{ fontSize: 10, color: 'var(--color-text-sub)' }}>
-                                {getTypeName(s.employee_type_id)}
-                            </div>
-                        </div>
-                        <div
-                            style={{
-                                textAlign: 'center',
-                                fontSize: 11,
-                                fontWeight: 600,
-                                color: '#6366f1',
-                            }}
-                        >
-                            {s.career ?? '—'}
-                        </div>
-                        <div
-                            style={{
-                                textAlign: 'center',
-                                fontSize: 11,
-                                color: 'var(--color-text-sub)',
-                            }}
-                        >
-                            {s.team_no ?? '—'}
-                        </div>
-                        <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                            {BADGES.filter((b) => s[b.key]).map((b) => (
-                                <span
-                                    key={b.key}
-                                    style={{
-                                        fontSize: 9,
-                                        background: b.bg,
-                                        color: b.color,
-                                        borderRadius: 4,
-                                        padding: '1px 4px',
-                                        whiteSpace: 'nowrap',
-                                    }}
-                                >
-                                    {b.label}
-                                </span>
-                            ))}
-                        </div>
-                        <div
-                            style={{
-                                fontSize: 14,
-                                color: 'var(--color-text-sub)',
-                                textAlign: 'right',
-                            }}
-                        >
-                            ›
-                        </div>
+                        )}
                     </div>
-                ))}
-                {filtered.length === 0 && (
-                    <div
-                        style={{
-                            textAlign: 'center',
-                            padding: 40,
-                            color: 'var(--color-text-sub)',
-                            fontSize: 13,
-                        }}
-                    >
-                        표시할 직원이 없습니다
-                    </div>
-                )}
-            </div>
+                </SortableContext>
+            </DndContext>
 
             {isEditOpen && editingStaff && (
                 <StaffEditModal
