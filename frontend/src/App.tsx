@@ -72,7 +72,7 @@ function App() {
                         background:
                             'linear-gradient(135deg, var(--color-accent-from), var(--color-accent-to))',
                         color: 'white',
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: 600,
                         letterSpacing: 1,
                         padding: '4px 14px',
@@ -82,7 +82,14 @@ function App() {
                 >
                     언제나이든치과
                 </div>
-                <h1 style={{ fontSize: 26, fontWeight: 700, color: 'white', marginBottom: 6 }}>
+                <h1
+                    style={{
+                        fontSize: 26,
+                        fontWeight: 700,
+                        color: 'var(--color-text)',
+                        marginBottom: 6,
+                    }}
+                >
                     진료실 스케줄 관리
                 </h1>
                 <p style={{ fontSize: 13, color: 'var(--color-text-sub)' }}>
@@ -94,7 +101,8 @@ function App() {
 
             <div
                 style={{
-                    fontSize: 12,
+                    fontSize: 13,
+                    fontWeight: 600,
                     color: 'var(--color-text-sub)',
                     textTransform: 'uppercase',
                     letterSpacing: 1,
@@ -140,12 +148,12 @@ function App() {
             {error && (
                 <div
                     style={{
-                        background: '#1e1010',
-                        border: '1px solid #7f1d1d',
+                        background: '#fef2f2',
+                        border: '1px solid #fca5a5',
                         borderRadius: 8,
                         padding: '10px 14px',
                         fontSize: 13,
-                        color: '#fca5a5',
+                        color: '#dc2626',
                         marginBottom: 16,
                     }}
                 >

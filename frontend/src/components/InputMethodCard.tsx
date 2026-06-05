@@ -29,7 +29,7 @@ function Card({ isSelected, onClick, icon, title, description, children }: CardP
             onClick={onClick}
             style={{
                 flex: 1,
-                background: isSelected ? '#21213a' : 'var(--color-card)',
+                background: isSelected ? '#dcfce7' : 'var(--color-card)',
                 border: `1.5px solid ${isSelected ? 'var(--color-accent-from)' : 'var(--color-border)'}`,
                 borderRadius: 12,
                 padding: 20,
@@ -48,7 +48,7 @@ function Card({ isSelected, onClick, icon, title, description, children }: CardP
             >
                 {title}
             </h3>
-            <p style={{ fontSize: 11, color: 'var(--color-text-sub)', marginBottom: 12 }}>
+            <p style={{ fontSize: 12, color: 'var(--color-text-sub)', marginBottom: 12 }}>
                 {description}
             </p>
             <div onClick={(e) => e.stopPropagation()}>{children}</div>

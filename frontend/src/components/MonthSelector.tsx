@@ -35,7 +35,8 @@ export function MonthSelector({ selected, onChange }: Props) {
         >
             <span
                 style={{
-                    fontSize: 12,
+                    fontSize: 13,
+                    fontWeight: 600,
                     color: 'var(--color-text-sub)',
                     whiteSpace: 'nowrap',
                     letterSpacing: '0.04em',
@@ -53,8 +54,8 @@ export function MonthSelector({ selected, onChange }: Props) {
                             style={{
                                 padding: '6px 16px',
                                 borderRadius: 20,
-                                fontSize: 12,
-                                fontWeight: isSelected ? 600 : 400,
+                                fontSize: 13,
+                                fontWeight: isSelected ? 700 : 500,
                                 border: isSelected ? 'none' : '1px solid var(--color-border)',
                                 background: isSelected
                                     ? 'linear-gradient(135deg, var(--color-accent-from), var(--color-accent-to))'

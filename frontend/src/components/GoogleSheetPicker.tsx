@@ -93,7 +93,7 @@ export function GoogleSheetPicker({ token, sheetId, onTokenChange, onSheetIdChan
                         border: '1px solid var(--color-border-hover)',
                         borderRadius: 6,
                         padding: '8px 12px',
-                        fontSize: 12,
+                        fontSize: 13,
                         color: 'var(--color-text)',
                         cursor: 'pointer',
                         width: '100%',
@@ -104,7 +104,7 @@ export function GoogleSheetPicker({ token, sheetId, onTokenChange, onSheetIdChan
                 {comingSoon && (
                     <div
                         style={{
-                            fontSize: 11,
+                            fontSize: 13,
                             color: 'var(--color-text-sub)',
                             textAlign: 'center',
                             marginTop: 6,
@@ -119,9 +119,9 @@ export function GoogleSheetPicker({ token, sheetId, onTokenChange, onSheetIdChan
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ fontSize: 11, color: 'var(--color-success)' }}>✅ 로그인됨</div>
+            <div style={{ fontSize: 13, color: 'var(--color-success)' }}>✅ 로그인됨</div>
             {sheetId ? (
-                <div style={{ fontSize: 11, color: 'var(--color-text-sub)' }}>
+                <div style={{ fontSize: 13, color: 'var(--color-text-sub)' }}>
                     시트 ID: {sheetId.slice(0, 20)}…
                 </div>
             ) : (
@@ -135,12 +135,12 @@ export function GoogleSheetPicker({ token, sheetId, onTokenChange, onSheetIdChan
                             border: '1px solid var(--color-border-hover)',
                             borderRadius: 6,
                             padding: '6px 10px',
-                            fontSize: 11,
+                            fontSize: 13,
                             color: 'var(--color-text)',
                             width: '100%',
                         }}
                     />
-                    {urlError && <div style={{ fontSize: 10, color: '#f87171' }}>{urlError}</div>}
+                    {urlError && <div style={{ fontSize: 12, color: '#dc2626' }}>{urlError}</div>}
                     <button
                         onClick={handleUrlSubmit}
                         style={{
@@ -148,7 +148,7 @@ export function GoogleSheetPicker({ token, sheetId, onTokenChange, onSheetIdChan
                             border: 'none',
                             borderRadius: 6,
                             padding: '6px',
-                            fontSize: 11,
+                            fontSize: 13,
                             color: 'var(--color-text)',
                             cursor: 'pointer',
                         }}
@@ -162,7 +162,7 @@ export function GoogleSheetPicker({ token, sheetId, onTokenChange, onSheetIdChan
                 style={{
                     background: 'none',
                     border: 'none',
-                    fontSize: 10,
+                    fontSize: 12,
                     color: 'var(--color-text-sub)',
                     cursor: 'pointer',
                     textAlign: 'left',

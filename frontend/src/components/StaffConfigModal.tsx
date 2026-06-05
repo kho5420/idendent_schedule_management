@@ -84,7 +84,8 @@ export function StaffConfigModal({ isOpen, config, onChange, onClose }: Props) {
 
                 <div
                     style={{
-                        fontSize: 11,
+                        fontSize: 12,
+                        fontWeight: 600,
                         color: 'var(--color-text-sub)',
                         textTransform: 'uppercase',
                         letterSpacing: '0.06em',
@@ -104,10 +105,17 @@ export function StaffConfigModal({ isOpen, config, onChange, onClose }: Props) {
                                 alignItems: 'center',
                                 padding: '8px 12px',
                                 background: 'var(--color-bg)',
+                                border: '1px solid var(--color-border)',
                                 borderRadius: 8,
                             }}
                         >
-                            <span style={{ fontSize: 13, color: 'var(--color-text)' }}>
+                            <span
+                                style={{
+                                    fontSize: 14,
+                                    fontWeight: 500,
+                                    color: 'var(--color-text)',
+                                }}
+                            >
                                 {member.name}
                             </span>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -116,7 +124,8 @@ export function StaffConfigModal({ isOpen, config, onChange, onClose }: Props) {
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: 4,
-                                        fontSize: 12,
+                                        fontSize: 13,
+                                        fontWeight: 500,
                                         color: 'var(--color-text-sub)',
                                         cursor: 'pointer',
                                     }}
@@ -137,8 +146,8 @@ export function StaffConfigModal({ isOpen, config, onChange, onClose }: Props) {
                                     style={{
                                         background: 'none',
                                         border: 'none',
-                                        color: 'var(--color-text-sub)',
-                                        fontSize: 13,
+                                        color: 'var(--color-text)',
+                                        fontSize: 14,
                                         cursor: 'pointer',
                                         padding: '2px 4px',
                                     }}

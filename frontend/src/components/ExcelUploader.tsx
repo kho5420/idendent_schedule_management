@@ -54,7 +54,7 @@ export function ExcelUploader({ file, onFileChange, isLoading }: Props) {
                     padding: 16,
                     textAlign: 'center',
                     cursor: clickable ? 'pointer' : 'default',
-                    background: isDragging ? '#1a1a2e' : 'transparent',
+                    background: isDragging ? '#dcfce7' : 'transparent',
                     transition: 'all 0.2s',
                 }}
             >
@@ -71,14 +71,14 @@ export function ExcelUploader({ file, onFileChange, isLoading }: Props) {
                             style={{
                                 width: 14,
                                 height: 14,
-                                border: '2px solid rgba(255,255,255,0.15)',
+                                border: '2px solid rgba(0,0,0,0.1)',
                                 borderTopColor: 'var(--color-accent-from)',
                                 borderRadius: '50%',
                                 display: 'inline-block',
                                 animation: 'spin 0.8s linear infinite',
                             }}
                         />
-                        <span style={{ fontSize: 11, color: 'var(--color-text-sub)' }}>
+                        <span style={{ fontSize: 13, color: 'var(--color-text-sub)' }}>
                             처리 중...
                         </span>
                     </div>
@@ -91,7 +91,7 @@ export function ExcelUploader({ file, onFileChange, isLoading }: Props) {
                             gap: 8,
                         }}
                     >
-                        <span style={{ fontSize: 12, color: 'var(--color-success)' }}>
+                        <span style={{ fontSize: 13, color: 'var(--color-success)' }}>
                             ✅ {file.name}
                         </span>
                         <button
@@ -114,7 +114,7 @@ export function ExcelUploader({ file, onFileChange, isLoading }: Props) {
                         </button>
                     </div>
                 ) : (
-                    <div style={{ fontSize: 11, color: 'var(--color-text-sub)' }}>
+                    <div style={{ fontSize: 13, color: 'var(--color-text-sub)' }}>
                         📂 .xlsx 파일을 드래그하거나 클릭하여 선택
                     </div>
                 )}

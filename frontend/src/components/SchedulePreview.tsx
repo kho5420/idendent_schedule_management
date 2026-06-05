@@ -17,7 +17,7 @@ function StaffTag({ name }: { name: string }) {
                 color: 'var(--color-tag-text)',
                 borderRadius: 4,
                 padding: '1px 6px',
-                fontSize: 10,
+                fontSize: 12,
                 margin: '1px 2px 1px 0',
             }}
         >
@@ -27,19 +27,19 @@ function StaffTag({ name }: { name: string }) {
 }
 
 const thStyle: React.CSSProperties = {
-    background: '#16162a',
+    background: 'var(--color-tag-bg)',
     color: 'var(--color-text-sub)',
     padding: '7px 10px',
     textAlign: 'left',
     fontWeight: 600,
-    fontSize: 10,
+    fontSize: 12,
     letterSpacing: '0.5px',
     borderBottom: '1px solid var(--color-border)',
 };
 
 const tdStyle: React.CSSProperties = {
     padding: '8px 10px',
-    borderBottom: '1px solid #1a1a2e',
+    borderBottom: '1px solid var(--color-border)',
     verticalAlign: 'top',
 };
 
@@ -115,7 +115,7 @@ export function SchedulePreview({ schedule }: Props) {
                         스케줄 생성 로직 구현 후 데이터가 표시됩니다.
                     </p>
                 ) : (
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                         <thead>
                             <tr>
                                 <th style={thStyle}>주차</th>
@@ -145,7 +145,7 @@ export function SchedulePreview({ schedule }: Props) {
                                                 {value === 'all' ? (
                                                     <span
                                                         style={{
-                                                            fontSize: 10,
+                                                            fontSize: 12,
                                                             color: 'var(--color-text-sub)',
                                                             fontStyle: 'italic',
                                                         }}
