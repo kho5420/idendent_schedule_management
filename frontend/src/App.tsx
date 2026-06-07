@@ -1,15 +1,32 @@
 import { useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import type { ScheduleMonth, InputMethod, GeneratedSchedule, SheetConnection } from './types';
+import type {
+    ScheduleMonth,
+    InputMethod,
+    GeneratedSchedule,
+    SheetConnection,
+    DayAssignment,
+} from './types';
 import { MonthSelector } from './components/MonthSelector';
 import { InputMethodCard } from './components/InputMethodCard';
 import { GenerateButton } from './components/GenerateButton';
 import { SchedulePreview } from './components/SchedulePreview';
+import { AssignmentPreview } from './components/AssignmentPreview';
 import { ChangelogModal } from './components/ChangelogModal';
 import { StaffSettingsPage } from './components/StaffSettingsPage';
 import { ScheduleSettingsPage } from './components/ScheduleSettingsPage';
 import { hasNewVersion, markAsSeen } from './lib/changelog';
+import { fetchStaff } from './lib/staffApi';
+import { fetchScheduleSettings } from './lib/scheduleSettingApi';
+import { fetchSheetRows } from './lib/sheetsApi';
+import { parseLeaveRequests } from './lib/leaveRequestParser';
+import { parseDoctorSchedule } from './lib/doctorScheduleParser';
+import { assignDailySchedule } from './lib/scheduleAssigner';
+import { planWeeklyOffDays } from './lib/weeklyOffPlanner';
 import './index.css';
+
+const DOCTOR_EMPLOYEE_TYPE_IDS = [1, 2];
+const CLINIC_STAFF_EMPLOYEE_TYPE_ID = 6;
 
 function getDefaultMonth(): ScheduleMonth {
     const d = new Date();
@@ -26,8 +43,9 @@ function MainPage() {
     const [scheduleSheet, setScheduleSheet] = useState<SheetConnection>(null);
     const [leaveRequestSheet, setLeaveRequestSheet] = useState<SheetConnection>(null);
     const [generatedSchedule] = useState<GeneratedSchedule | null>(null);
-    const [isGenerating] = useState(false);
-    const [error] = useState<string | null>(null);
+    const [dayAssignments, setDayAssignments] = useState<DayAssignment[] | null>(null);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [comingSoon, setComingSoon] = useState(false);
     const [isChangelogOpen, setIsChangelogOpen] = useState(false);
     const [showBadge, setShowBadge] = useState(() => hasNewVersion());
@@ -41,8 +59,59 @@ function MainPage() {
 
     async function handleGenerate() {
         if (!isReady || !inputMethod) return;
-        setComingSoon(true);
-        setTimeout(() => setComingSoon(false), 2000);
+
+        if (inputMethod !== 'google' || !googleToken || !scheduleSheet) {
+            setComingSoon(true);
+            setTimeout(() => setComingSoon(false), 2000);
+            return;
+        }
+
+        setError(null);
+        setDayAssignments(null);
+        setIsGenerating(true);
+        try {
+            const [staff, scheduleSettings, scheduleRows, leaveRequestRows] = await Promise.all([
+                fetchStaff(),
+                fetchScheduleSettings(),
+                fetchSheetRows(scheduleSheet.sheetId, googleToken, scheduleSheet.tabName),
+                leaveRequestSheet
+                    ? fetchSheetRows(
+                          leaveRequestSheet.sheetId,
+                          googleToken,
+                          leaveRequestSheet.tabName
+                      )
+                    : Promise.resolve([]),
+            ]);
+
+            const clinicStaff = staff.filter(
+                (s) => s.employee_type_id === CLINIC_STAFF_EMPLOYEE_TYPE_ID
+            );
+            const doctors = staff.filter(
+                (s) =>
+                    s.employee_type_id != null &&
+                    DOCTOR_EMPLOYEE_TYPE_IDS.includes(s.employee_type_id)
+            );
+
+            const doctorSchedule = parseDoctorSchedule(scheduleRows, selectedMonth);
+            const leaveRequests = parseLeaveRequests(leaveRequestRows, selectedMonth);
+
+            const plannedOffDays = planWeeklyOffDays(clinicStaff, doctorSchedule, leaveRequests);
+            setDayAssignments(
+                assignDailySchedule(
+                    clinicStaff,
+                    doctors,
+                    leaveRequests,
+                    doctorSchedule,
+                    scheduleSettings,
+                    selectedMonth,
+                    plannedOffDays
+                )
+            );
+        } catch (e) {
+            setError(e instanceof Error ? e.message : '스케줄 생성 중 오류가 발생했습니다');
+        } finally {
+            setIsGenerating(false);
+        }
     }
 
     return (
@@ -225,6 +294,8 @@ function MainPage() {
             )}
 
             {generatedSchedule && <SchedulePreview schedule={generatedSchedule} />}
+
+            {dayAssignments && <AssignmentPreview assignments={dayAssignments} />}
 
             <ChangelogModal isOpen={isChangelogOpen} onClose={() => setIsChangelogOpen(false)} />
         </div>

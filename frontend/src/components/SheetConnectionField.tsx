@@ -87,7 +87,12 @@ export function SheetConnectionField({
             }
         } catch (e) {
             setStatus('error');
-            setMessage(e instanceof Error ? e.message : '연결 확인 중 오류가 발생했습니다.');
+            const raw = e instanceof Error ? e.message : '연결 확인 중 오류가 발생했습니다.';
+            setMessage(
+                raw.includes('401')
+                    ? '인증이 만료되었습니다. 로그아웃 후 다시 로그인해주세요.'
+                    : raw
+            );
             onConnectionChange(null);
         }
     }

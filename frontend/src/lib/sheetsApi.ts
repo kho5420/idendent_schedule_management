@@ -18,6 +18,36 @@ function extractDay(cell: unknown): number | null {
     return match ? parseInt(match[1], 10) : null;
 }
 
+type SheetCellData = {
+    formattedValue?: string;
+    effectiveFormat?: { textFormat?: { strikethrough?: boolean } };
+};
+
+export async function fetchLeaveSheetRows(
+    sheetId: string,
+    token: string,
+    tabName: string
+): Promise<unknown[][]> {
+    const range = `${tabName}!A1:H100`;
+    const fields =
+        'sheets.data.rowData.values(formattedValue,effectiveFormat.textFormat.strikethrough)';
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?includeGridData=true&ranges=${encodeURIComponent(range)}&fields=${encodeURIComponent(fields)}`;
+
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) throw new Error(`Google Sheets API 오류 (${res.status})`);
+
+    const data = await res.json();
+    const rowData: Array<{ values?: SheetCellData[] }> = data.sheets?.[0]?.data?.[0]?.rowData ?? [];
+
+    return rowData.map((row) =>
+        (row.values ?? []).map((cell) =>
+            cell.effectiveFormat?.textFormat?.strikethrough === true
+                ? ''
+                : (cell.formattedValue ?? '')
+        )
+    );
+}
+
 export async function checkSheetTab(
     sheetId: string,
     token: string,
@@ -38,12 +68,11 @@ export async function checkSheetTab(
     return sheets.some((sheet) => sheet.properties?.title === tabName);
 }
 
-export async function fetchSheetData(
+export async function fetchSheetRows(
     sheetId: string,
     token: string,
-    month: ScheduleMonth
-): Promise<ScheduleData> {
-    const tabName = findSheetTabName(month);
+    tabName: string
+): Promise<unknown[][]> {
     const range = encodeURIComponent(`${tabName}!A1:H100`);
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}`;
 
@@ -56,7 +85,16 @@ export async function fetchSheetData(
     }
 
     const data = await res.json();
-    const rows: unknown[][] = data.values ?? [];
+    return data.values ?? [];
+}
+
+export async function fetchSheetData(
+    sheetId: string,
+    token: string,
+    month: ScheduleMonth
+): Promise<ScheduleData> {
+    const tabName = findSheetTabName(month);
+    const rows = await fetchSheetRows(sheetId, token, tabName);
 
     const DAY_COL_TO_DOW: Record<number, number> = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6 };
     const days: ExistingDayData[] = [];

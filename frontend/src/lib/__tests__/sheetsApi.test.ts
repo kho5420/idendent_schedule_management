@@ -1,8 +1,117 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchSheetData, checkSheetTab } from '../sheetsApi';
+import { fetchSheetData, fetchSheetRows, fetchLeaveSheetRows, checkSheetTab } from '../sheetsApi';
 
 beforeEach(() => {
     vi.restoreAllMocks();
+});
+
+describe('fetchSheetRows', () => {
+    it('지정한 시트/탭의 원본 행 데이터를 그대로 반환한다', async () => {
+        const mockValues = [
+            ['A', 'B'],
+            ['C', 'D'],
+        ];
+
+        vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ values: mockValues }),
+        } as Response);
+
+        const result = await fetchSheetRows('sheet-id-123', 'token-abc', '26.07');
+        expect(result).toEqual(mockValues);
+    });
+
+    it('값이 없으면 빈 배열을 반환한다', async () => {
+        vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({}),
+        } as Response);
+
+        const result = await fetchSheetRows('sheet-id-123', 'token-abc', '26.07');
+        expect(result).toEqual([]);
+    });
+
+    it('API 오류 시 에러를 던진다', async () => {
+        vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+            ok: false,
+            status: 403,
+            json: async () => ({ error: { message: 'Forbidden' } }),
+        } as Response);
+
+        await expect(fetchSheetRows('id', 'token', '26.07')).rejects.toThrow(
+            'Google Sheets API 오류'
+        );
+    });
+});
+
+describe('fetchLeaveSheetRows', () => {
+    function makeCell(text: string, strikethrough: boolean) {
+        return {
+            formattedValue: text,
+            effectiveFormat: { textFormat: { strikethrough } },
+        };
+    }
+
+    it('취소선(strikethrough)이 있는 셀을 빈 문자열로 대체한다', async () => {
+        vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                sheets: [
+                    {
+                        data: [
+                            {
+                                rowData: [
+                                    {
+                                        values: [
+                                            makeCell('미연 연차', false),
+                                            makeCell('지수 주차', true),
+                                        ],
+                                    },
+                                    { values: [makeCell('8월 10일', false)] },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            }),
+        } as Response);
+
+        const result = await fetchLeaveSheetRows('sheet-id', 'token', '26.07');
+        expect(result[0]).toEqual(['미연 연차', '']);
+        expect(result[1]).toEqual(['8월 10일']);
+    });
+
+    it('포맷 정보가 없는 셀은 텍스트를 그대로 반환한다', async () => {
+        vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                sheets: [
+                    {
+                        data: [
+                            {
+                                rowData: [{ values: [{ formattedValue: '미연 연차' }] }],
+                            },
+                        ],
+                    },
+                ],
+            }),
+        } as Response);
+
+        const result = await fetchLeaveSheetRows('sheet-id', 'token', '26.07');
+        expect(result[0]).toEqual(['미연 연차']);
+    });
+
+    it('API 오류 시 에러를 던진다', async () => {
+        vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+            ok: false,
+            status: 403,
+            json: async () => ({}),
+        } as Response);
+
+        await expect(fetchLeaveSheetRows('id', 'token', '26.07')).rejects.toThrow(
+            'Google Sheets API 오류'
+        );
+    });
 });
 
 describe('fetchSheetData', () => {

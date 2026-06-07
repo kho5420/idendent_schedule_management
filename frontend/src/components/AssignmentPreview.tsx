@@ -1,0 +1,145 @@
+import type { DayAssignment } from '../types';
+import { formatDayCell } from '../lib/scheduleFormatter';
+
+interface Props {
+    assignments: DayAssignment[];
+}
+
+const DAY_HEADERS = ['월', '화', '수', '목', '금', '토', '일'];
+
+function dowToCol(dayOfWeek: number): number {
+    return dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+}
+
+function groupByWeek(assignments: DayAssignment[]): (DayAssignment | null)[][] {
+    const sorted = [...assignments].sort((a, b) => a.date.localeCompare(b.date));
+    const weeks: (DayAssignment | null)[][] = [];
+    let current: (DayAssignment | null)[] = new Array(7).fill(null);
+
+    for (const a of sorted) {
+        const col = dowToCol(a.dayOfWeek);
+        if (col === 0 && current.some((x) => x !== null)) {
+            weeks.push(current);
+            current = new Array(7).fill(null);
+        }
+        current[col] = a;
+    }
+    if (current.some((x) => x !== null)) weeks.push(current);
+
+    return weeks;
+}
+
+function CalendarCell({ assignment }: { assignment: DayAssignment | null }) {
+    const tdStyle: React.CSSProperties = {
+        width: `${100 / 7}%`,
+        verticalAlign: 'top',
+        padding: '6px 4px',
+        borderRight: '1px solid var(--color-border)',
+        borderBottom: '1px solid var(--color-border)',
+        fontSize: 11,
+        minWidth: 0,
+    };
+
+    if (!assignment) {
+        return <td style={{ ...tdStyle, background: 'var(--color-tag-bg)' }} />;
+    }
+
+    const isWeekend = assignment.dayOfWeek === 0 || assignment.dayOfWeek === 6;
+    const dayNum = parseInt(assignment.date.slice(-2), 10);
+
+    return (
+        <td style={{ ...tdStyle, background: isWeekend ? '#f8f9fa' : 'var(--color-card)' }}>
+            <div
+                style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    marginBottom: 4,
+                    color: isWeekend ? '#888' : 'var(--color-text)',
+                }}
+            >
+                {dayNum}
+            </div>
+            <pre
+                style={{
+                    margin: 0,
+                    fontFamily: 'inherit',
+                    fontSize: 11,
+                    lineHeight: 1.5,
+                    color: 'var(--color-text)',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-all',
+                }}
+            >
+                {formatDayCell(assignment)}
+            </pre>
+        </td>
+    );
+}
+
+export function AssignmentPreview({ assignments }: Props) {
+    const weeks = groupByWeek(assignments);
+
+    return (
+        <div
+            style={{
+                background: 'var(--color-card)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 12,
+                overflow: 'hidden',
+            }}
+        >
+            <div
+                style={{
+                    padding: '14px 18px',
+                    borderBottom: '1px solid var(--color-border)',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: 'var(--color-text)',
+                }}
+            >
+                생성 결과 미리보기 (검증용)
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+                <table
+                    style={{
+                        width: '100%',
+                        minWidth: 700,
+                        borderCollapse: 'collapse',
+                        tableLayout: 'fixed',
+                    }}
+                >
+                    <thead>
+                        <tr>
+                            {DAY_HEADERS.map((label, i) => (
+                                <th
+                                    key={label}
+                                    style={{
+                                        padding: '8px 4px',
+                                        textAlign: 'center',
+                                        fontSize: 12,
+                                        fontWeight: 600,
+                                        color: i >= 5 ? '#888' : 'var(--color-text-sub)',
+                                        background: 'var(--color-tag-bg)',
+                                        borderRight: '1px solid var(--color-border)',
+                                        borderBottom: '1px solid var(--color-border)',
+                                    }}
+                                >
+                                    {label}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {weeks.map((week, i) => (
+                            <tr key={i}>
+                                {week.map((a, col) => (
+                                    <CalendarCell key={col} assignment={a} />
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}

@@ -7,6 +7,36 @@ export type SheetConnection = {
     tabName: string;
 } | null;
 
+export type LeaveType = '연차' | '반차' | '주차';
+
+export type LeaveRequest = {
+    date: string; // "YYYY-MM-DD"
+    name: string;
+    type: LeaveType;
+};
+
+export type DoctorDayInfo = {
+    date: string; // "YYYY-MM-DD"
+    dayOfWeek: number; // 0=일, 1=월, ..., 6=토
+    doctorAliases: string[]; // staff.alias 코드 목록 (예: ['Y', '오'])
+    isFullAttendance: boolean; // "원장님 전체출근"
+};
+
+export type DayAssignment = {
+    date: string; // "YYYY-MM-DD"
+    dayOfWeek: number; // 0=일, 1=월, ..., 6=토
+    working: string[]; // 출근 인원 이름 (반차 포함)
+    fullDayOff: LeaveRequest[]; // 연차/주차 (하루 휴무)
+    halfDayOff: LeaveRequest[]; // 반차
+    isOrthoDay: boolean; // 교정과 원장님(is_ortho) 진료일
+    orthoStaffCount: number; // 출근 인원 중 is_ortho 인원 수
+    nightFixedStaff: string[]; // 출근 인원 중 야간 고정(is_night_fixed) 인원
+    hasTeamLeader: boolean; // 출근 인원 중 팀장(is_team_leader) 존재 여부
+    hasNightShift: boolean; // 주간/야간 분리 배정 요일 여부 (schedule_setting.has_night_shift)
+    dayShiftStaff: string[]; // 주간 배정 인원 (hasNightShift가 true일 때만 채워짐)
+    nightShiftStaff: string[]; // 야간 배정 인원 (hasNightShift가 true일 때만 채워짐, is_night_fixed 인원 포함)
+};
+
 export type ExistingDayData = {
     date: string; // "YYYY-MM-DD"
     dayOfWeek: number; // 0=일, 1=월, ..., 6=토
