@@ -253,11 +253,11 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                         boxShadow: '0 24px 64px rgba(0,0,0,0.2)',
                     }}
                 >
-                    {/* ── 헤더 (다크 그린 그라디언트) ── */}
+                    {/* ── 헤더 (멜론 우유 톤 그라디언트, 앱 테마와 통일) ── */}
                     <div
                         style={{
                             background:
-                                'linear-gradient(145deg, #052e16 0%, #064e3b 50%, #065f46 100%)',
+                                'linear-gradient(145deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%)',
                             borderRadius: '22px 22px 0 0',
                             padding: '22px 20px 26px',
                             position: 'relative',
@@ -272,10 +272,10 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                 right: 14,
                                 width: 30,
                                 height: 30,
-                                background: 'rgba(255,255,255,0.12)',
-                                border: '1px solid rgba(255,255,255,0.18)',
+                                background: 'rgba(255,255,255,0.5)',
+                                border: '1px solid var(--color-border)',
                                 borderRadius: '50%',
-                                color: 'rgba(255,255,255,0.7)',
+                                color: 'var(--color-text-sub)',
                                 fontSize: 13,
                                 cursor: 'pointer',
                                 display: 'flex',
@@ -294,12 +294,12 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                         display: 'inline-flex',
                                         alignItems: 'center',
                                         gap: 6,
-                                        background: 'rgba(255,255,255,0.12)',
-                                        border: '1px solid rgba(255,255,255,0.22)',
+                                        background: 'rgba(255,255,255,0.6)',
+                                        border: '1px solid var(--color-border)',
                                         borderRadius: 20,
                                         padding: '5px 12px 5px 9px',
                                         marginBottom: 9,
-                                        color: '#a7f3d0',
+                                        color: 'var(--color-text-sub)',
                                     }}
                                 >
                                     <RoleIcon role={roleName} size={13} />
@@ -307,7 +307,7 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                         style={{
                                             fontSize: 11,
                                             fontWeight: 700,
-                                            color: 'rgba(236,253,245,0.92)',
+                                            color: 'var(--color-text-sub)',
                                             letterSpacing: '0.02em',
                                         }}
                                     >
@@ -319,7 +319,7 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                     style={{
                                         fontSize: 10,
                                         fontWeight: 700,
-                                        color: 'rgba(167,243,208,0.75)',
+                                        color: 'var(--color-text-sub)',
                                         letterSpacing: 1.2,
                                         textTransform: 'uppercase',
                                         marginBottom: 7,
@@ -337,9 +337,9 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                         width: '100%',
                                         fontSize: 22,
                                         fontWeight: 800,
-                                        color: 'white',
-                                        background: 'rgba(255,255,255,0.1)',
-                                        border: '1px solid rgba(255,255,255,0.2)',
+                                        color: 'var(--color-text)',
+                                        background: 'rgba(255,255,255,0.6)',
+                                        border: '1px solid var(--color-border)',
                                         borderRadius: 10,
                                         padding: '7px 12px',
                                         boxSizing: 'border-box',
