@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
+import { SheetConnectionField } from './SheetConnectionField';
+import type { SheetConnection } from '../types';
 
 const TOKEN_KEY = 'google_access_token';
 
 interface Props {
     token: string | null;
-    sheetId: string | null;
     onTokenChange: (token: string | null) => void;
-    onSheetIdChange: (id: string | null) => void;
+    onScheduleSheetChange: (connection: SheetConnection) => void;
+    onLeaveRequestSheetChange: (connection: SheetConnection) => void;
 }
 
 declare global {
@@ -25,16 +27,12 @@ declare global {
     }
 }
 
-function extractSheetId(input: string): string | null {
-    const match = input.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-    if (match) return match[1];
-    if (/^[a-zA-Z0-9-_]{20,}$/.test(input.trim())) return input.trim();
-    return null;
-}
-
-export function GoogleSheetPicker({ token, sheetId, onTokenChange, onSheetIdChange }: Props) {
-    const [urlInput, setUrlInput] = useState('');
-    const [urlError, setUrlError] = useState('');
+export function GoogleSheetPicker({
+    token,
+    onTokenChange,
+    onScheduleSheetChange,
+    onLeaveRequestSheetChange,
+}: Props) {
     const [comingSoon, setComingSoon] = useState(false);
 
     useEffect(() => {
@@ -51,7 +49,7 @@ export function GoogleSheetPicker({ token, sheetId, onTokenChange, onSheetIdChan
         }
         const client = window.google.accounts.oauth2.initTokenClient({
             client_id: clientId,
-            scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
+            scope: 'https://www.googleapis.com/auth/spreadsheets',
             callback: (res) => {
                 if (res.access_token) {
                     localStorage.setItem(TOKEN_KEY, res.access_token);
@@ -65,18 +63,8 @@ export function GoogleSheetPicker({ token, sheetId, onTokenChange, onSheetIdChan
     function logout() {
         localStorage.removeItem(TOKEN_KEY);
         onTokenChange(null);
-        onSheetIdChange(null);
-        setUrlInput('');
-    }
-
-    function handleUrlSubmit() {
-        const id = extractSheetId(urlInput);
-        if (!id) {
-            setUrlError('올바른 구글 스프레드시트 URL이나 ID를 입력해주세요.');
-            return;
-        }
-        setUrlError('');
-        onSheetIdChange(id);
+        onScheduleSheetChange(null);
+        onLeaveRequestSheetChange(null);
     }
 
     if (!token) {
@@ -118,58 +106,34 @@ export function GoogleSheetPicker({ token, sheetId, onTokenChange, onSheetIdChan
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ fontSize: 13, color: 'var(--color-success)' }}>✅ 로그인됨</div>
-            {sheetId ? (
-                <div style={{ fontSize: 13, color: 'var(--color-text-sub)' }}>
-                    시트 ID: {sheetId.slice(0, 20)}…
-                </div>
-            ) : (
-                <>
-                    <input
-                        value={urlInput}
-                        onChange={(e) => setUrlInput(e.target.value)}
-                        placeholder="스프레드시트 URL 또는 ID 입력"
-                        style={{
-                            background: 'var(--color-bg)',
-                            border: '1px solid var(--color-border-hover)',
-                            borderRadius: 6,
-                            padding: '6px 10px',
-                            fontSize: 13,
-                            color: 'var(--color-text)',
-                            width: '100%',
-                        }}
-                    />
-                    {urlError && <div style={{ fontSize: 12, color: '#dc2626' }}>{urlError}</div>}
-                    <button
-                        onClick={handleUrlSubmit}
-                        style={{
-                            background: 'var(--color-border)',
-                            border: 'none',
-                            borderRadius: 6,
-                            padding: '6px',
-                            fontSize: 13,
-                            color: 'var(--color-text)',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        확인
-                    </button>
-                </>
-            )}
-            <button
-                onClick={logout}
-                style={{
-                    background: 'none',
-                    border: 'none',
-                    fontSize: 12,
-                    color: 'var(--color-text-sub)',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                }}
-            >
-                로그아웃
-            </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: 13, color: 'var(--color-success)' }}>✅ 로그인됨</div>
+                <button
+                    onClick={logout}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        fontSize: 12,
+                        color: 'var(--color-text-sub)',
+                        cursor: 'pointer',
+                    }}
+                >
+                    로그아웃
+                </button>
+            </div>
+            <SheetConnectionField
+                label="📅 스케줄 시트"
+                token={token}
+                tabPlaceholder="탭 이름 (예: 26.07)"
+                onConnectionChange={onScheduleSheetChange}
+            />
+            <SheetConnectionField
+                label="🌴 휴무신청 시트 (선택)"
+                token={token}
+                tabPlaceholder="탭 이름"
+                onConnectionChange={onLeaveRequestSheetChange}
+            />
         </div>
     );
 }
