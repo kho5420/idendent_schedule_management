@@ -79,3 +79,23 @@ export type StaffUpdateData = Partial<
         | 'sort_order'
     >
 >;
+
+export type ScheduleSetting = {
+    id: number;
+    day_name: string;
+    sort_order: number;
+    min_staff_with_ortho: number;
+    min_staff_without_ortho: number;
+    min_staff_on_leave: number;
+    has_night_shift: boolean;
+};
+
+export type ScheduleSettingUpdateData = Partial<
+    Pick<
+        ScheduleSetting,
+        | 'min_staff_with_ortho'
+        | 'min_staff_without_ortho'
+        | 'min_staff_on_leave'
+        | 'has_night_shift'
+    >
+>;
