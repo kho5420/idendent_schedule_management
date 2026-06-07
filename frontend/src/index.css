@@ -310,3 +310,14 @@ body {
 .schedule-setting-toggle.on::after {
     left: 22px;
 }
+
+@media (max-width: 640px) {
+    .schedule-setting-card {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .schedule-setting-head,
+    .schedule-setting-row {
+        min-width: 580px;
+    }
+}
