@@ -18,29 +18,6 @@ function extractDay(cell: unknown): number | null {
     return match ? parseInt(match[1], 10) : null;
 }
 
-export async function updateSheetCell(
-    sheetId: string,
-    token: string,
-    cellRange: string,
-    value: string
-): Promise<void> {
-    const range = encodeURIComponent(cellRange);
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`;
-
-    const res = await fetch(url, {
-        method: 'PUT',
-        headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ range: cellRange, values: [[value]] }),
-    });
-
-    if (!res.ok) {
-        throw new Error(`Google Sheets API 오류 (${res.status})`);
-    }
-}
-
 export async function checkSheetTab(
     sheetId: string,
     token: string,
