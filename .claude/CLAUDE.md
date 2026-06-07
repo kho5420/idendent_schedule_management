@@ -66,5 +66,7 @@ GitHub Actions Secrets: `SUPABASE_URL`, `SUPABASE_ANON_KEY` (workflow에서 `VIT
 `frontend/CHANGELOG.md` 수정 시 `## vX.Y.Z — YYYY-MM-DD` 형식, 항목은 `- ` 로 시작
 
 ## 작업 규칙
-- `git commit`은 사용자가 요청하기 전에는 하지 말것. `git config` 수정 금지
+- **`git commit`은 절대 먼저 하지 말 것. 사용자가 명시적으로 "커밋해줘"라고 요청한 경우에만 커밋한다.** 작업 단계마다, 또는 서브에이전트 워크플로 도중에 "관행적으로" 커밋하는 것 금지 — 매번 사용자 승인 필요
+- **작업용 브랜치(feature branch)를 임의로 만들지 말 것.** 별도 브랜치가 필요하다고 판단되어도 먼저 사용자에게 묻고, 명시적 동의 후에만 생성한다. 항상 main에서 직접 작업
+- `git config` 수정 금지
 - 빌드확인은 하지 말것

@@ -218,8 +218,8 @@ export function ScheduleSettingsPage() {
             <div className="schedule-setting-card">
                 <div className="schedule-setting-head">
                     <span>요일</span>
-                    <span>교정 있는 날</span>
                     <span>교정 없는 날</span>
+                    <span>교정 있는 날</span>
                     <span>휴무 시 최소</span>
                     <span>야간진료</span>
                 </div>
@@ -246,8 +246,8 @@ export function ScheduleSettingsPage() {
                             </span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                 <Stepper
-                                    value={s.min_staff_with_ortho}
-                                    onChange={(next) => setMinWithOrtho(s.id, next)}
+                                    value={s.min_staff_without_ortho}
+                                    onChange={(next) => setMinWithoutOrtho(s.id, next)}
                                 />
                                 <span style={{ fontSize: 11, color: 'var(--color-text-sub)' }}>
                                     명 이상
@@ -255,8 +255,8 @@ export function ScheduleSettingsPage() {
                             </span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                 <Stepper
-                                    value={s.min_staff_without_ortho}
-                                    onChange={(next) => setMinWithoutOrtho(s.id, next)}
+                                    value={s.min_staff_with_ortho}
+                                    onChange={(next) => setMinWithOrtho(s.id, next)}
                                 />
                                 <span style={{ fontSize: 11, color: 'var(--color-text-sub)' }}>
                                     명 이상
