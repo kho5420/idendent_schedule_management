@@ -76,6 +76,21 @@ body {
     }
 }
 
+.month-chip {
+    border: 1px solid var(--color-border);
+    background-color: transparent;
+    color: var(--color-text-sub);
+    transition:
+        border-color 0.15s ease,
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+.month-chip:hover {
+    border-color: var(--color-border-hover);
+    background-color: var(--color-tag-bg);
+    color: var(--color-text);
+}
+
 /* Input method cards grid */
 .input-method-grid {
     display: flex;
@@ -94,6 +109,53 @@ body {
     to {
         transform: rotate(360deg);
     }
+}
+
+/* Header action buttons (업데이트 / 직원 설정) */
+.header-action-btn {
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-sub);
+    transition:
+        border-color 0.15s ease,
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+.header-action-btn:hover {
+    border-color: var(--color-border-hover);
+    background-color: var(--color-tag-bg);
+    color: var(--color-text);
+}
+
+/* ── Staff settings page ──────────────────────────── */
+
+/* Filter chips (전체 / 직종별 / 휴직) */
+.staff-filter-chip {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-sub);
+    transition:
+        border-color 0.15s ease,
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+.staff-filter-chip:hover {
+    border-color: var(--color-border-hover);
+    background-color: var(--color-tag-bg);
+    color: var(--color-text);
+}
+
+/* Staff list row */
+.staff-row {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    transition:
+        border-color 0.15s ease,
+        background-color 0.15s ease;
+}
+.staff-row:hover {
+    border-color: var(--color-border-hover);
+    background-color: var(--color-tag-bg);
 }
 
 /* ── Staff edit modal ─────────────────────────────── */

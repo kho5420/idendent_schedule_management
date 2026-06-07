@@ -20,23 +20,12 @@ import type { StaffRow, EmployeeType } from '../types';
 import { fetchStaff, fetchEmployeeTypes, updateSortOrders } from '../lib/staffApi';
 import { StaffEditModal } from './StaffEditModal';
 import { StaffBulkEditModal } from './StaffBulkEditModal';
+import { RoleIcon } from './RoleIcon';
+import { roleTone } from '../lib/roleTone';
 
 type Filter = 'all' | 'leave' | number;
 
-function avatarGradient(name: string): string {
-    const g = [
-        'linear-gradient(135deg,#6366f1,#8b5cf6)',
-        'linear-gradient(135deg,#8b5cf6,#a78bfa)',
-        'linear-gradient(135deg,#0ea5e9,#38bdf8)',
-        'linear-gradient(135deg,#10b981,#34d399)',
-        'linear-gradient(135deg,#f59e0b,#fbbf24)',
-        'linear-gradient(135deg,#64748b,#94a3b8)',
-        'linear-gradient(135deg,#ec4899,#f472b6)',
-    ];
-    return g[(name.charCodeAt(0) || 0) % g.length];
-}
-
-const LIST_GRID = '20px 28px 1fr 50px 28px 1fr 16px';
+const LIST_GRID = '20px 32px 1fr 50px 28px 1fr 16px';
 
 const BADGES = [
     { key: 'is_team_leader' as const, label: '팀장', bg: '#fef3c7', color: '#d97706' },
@@ -69,6 +58,9 @@ function SortableStaffRow({
         disabled: !dragEnabled,
     });
 
+    const role = getTypeName(s.employee_type_id);
+    const tone = roleTone(role);
+
     const style: React.CSSProperties = {
         display: 'grid',
         gridTemplateColumns: LIST_GRID,
@@ -76,18 +68,20 @@ function SortableStaffRow({
         alignItems: 'center',
         padding: '8px',
         borderRadius: 10,
-        background: selected ? '#eef2ff' : 'var(--color-card)',
-        border: `1px solid ${selected ? '#c7d2fe' : 'var(--color-border)'}`,
         opacity: isDragging ? 0.4 : s.is_on_leave ? 0.6 : 1,
         cursor: 'pointer',
         transform: CSS.Transform.toString(transform),
         transition,
         zIndex: isDragging ? 1 : undefined,
         position: 'relative',
+        ...(selected && {
+            background: '#eef2ff',
+            border: '1px solid #c7d2fe',
+        }),
     };
 
     return (
-        <div ref={setNodeRef} style={style} onClick={() => onEdit(s)}>
+        <div ref={setNodeRef} className="staff-row" style={style} onClick={() => onEdit(s)}>
             <input
                 type="checkbox"
                 checked={selected}
@@ -97,27 +91,24 @@ function SortableStaffRow({
             />
             <div
                 style={{
-                    width: 24,
-                    height: 24,
-                    background: avatarGradient(s.name),
-                    borderRadius: '50%',
+                    width: 30,
+                    height: 30,
+                    borderRadius: 9,
+                    background: tone.bg,
+                    color: tone.fg,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: 'white',
-                    fontSize: 10,
-                    fontWeight: 700,
+                    flexShrink: 0,
                 }}
             >
-                {s.name[0]}
+                <RoleIcon role={role} />
             </div>
             <div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text)' }}>
                     {s.name}
                 </div>
-                <div style={{ fontSize: 10, color: 'var(--color-text-sub)' }}>
-                    {getTypeName(s.employee_type_id)}
-                </div>
+                <div style={{ fontSize: 10, color: 'var(--color-text-sub)' }}>{role}</div>
             </div>
             <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, color: '#6366f1' }}>
                 {s.career ?? '—'}
@@ -425,18 +416,18 @@ export function StaffSettingsPage() {
                     <button
                         key={String(chip.value)}
                         onClick={() => setFilter(chip.value)}
+                        className="staff-filter-chip"
                         style={{
                             fontSize: 11,
                             borderRadius: 20,
                             padding: '3px 10px',
                             cursor: 'pointer',
-                            background:
-                                filter === chip.value
-                                    ? 'var(--color-accent-to)'
-                                    : 'var(--color-card)',
-                            color: filter === chip.value ? 'white' : 'var(--color-text-sub)',
-                            border: `1px solid ${filter === chip.value ? 'transparent' : 'var(--color-border)'}`,
                             fontWeight: filter === chip.value ? 700 : 400,
+                            ...(filter === chip.value && {
+                                background: 'var(--color-accent-to)',
+                                color: 'white',
+                                border: '1px solid transparent',
+                            }),
                         }}
                     >
                         {chip.label}

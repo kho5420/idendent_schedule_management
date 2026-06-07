@@ -60,14 +60,12 @@ function MainPage() {
                             setShowBadge(false);
                             markAsSeen();
                         }}
+                        className="header-action-btn"
                         style={{
                             position: 'relative',
-                            background: 'none',
-                            border: '1px solid var(--color-border)',
                             borderRadius: 8,
                             padding: '6px 10px',
                             fontSize: 12,
-                            color: 'var(--color-text-sub)',
                             cursor: 'pointer',
                         }}
                     >
@@ -93,13 +91,11 @@ function MainPage() {
                     </button>
                     <button
                         onClick={() => navigate('/staff')}
+                        className="header-action-btn"
                         style={{
-                            background: 'none',
-                            border: '1px solid var(--color-border)',
                             borderRadius: 8,
                             padding: '6px 10px',
                             fontSize: 12,
-                            color: 'var(--color-text-sub)',
                             cursor: 'pointer',
                         }}
                     >

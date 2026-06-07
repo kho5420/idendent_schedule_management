@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { StaffRow, EmployeeType, CareerLevel } from '../types';
 import { createStaff, updateStaff, deleteStaff } from '../lib/staffApi';
+import { RoleIcon } from './RoleIcon';
 
 type Props = {
     staff: StaffRow | null;
@@ -74,6 +75,8 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
     const [form, setForm] = useState<FormData>(staff ? { ...staff } : { ...EMPTY });
     const [saving, setSaving] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
+
+    const roleName = employeeTypes.find((t) => t.id === form.employee_type_id)?.name ?? '';
 
     useEffect(() => {
         function handleKeyDown(e: KeyboardEvent) {
@@ -283,35 +286,35 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                             ✕
                         </button>
 
-                        {/* 아바타 + 이름 */}
-                        <div
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 16,
-                                paddingRight: 44,
-                            }}
-                        >
-                            <div
-                                style={{
-                                    width: 54,
-                                    height: 54,
-                                    background: 'linear-gradient(135deg, #a7f3d0, #34d399)',
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: 22,
-                                    fontWeight: 800,
-                                    color: '#052e16',
-                                    border: '2px solid rgba(255,255,255,0.3)',
-                                    flexShrink: 0,
-                                    boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
-                                }}
-                            >
-                                {form.name[0] || '?'}
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
+                        {/* 직책 라벨 + 이름 */}
+                        <div style={{ paddingRight: 44 }}>
+                            {roleName ? (
+                                <div
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 6,
+                                        background: 'rgba(255,255,255,0.12)',
+                                        border: '1px solid rgba(255,255,255,0.22)',
+                                        borderRadius: 20,
+                                        padding: '5px 12px 5px 9px',
+                                        marginBottom: 9,
+                                        color: '#a7f3d0',
+                                    }}
+                                >
+                                    <RoleIcon role={roleName} size={13} />
+                                    <span
+                                        style={{
+                                            fontSize: 11,
+                                            fontWeight: 700,
+                                            color: 'rgba(236,253,245,0.92)',
+                                            letterSpacing: '0.02em',
+                                        }}
+                                    >
+                                        {roleName}
+                                    </span>
+                                </div>
+                            ) : (
                                 <div
                                     style={{
                                         fontSize: 10,
@@ -324,6 +327,8 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                 >
                                     {staff ? '직원 편집' : '새 직원 추가'}
                                 </div>
+                            )}
+                            <div>
                                 <input
                                     value={form.name}
                                     onChange={(e) => set('name', e.target.value)}

@@ -7,7 +7,7 @@ interface Props {
 
 function getMonthRange(): ScheduleMonth[] {
     const months: ScheduleMonth[] = [];
-    for (let offset = -2; offset <= 3; offset++) {
+    for (let offset = 0; offset <= 3; offset++) {
         const d = new Date();
         d.setMonth(d.getMonth() + offset);
         months.push({ year: d.getFullYear(), month: d.getMonth() + 1 });
@@ -51,17 +51,19 @@ export function MonthSelector({ selected, onChange }: Props) {
                         <button
                             key={`${m.year}-${m.month}`}
                             onClick={() => onChange(m)}
+                            className="month-chip"
                             style={{
                                 padding: '6px 16px',
                                 borderRadius: 20,
                                 fontSize: 13,
                                 fontWeight: isSelected ? 700 : 500,
-                                border: isSelected ? 'none' : '1px solid var(--color-border)',
-                                background: isSelected
-                                    ? 'linear-gradient(135deg, var(--color-accent-from), var(--color-accent-to))'
-                                    : 'transparent',
-                                color: isSelected ? 'white' : 'var(--color-text-sub)',
                                 cursor: 'pointer',
+                                ...(isSelected && {
+                                    border: 'none',
+                                    background:
+                                        'linear-gradient(135deg, var(--color-accent-from), var(--color-accent-to))',
+                                    color: 'white',
+                                }),
                             }}
                         >
                             {formatChip(m)}
