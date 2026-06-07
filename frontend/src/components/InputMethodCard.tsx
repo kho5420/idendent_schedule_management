@@ -1,4 +1,4 @@
-import type { InputMethod } from '../types';
+import type { InputMethod, SheetConnection } from '../types';
 import { ExcelUploader } from './ExcelUploader';
 import { GoogleSheetPicker } from './GoogleSheetPicker';
 
@@ -6,12 +6,14 @@ interface Props {
     selected: InputMethod | null;
     uploadedFile: File | null;
     googleToken: string | null;
-    sheetId: string | null;
+    scheduleSheet: SheetConnection;
+    leaveRequestSheet: SheetConnection;
     isLoading?: boolean;
     onMethodSelect: (method: InputMethod) => void;
     onFileChange: (file: File | null) => void;
     onTokenChange: (token: string | null) => void;
-    onSheetIdChange: (id: string | null) => void;
+    onScheduleSheetChange: (connection: SheetConnection) => void;
+    onLeaveRequestSheetChange: (connection: SheetConnection) => void;
 }
 
 interface CardProps {
@@ -60,13 +62,18 @@ export function InputMethodCard({
     selected,
     uploadedFile,
     googleToken,
-    sheetId,
+    scheduleSheet,
+    leaveRequestSheet,
     isLoading,
     onMethodSelect,
     onFileChange,
     onTokenChange,
-    onSheetIdChange,
+    onScheduleSheetChange,
+    onLeaveRequestSheetChange,
 }: Props) {
+    // App.tsx에서 prop-drilling으로만 전달됨 — 현재 값은 사용하지 않고 변경 콜백만 사용
+    void scheduleSheet;
+    void leaveRequestSheet;
     return (
         <div className="input-method-grid">
             <Card
@@ -91,9 +98,9 @@ export function InputMethodCard({
             >
                 <GoogleSheetPicker
                     token={googleToken}
-                    sheetId={sheetId}
                     onTokenChange={onTokenChange}
-                    onSheetIdChange={onSheetIdChange}
+                    onScheduleSheetChange={onScheduleSheetChange}
+                    onLeaveRequestSheetChange={onLeaveRequestSheetChange}
                 />
             </Card>
         </div>
