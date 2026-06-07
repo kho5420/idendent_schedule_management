@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import type { ScheduleMonth, InputMethod, GeneratedSchedule } from './types';
+import type { ScheduleMonth, InputMethod, GeneratedSchedule, SheetConnection } from './types';
 import { MonthSelector } from './components/MonthSelector';
 import { InputMethodCard } from './components/InputMethodCard';
 import { GenerateButton } from './components/GenerateButton';
@@ -23,7 +23,8 @@ function MainPage() {
     const [inputMethod, setInputMethod] = useState<InputMethod | null>(null);
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
     const [googleToken, setGoogleToken] = useState<string | null>(null);
-    const [sheetId, setSheetId] = useState<string | null>(null);
+    const [scheduleSheet, setScheduleSheet] = useState<SheetConnection>(null);
+    const [leaveRequestSheet, setLeaveRequestSheet] = useState<SheetConnection>(null);
     const [generatedSchedule] = useState<GeneratedSchedule | null>(null);
     const [isGenerating] = useState(false);
     const [error] = useState<string | null>(null);
@@ -35,7 +36,7 @@ function MainPage() {
         inputMethod === 'excel'
             ? uploadedFile !== null
             : inputMethod === 'google'
-              ? googleToken !== null && sheetId !== null
+              ? googleToken !== null && scheduleSheet !== null
               : false;
 
     async function handleGenerate() {
@@ -176,12 +177,14 @@ function MainPage() {
                 selected={inputMethod}
                 uploadedFile={uploadedFile}
                 googleToken={googleToken}
-                sheetId={sheetId}
+                scheduleSheet={scheduleSheet}
+                leaveRequestSheet={leaveRequestSheet}
                 isLoading={isGenerating}
                 onMethodSelect={setInputMethod}
                 onFileChange={setUploadedFile}
                 onTokenChange={setGoogleToken}
-                onSheetIdChange={setSheetId}
+                onScheduleSheetChange={setScheduleSheet}
+                onLeaveRequestSheetChange={setLeaveRequestSheet}
             />
 
             <GenerateButton
