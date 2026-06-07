@@ -18,6 +18,49 @@ function extractDay(cell: unknown): number | null {
     return match ? parseInt(match[1], 10) : null;
 }
 
+export async function updateSheetCell(
+    sheetId: string,
+    token: string,
+    cellRange: string,
+    value: string
+): Promise<void> {
+    const range = encodeURIComponent(cellRange);
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`;
+
+    const res = await fetch(url, {
+        method: 'PUT',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ range: cellRange, values: [[value]] }),
+    });
+
+    if (!res.ok) {
+        throw new Error(`Google Sheets API 오류 (${res.status})`);
+    }
+}
+
+export async function checkSheetTab(
+    sheetId: string,
+    token: string,
+    tabName: string
+): Promise<boolean> {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`;
+
+    const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) {
+        throw new Error(`Google Sheets API 오류 (${res.status})`);
+    }
+
+    const data = await res.json();
+    const sheets: Array<{ properties?: { title?: string } }> = data.sheets ?? [];
+    return sheets.some((sheet) => sheet.properties?.title === tabName);
+}
+
 export async function fetchSheetData(
     sheetId: string,
     token: string,

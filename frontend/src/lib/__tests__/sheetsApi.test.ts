@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchSheetData } from '../sheetsApi';
+import { fetchSheetData, checkSheetTab } from '../sheetsApi';
 
 beforeEach(() => {
     vi.restoreAllMocks();
@@ -37,6 +37,42 @@ describe('fetchSheetData', () => {
         } as Response);
 
         await expect(fetchSheetData('id', 'token', { year: 2026, month: 6 })).rejects.toThrow(
+            'Google Sheets API 오류'
+        );
+    });
+});
+
+describe('checkSheetTab', () => {
+    it('탭 제목 목록에 포함되어 있으면 true를 반환한다', async () => {
+        vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+                sheets: [{ properties: { title: '26.06' } }, { properties: { title: '26.07' } }],
+            }),
+        } as Response);
+
+        const result = await checkSheetTab('sheet-id', 'token', '26.07');
+        expect(result).toBe(true);
+    });
+
+    it('탭 제목 목록에 없으면 false를 반환한다', async () => {
+        vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ sheets: [{ properties: { title: '26.06' } }] }),
+        } as Response);
+
+        const result = await checkSheetTab('sheet-id', 'token', '26.07');
+        expect(result).toBe(false);
+    });
+
+    it('API 오류 시 에러를 던진다', async () => {
+        vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+            ok: false,
+            status: 403,
+            json: async () => ({ error: { message: 'Forbidden' } }),
+        } as Response);
+
+        await expect(checkSheetTab('id', 'token', '26.07')).rejects.toThrow(
             'Google Sheets API 오류'
         );
     });
