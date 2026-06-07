@@ -91,6 +91,7 @@ describe('createStaff', () => {
 
         const data = {
             name: '신규',
+            alias: null,
             use_yn: 'Y' as const,
             employee_type_id: null,
             career: null,
@@ -122,6 +123,7 @@ describe('createStaff', () => {
 
         const data = {
             name: '신규',
+            alias: null,
             use_yn: 'Y' as const,
             employee_type_id: null,
             career: null,
