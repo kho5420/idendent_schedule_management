@@ -126,12 +126,14 @@ export function GoogleSheetPicker({
                 label="📅 스케줄 시트"
                 token={token}
                 tabPlaceholder="탭 이름 (예: 26.07)"
+                storageKey="google_sheet_connection_schedule"
                 onConnectionChange={onScheduleSheetChange}
             />
             <SheetConnectionField
                 label="🌴 휴무신청 시트 (선택)"
                 token={token}
                 tabPlaceholder="탭 이름"
+                storageKey="google_sheet_connection_leave_request"
                 onConnectionChange={onLeaveRequestSheetChange}
             />
         </div>
