@@ -16,6 +16,7 @@ type FormData = Omit<StaffRow, 'id' | 'sort_order'>;
 
 const EMPTY: FormData = {
     name: '',
+    alias: null,
     use_yn: 'Y',
     employee_type_id: null,
     career: null,
@@ -342,6 +343,26 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                         border: '1px solid var(--color-border)',
                                         borderRadius: 10,
                                         padding: '7px 12px',
+                                        boxSizing: 'border-box',
+                                        outline: 'none',
+                                        fontFamily: 'inherit',
+                                    }}
+                                />
+                            </div>
+                            <div style={{ marginTop: 6 }}>
+                                <input
+                                    value={form.alias ?? ''}
+                                    onChange={(e) => set('alias', e.target.value || null)}
+                                    placeholder="별칭 (예: Y, 신, 이은)"
+                                    style={{
+                                        width: '100%',
+                                        fontSize: 13,
+                                        fontWeight: 600,
+                                        color: 'var(--color-text-sub)',
+                                        background: 'rgba(255,255,255,0.4)',
+                                        border: '1px solid var(--color-border)',
+                                        borderRadius: 8,
+                                        padding: '5px 12px',
                                         boxSizing: 'border-box',
                                         outline: 'none',
                                         fontFamily: 'inherit',

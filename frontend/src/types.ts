@@ -48,6 +48,7 @@ export type CareerLevel = '고' | '중' | '저' | '신규';
 export type StaffRow = {
     id: number;
     name: string;
+    alias: string | null;
     use_yn: 'Y' | 'N';
     employee_type_id: number | null;
     career: CareerLevel | null;
@@ -66,6 +67,7 @@ export type StaffUpdateData = Partial<
     Pick<
         StaffRow,
         | 'name'
+        | 'alias'
         | 'employee_type_id'
         | 'career'
         | 'team_no'
