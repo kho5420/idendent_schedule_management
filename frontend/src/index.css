@@ -209,3 +209,104 @@ body {
 .staff-modal-card {
     animation: staff-modal-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ── Schedule settings page ───────────────────────── */
+.schedule-setting-card {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    overflow: hidden;
+}
+.schedule-setting-head {
+    display: grid;
+    grid-template-columns: 64px 1fr 1fr 1fr 88px;
+    gap: 4px;
+    padding: 14px 18px;
+    background-color: var(--color-tag-bg);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-sub);
+}
+.schedule-setting-row {
+    display: grid;
+    grid-template-columns: 64px 1fr 1fr 1fr 88px;
+    gap: 4px;
+    align-items: center;
+    padding: 12px 18px;
+    border-top: 1px solid var(--color-border);
+}
+.schedule-setting-row.weekend {
+    background-color: #fff7ed;
+}
+.schedule-setting-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--color-accent-to);
+    margin-right: 8px;
+}
+.schedule-setting-dot.weekend {
+    background-color: #c2410c;
+}
+.schedule-setting-stepper {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.schedule-setting-stepper button {
+    width: 26px;
+    height: 30px;
+    border: none;
+    background-color: var(--color-bg);
+    color: var(--color-text-sub);
+    font-size: 14px;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+.schedule-setting-stepper button:hover {
+    background-color: var(--color-tag-bg);
+    color: var(--color-text);
+}
+.schedule-setting-stepper .value {
+    width: 34px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+.schedule-setting-toggle {
+    position: relative;
+    width: 44px;
+    height: 25px;
+    border: none;
+    border-radius: 13px;
+    background-color: var(--color-border);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    padding: 0;
+}
+.schedule-setting-toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background-color: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: left 0.15s ease;
+}
+.schedule-setting-toggle.on {
+    background-color: var(--color-accent-to);
+}
+.schedule-setting-toggle.on::after {
+    left: 22px;
+}
