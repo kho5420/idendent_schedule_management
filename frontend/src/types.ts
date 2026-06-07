@@ -2,6 +2,11 @@ export type ScheduleMonth = { year: number; month: number };
 
 export type InputMethod = 'excel' | 'google';
 
+export type SheetConnection = {
+    sheetId: string;
+    tabName: string;
+} | null;
+
 export type ExistingDayData = {
     date: string; // "YYYY-MM-DD"
     dayOfWeek: number; // 0=일, 1=월, ..., 6=토
