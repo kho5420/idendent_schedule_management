@@ -45,7 +45,7 @@ cd frontend && npm run lint       # ESLint 검사
 
 ## 환경변수
 `frontend/.env`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_GOOGLE_CLIENT_ID`
-GitHub Actions Secrets: `SUPABASE_URL`, `SUPABASE_ANON_KEY` (workflow에서 `VITE_` prefix 부여)
+GitHub Actions Secrets: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `GOOGLE_CLIENT_ID` (workflow에서 `VITE_` prefix 부여)
 
 ## DB (Supabase PostgreSQL)
 - 접속정보 → `.claude/secrets.md` (gitignore됨)
