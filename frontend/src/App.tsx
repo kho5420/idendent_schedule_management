@@ -7,6 +7,7 @@ import { GenerateButton } from './components/GenerateButton';
 import { SchedulePreview } from './components/SchedulePreview';
 import { ChangelogModal } from './components/ChangelogModal';
 import { StaffSettingsPage } from './components/StaffSettingsPage';
+import { ScheduleSettingsPage } from './components/ScheduleSettingsPage';
 import { hasNewVersion, markAsSeen } from './lib/changelog';
 import './index.css';
 
@@ -100,6 +101,18 @@ function MainPage() {
                         }}
                     >
                         ⚙ 직원 설정
+                    </button>
+                    <button
+                        onClick={() => navigate('/schedule-settings')}
+                        className="header-action-btn"
+                        style={{
+                            borderRadius: 8,
+                            padding: '6px 10px',
+                            fontSize: 12,
+                            cursor: 'pointer',
+                        }}
+                    >
+                        📅 스케줄 설정
                     </button>
                 </div>
                 <div style={{ textAlign: 'center' }}>
@@ -220,6 +233,7 @@ function App() {
         <Routes>
             <Route path="/" element={<MainPage />} />
             <Route path="/staff" element={<StaffSettingsPage />} />
+            <Route path="/schedule-settings" element={<ScheduleSettingsPage />} />
         </Routes>
     );
 }
