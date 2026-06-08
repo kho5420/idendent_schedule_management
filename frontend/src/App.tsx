@@ -13,6 +13,7 @@ import { GenerateButton } from './components/GenerateButton';
 import { SchedulePreview } from './components/SchedulePreview';
 import { AssignmentPreview } from './components/AssignmentPreview';
 import { ChangelogModal } from './components/ChangelogModal';
+import { SheetGuideModal } from './components/SheetGuideModal';
 import { StaffSettingsPage } from './components/StaffSettingsPage';
 import { ScheduleSettingsPage } from './components/ScheduleSettingsPage';
 import { hasNewVersion, markAsSeen } from './lib/changelog';
@@ -48,6 +49,7 @@ function MainPage() {
     const [error, setError] = useState<string | null>(null);
     const [comingSoon, setComingSoon] = useState(false);
     const [isChangelogOpen, setIsChangelogOpen] = useState(false);
+    const [isSheetGuideOpen, setIsSheetGuideOpen] = useState(false);
     const [showBadge, setShowBadge] = useState(() => hasNewVersion());
 
     const isReady =
@@ -256,6 +258,38 @@ function MainPage() {
                 onLeaveRequestSheetChange={setLeaveRequestSheet}
             />
 
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    background: '#fefce8',
+                    border: '1px solid #fde68a',
+                    borderRadius: 8,
+                    padding: '8px 12px',
+                    marginBottom: 12,
+                }}
+            >
+                <span style={{ fontSize: 12, color: '#92400e' }}>
+                    구글 시트 연동이 처음이신가요?
+                </span>
+                <button
+                    onClick={() => setIsSheetGuideOpen(true)}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: '#2563eb',
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                        padding: 0,
+                    }}
+                >
+                    설정 가이드 보기 →
+                </button>
+            </div>
+
             <GenerateButton
                 month={selectedMonth}
                 isReady={isReady}
@@ -298,6 +332,7 @@ function MainPage() {
             {dayAssignments && <AssignmentPreview assignments={dayAssignments} />}
 
             <ChangelogModal isOpen={isChangelogOpen} onClose={() => setIsChangelogOpen(false)} />
+            <SheetGuideModal isOpen={isSheetGuideOpen} onClose={() => setIsSheetGuideOpen(false)} />
         </div>
     );
 }
