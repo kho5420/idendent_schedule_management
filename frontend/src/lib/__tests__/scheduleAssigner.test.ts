@@ -331,6 +331,75 @@ describe('assignDailySchedule', () => {
         expect(day.orthoStaffCount).toBe(3);
     });
 
+    it('야간시프트 요일은 plannedOff(정기 휴무)를 무시하고 전원 출근시킨다', () => {
+        const staff = [지수, 혜수];
+        const plannedOff = new Map([[혜수.id, new Set(['2026-07-08'])]]);
+        const doctorSchedule: DoctorDayInfo[] = [
+            { date: '2026-07-08', dayOfWeek: 3, doctorAliases: ['오'], isFullAttendance: false },
+        ];
+
+        const [day] = assignDailySchedule(
+            staff,
+            [대표원장, 오원장],
+            [],
+            doctorSchedule,
+            scheduleSettings,
+            month,
+            plannedOff
+        );
+
+        // has_night_shift 요일이므로 정기 휴무를 무시하고 모두 출근
+        expect(day.working).toContain('혜수');
+        expect(day.working).toContain('지수');
+    });
+
+    it('야간시프트/전체출근 요일은 교정 3명 제한을 적용하지 않고 전원 출근시킨다', () => {
+        // 교정 원장(정) 출근 + 수요일(야간) → 교정일이지만 전원 출근해야 함
+        const o = [1, 2, 3, 4, 5].map((i) =>
+            makeStaff({ name: `o${i}`, is_ortho: true, career: '고' })
+        );
+        const n1 = makeStaff({ name: 'n1', is_ortho: false });
+        const staff = [...o, n1];
+        const wed: DoctorDayInfo = {
+            date: '2026-07-01',
+            dayOfWeek: 3,
+            doctorAliases: ['정'],
+            isFullAttendance: false,
+        };
+
+        const [day] = assignDailySchedule(
+            staff,
+            [대표원장, 정원장],
+            [],
+            [wed],
+            scheduleSettings,
+            month
+        );
+
+        expect(day.isOrthoDay).toBe(true);
+        expect(day.working).toHaveLength(6); // 교정 3명 제한 미적용 → 전원
+        expect(day.orthoStaffCount).toBe(5);
+    });
+
+    it('야간시프트 요일이어도 연차/주차 인원은 제외한다', () => {
+        const staff = [지수, 혜수];
+        const leaveRequests: LeaveRequest[] = [{ date: '2026-07-08', name: '혜수', type: '연차' }];
+        const doctorSchedule: DoctorDayInfo[] = [
+            { date: '2026-07-08', dayOfWeek: 3, doctorAliases: ['오'], isFullAttendance: false },
+        ];
+
+        const [day] = assignDailySchedule(
+            staff,
+            [대표원장, 오원장],
+            leaveRequests,
+            doctorSchedule,
+            scheduleSettings,
+            month
+        );
+
+        expect(day.working).toEqual(['지수']);
+    });
+
     it('일요일에 팀장(is_team_leader) 출근 여부를 표시한다', () => {
         const staffWithLeader = [지수, 윤정];
         const staffWithoutLeader = [지수, 혜수];

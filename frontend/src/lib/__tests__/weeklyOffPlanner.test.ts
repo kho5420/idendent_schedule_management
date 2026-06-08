@@ -1,6 +1,22 @@
 import { describe, it, expect } from 'vitest';
 import { planWeeklyOffDays } from '../weeklyOffPlanner';
-import type { StaffRow, DoctorDayInfo } from '../../types';
+import type { StaffRow, DoctorDayInfo, ScheduleSetting } from '../../types';
+
+const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
+function makeSettings(
+    over: (day: string) => Partial<ScheduleSetting> = () => ({})
+): ScheduleSetting[] {
+    return DAY_NAMES.map((day_name, i) => ({
+        id: i + 1,
+        day_name,
+        sort_order: i,
+        min_staff_with_ortho: 0,
+        min_staff_without_ortho: 0,
+        min_staff_on_leave: 0,
+        has_night_shift: false,
+        ...over(day_name),
+    }));
+}
 
 let nextId = 1;
 function makeStaff(overrides: Partial<StaffRow>): StaffRow {
@@ -214,6 +230,72 @@ describe('planWeeklyOffDays', () => {
             '2026-07-10',
         ];
         expect(week2Weekdays.some((d) => offs.has(d))).toBe(true);
+    });
+
+    it('야간시프트(has_night_shift) 요일은 평일 off 후보에서 제외한다', () => {
+        const staff = [
+            makeStaff({ name: 'A' }),
+            makeStaff({ name: 'B' }),
+            makeStaff({ name: 'C' }),
+        ];
+        const settings = makeSettings((d) => (d === '수' ? { has_night_shift: true } : {}));
+        const result = planWeeklyOffDays(staff, WEEK2, [], settings);
+
+        const wed = '2026-07-08';
+        const otherWeekdays = ['2026-07-06', '2026-07-07', '2026-07-09', '2026-07-10'];
+        for (const s of staff) {
+            const offs = result.get(s.id)!;
+            expect(offs.has(wed)).toBe(false); // 수요일은 off 배정 안 함
+            // 평일 off 1일은 여전히 다른 요일에 배정
+            expect(otherWeekdays.filter((d) => offs.has(d))).toHaveLength(1);
+        }
+    });
+
+    it('각 요일의 min_staff_without_ortho 하한을 지켜 여유 큰 요일로 평일 off를 몰아 배정한다', () => {
+        const staff = ['A', 'B', 'C', 'D', 'E'].map((name) => makeStaff({ name }));
+        // 목요일만 하한 0, 나머지 평일 하한 5 → 5명 모두 off는 목요일에만 가능
+        const settings = makeSettings((d) =>
+            d === '목'
+                ? { min_staff_without_ortho: 0 }
+                : ['월', '화', '수', '금'].includes(d)
+                  ? { min_staff_without_ortho: 5 }
+                  : {}
+        );
+        const result = planWeeklyOffDays(staff, WEEK2, [], settings);
+
+        const thu = '2026-07-09';
+        for (const s of staff) {
+            expect(result.get(s.id)!.has(thu)).toBe(true);
+        }
+    });
+
+    it('월초 부분주(수요일 시작)는 전월 평일까지 한 주로 채워 목·금 하한을 지킨다', () => {
+        // 7월이 수요일(1일)에 시작 → 전월(6/29 월, 6/30 화)까지 한 주로 보충되어야 함.
+        // 보충이 없으면 목·금에만 off가 몰려 하한(4) 미달.
+        const staff = ['A', 'B', 'C', 'D', 'E'].map((name) => makeStaff({ name }));
+        const partialWeek: DoctorDayInfo[] = [
+            { date: '2026-07-01', dayOfWeek: 3, doctorAliases: [], isFullAttendance: true }, // 수(야간)
+            { date: '2026-07-02', dayOfWeek: 4, doctorAliases: ['Y'], isFullAttendance: false }, // 목
+            { date: '2026-07-03', dayOfWeek: 5, doctorAliases: ['Y'], isFullAttendance: false }, // 금
+        ];
+        const settings = makeSettings((d) =>
+            d === '수'
+                ? { has_night_shift: true }
+                : ['목', '금'].includes(d)
+                  ? { min_staff_without_ortho: 4 }
+                  : {}
+        );
+        const result = planWeeklyOffDays(staff, partialWeek, [], settings);
+
+        const offOnThu = staff.filter((s) => result.get(s.id)!.has('2026-07-02')).length;
+        const offOnFri = staff.filter((s) => result.get(s.id)!.has('2026-07-03')).length;
+        // 5명 중 목·금 하한 4 → 각 요일 off는 1명 이하여야 함 (나머지는 보충된 전월 월·화로 분산)
+        expect(offOnThu).toBeLessThanOrEqual(1);
+        expect(offOnFri).toBeLessThanOrEqual(1);
+        // 수요일(야간)에는 off 없음
+        for (const s of staff) {
+            expect(result.get(s.id)!.has('2026-07-01')).toBe(false);
+        }
     });
 
     it('연차는 정기 off 배정에 영향을 주지 않는다', () => {

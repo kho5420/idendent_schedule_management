@@ -52,12 +52,14 @@ function isWorkingThatDay(
     dayOfWeek: number,
     fullDayOffAliases: Set<string>,
     plannedOffDays: Map<number, Set<string>>,
-    date: string
+    date: string,
+    ignorePlannedOff: boolean
 ): boolean {
     if (staffMember.is_on_leave) return false;
     if (fullDayOffAliases.has(staffMember.alias ?? staffMember.name)) return false;
     if (dayOfWeek === SUNDAY && staffMember.career === NEW_CAREER) return false;
-    if (plannedOffDays.get(staffMember.id)?.has(date)) return false;
+    // 전원출근일(전체출근 또는 야간시프트)에는 정기 휴무를 무시하고 휴무인원만 제외
+    if (!ignorePlannedOff && plannedOffDays.get(staffMember.id)?.has(date)) return false;
     return true;
 }
 
@@ -107,13 +109,18 @@ export function assignDailySchedule(
         const halfDayOff = leavesForDay.filter((r) => r.type === '반차');
         const fullDayOffAliases = new Set(fullDayOff.map((r) => r.name));
 
+        // 야간시프트 요일은 "휴무인원 제외하고 전원 출근"(SCHEDULE_RULE) → 전체출근일과 동일하게 정기 휴무 무시
+        const hasNightShift = hasNightShiftOnDay(doctorInfo.dayOfWeek, scheduleSettings);
+        const forceAttendance = doctorInfo.isFullAttendance || hasNightShift;
+
         let workingStaff = clinicStaff.filter((s) =>
             isWorkingThatDay(
                 s,
                 doctorInfo.dayOfWeek,
                 fullDayOffAliases,
                 plannedOffDays,
-                doctorInfo.date
+                doctorInfo.date,
+                forceAttendance
             )
         );
 
@@ -121,7 +128,8 @@ export function assignDailySchedule(
         const isOrthoDay = isOrthoDoctorPresent(doctorInfo, doctors);
         if (isOrthoDay) {
             const orthoWorking = workingStaff.filter((s) => s.is_ortho);
-            if (orthoWorking.length > ORTHO_FIXED_COUNT) {
+            // 전원출근일(전체출근·야간시프트)에는 초과 인원을 잘라내지 않는다 (3명은 최소 보장)
+            if (!forceAttendance && orthoWorking.length > ORTHO_FIXED_COUNT) {
                 const nonOrtho = workingStaff.filter((s) => !s.is_ortho);
                 workingStaff = [...nonOrtho, ...orthoWorking.slice(0, ORTHO_FIXED_COUNT)];
             } else if (orthoWorking.length < ORTHO_FIXED_COUNT) {
@@ -137,7 +145,6 @@ export function assignDailySchedule(
             }
         }
 
-        const hasNightShift = hasNightShiftOnDay(doctorInfo.dayOfWeek, scheduleSettings);
         const shiftSplit = hasNightShift ? splitDayNightShift(workingStaff) : EMPTY_SHIFT_SPLIT;
 
         return {

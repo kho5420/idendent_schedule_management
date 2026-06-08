@@ -97,7 +97,12 @@ function MainPage() {
             const doctorSchedule = parseDoctorSchedule(scheduleRows, selectedMonth);
             const leaveRequests = parseLeaveRequests(leaveRequestRows, selectedMonth);
 
-            const plannedOffDays = planWeeklyOffDays(clinicStaff, doctorSchedule, leaveRequests);
+            const plannedOffDays = planWeeklyOffDays(
+                clinicStaff,
+                doctorSchedule,
+                leaveRequests,
+                scheduleSettings
+            );
             setDayAssignments(
                 assignDailySchedule(
                     clinicStaff,
