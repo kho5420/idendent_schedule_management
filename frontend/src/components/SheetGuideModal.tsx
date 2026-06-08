@@ -46,10 +46,11 @@ const STEPS: GuideStep[] = [
         ],
     },
     {
-        title: '5단계: 클라이언트 ID 등록',
+        title: '5단계: 클라이언트 ID 앱에 입력',
         items: [
-            '로컬 개발: frontend/.env 파일을 열어 VITE_GOOGLE_CLIENT_ID= 뒤에 발급받은 ID를 붙여넣기',
-            '배포 (GitHub Pages): 저장소 → Settings → Secrets and variables → Actions에 GOOGLE_CLIENT_ID 값 등록',
+            '앱 메인 화면에서 "구글 스프레드시트" 카드를 선택하면 클라이언트 ID 입력란이 나타납니다',
+            '4단계에서 발급받은 클라이언트 ID (xxxx.apps.googleusercontent.com)를 붙여넣고 "저장" 클릭',
+            '한 번 저장하면 브라우저에 기억되어 다음에 다시 입력할 필요가 없습니다',
         ],
     },
 ];

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { SheetConnectionField } from './SheetConnectionField';
 import type { SheetConnection } from '../types';
 
+const CLIENT_ID_KEY = 'google_client_id';
 const TOKEN_KEY = 'google_access_token';
 
 interface Props {
@@ -33,20 +34,35 @@ export function GoogleSheetPicker({
     onScheduleSheetChange,
     onLeaveRequestSheetChange,
 }: Props) {
-    const [comingSoon, setComingSoon] = useState(false);
+    const [clientId, setClientId] = useState(() => localStorage.getItem(CLIENT_ID_KEY) ?? '');
+    const [inputValue, setInputValue] = useState('');
+    const [loginError, setLoginError] = useState<string | null>(null);
 
     useEffect(() => {
         const saved = localStorage.getItem(TOKEN_KEY);
         if (saved && !token) onTokenChange(saved);
     }, []);
 
+    function saveClientId() {
+        const trimmed = inputValue.trim();
+        if (!trimmed) return;
+        localStorage.setItem(CLIENT_ID_KEY, trimmed);
+        setClientId(trimmed);
+        setInputValue('');
+    }
+
+    function resetClientId() {
+        localStorage.removeItem(CLIENT_ID_KEY);
+        setClientId('');
+        logout();
+    }
+
     function login() {
-        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-        if (!clientId || !window.google) {
-            setComingSoon(true);
-            setTimeout(() => setComingSoon(false), 2000);
+        if (!window.google) {
+            setLoginError('Google 스크립트 로딩 중입니다. 잠시 후 다시 시도해 주세요.');
             return;
         }
+        setLoginError(null);
         const client = window.google.accounts.oauth2.initTokenClient({
             client_id: clientId,
             scope: 'https://www.googleapis.com/auth/spreadsheets',
@@ -67,9 +83,55 @@ export function GoogleSheetPicker({
         onLeaveRequestSheetChange(null);
     }
 
+    if (!clientId) {
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--color-text-sub)', lineHeight: 1.5 }}>
+                    Google Cloud에서 발급받은 OAuth 클라이언트 ID를 입력하세요.
+                </div>
+                <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && saveClientId()}
+                    placeholder="xxxx.apps.googleusercontent.com"
+                    style={{
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        border: '1px solid var(--color-border-hover)',
+                        borderRadius: 6,
+                        padding: '6px 8px',
+                        fontSize: 12,
+                        color: 'var(--color-text)',
+                        background: 'var(--color-card)',
+                        outline: 'none',
+                    }}
+                />
+                <button
+                    onClick={saveClientId}
+                    disabled={!inputValue.trim()}
+                    style={{
+                        background: inputValue.trim()
+                            ? 'linear-gradient(135deg, var(--color-accent-from), var(--color-accent-to))'
+                            : 'var(--color-border)',
+                        border: 'none',
+                        borderRadius: 6,
+                        padding: '7px 12px',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: 'white',
+                        cursor: inputValue.trim() ? 'pointer' : 'not-allowed',
+                    }}
+                >
+                    저장
+                </button>
+            </div>
+        );
+    }
+
     if (!token) {
         return (
-            <div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <button
                     onClick={login}
                     style={{
@@ -89,18 +151,26 @@ export function GoogleSheetPicker({
                 >
                     🔑 Google로 로그인
                 </button>
-                {comingSoon && (
-                    <div
-                        style={{
-                            fontSize: 13,
-                            color: 'var(--color-text-sub)',
-                            textAlign: 'center',
-                            marginTop: 6,
-                        }}
-                    >
-                        🚧 준비 중입니다
+                {loginError && (
+                    <div style={{ fontSize: 11, color: '#dc2626', textAlign: 'center' }}>
+                        {loginError}
                     </div>
                 )}
+                <button
+                    onClick={resetClientId}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        fontSize: 11,
+                        color: 'var(--color-text-sub)',
+                        cursor: 'pointer',
+                        textDecoration: 'underline',
+                        padding: 0,
+                        textAlign: 'center',
+                    }}
+                >
+                    클라이언트 ID 변경
+                </button>
             </div>
         );
     }

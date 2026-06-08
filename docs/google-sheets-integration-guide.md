@@ -39,10 +39,11 @@
    - `https://kho5420.github.io` (배포된 GitHub Pages 주소)
 6. "만들기" 클릭 → 클라이언트 ID가 발급됩니다 (`xxxxxxxxxxxx.apps.googleusercontent.com` 형태)
 
-## 5단계: 발급받은 클라이언트 ID 등록 (개발자만)
+## 5단계: 발급받은 클라이언트 ID 앱에 입력
 
-- **로컬 개발**: `frontend/.env` 파일을 열어 `VITE_GOOGLE_CLIENT_ID=` 뒤에 발급받은 ID를 붙여넣기
-- **배포 (GitHub Pages)**: GitHub 저장소 → Settings → Secrets and variables → Actions에 동일한 값을 등록 (배포 워크플로에서 `VITE_` 접두사를 붙여 빌드 시 주입합니다)
+1. 앱 메인 화면에서 **"구글 스프레드시트"** 카드를 선택하면 클라이언트 ID 입력란이 나타납니다
+2. 4단계에서 발급받은 클라이언트 ID (`xxxxxxxxxxxx.apps.googleusercontent.com`)를 붙여넣고 **"저장"** 클릭
+3. 한 번 저장하면 브라우저에 기억되어 다음에 다시 입력할 필요가 없습니다
 
 ## 참고 사항
 
