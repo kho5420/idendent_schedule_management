@@ -358,6 +358,8 @@ function MainPage() {
                         <div>
                             <b>🔀 다시 섞기</b> : 지금 짜인 표가 마음에 안 들 때 눌러요. 규칙(휴무
                             일수·요일 등)은 그대로 지키면서 <b>사람 배치만 다르게</b> 새로 짜드려요.
+                        </div>
+                        <div style={{ marginTop: 2 }}>
                             원하는 모양이 나올 때까지 여러 번 눌러도 됩니다.
                         </div>
                         <div style={{ marginTop: 2 }}>
