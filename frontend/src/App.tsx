@@ -24,6 +24,7 @@ import { parseLeaveRequests } from './lib/leaveRequestParser';
 import { parseDoctorSchedule } from './lib/doctorScheduleParser';
 import { assignDailySchedule } from './lib/scheduleAssigner';
 import { planWeeklyOffDays } from './lib/weeklyOffPlanner';
+import { writeScheduleToNewTab } from './lib/sheetWriter';
 import './index.css';
 
 const DOCTOR_EMPLOYEE_TYPE_IDS = [1, 2];
@@ -47,6 +48,8 @@ function MainPage() {
     const [dayAssignments, setDayAssignments] = useState<DayAssignment[] | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [seed, setSeed] = useState(0);
+    const [isWriting, setIsWriting] = useState(false);
+    const [writeMsg, setWriteMsg] = useState<{ ok: boolean; text: string } | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [comingSoon, setComingSoon] = useState(false);
     const [isChangelogOpen, setIsChangelogOpen] = useState(false);
@@ -120,6 +123,29 @@ function MainPage() {
             setError(e instanceof Error ? e.message : '스케줄 생성 중 오류가 발생했습니다');
         } finally {
             setIsGenerating(false);
+        }
+    }
+
+    async function handleWriteToSheet() {
+        if (!dayAssignments || !googleToken || !scheduleSheet) return;
+        setWriteMsg(null);
+        setIsWriting(true);
+        try {
+            const tab = await writeScheduleToNewTab(
+                scheduleSheet.sheetId,
+                googleToken,
+                selectedMonth,
+                dayAssignments
+            );
+            setWriteMsg({ ok: true, text: `'${tab}' 탭에 입력 완료` });
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : '시트 입력 중 오류가 발생했습니다';
+            setWriteMsg({
+                ok: false,
+                text: msg.includes('(401)') ? '구글 로그인이 만료됐어요. 다시 연결해 주세요' : msg,
+            });
+        } finally {
+            setIsWriting(false);
         }
     }
 
@@ -375,6 +401,22 @@ function MainPage() {
                         }}
                     >
                         <button
+                            onClick={() => void handleWriteToSheet()}
+                            disabled={isWriting || isGenerating}
+                            className="header-action-btn"
+                            style={{
+                                borderRadius: 8,
+                                padding: '8px 14px',
+                                fontSize: 13,
+                                fontWeight: 600,
+                                marginRight: 8,
+                                cursor: isWriting || isGenerating ? 'default' : 'pointer',
+                                opacity: isWriting || isGenerating ? 0.6 : 1,
+                            }}
+                        >
+                            {isWriting ? '입력 중…' : '📝 시트에 입력'}
+                        </button>
+                        <button
                             onClick={() => {
                                 const next = Math.floor(Math.random() * 1_000_000_000) + 1;
                                 setSeed(next);
@@ -394,6 +436,22 @@ function MainPage() {
                             🔀 다시 섞기
                         </button>
                     </div>
+                    {writeMsg && (
+                        <div
+                            style={{
+                                background: writeMsg.ok ? '#f0fdf4' : '#fef2f2',
+                                border: `1px solid ${writeMsg.ok ? '#bbf7d0' : '#fca5a5'}`,
+                                borderRadius: 8,
+                                padding: '10px 14px',
+                                fontSize: 13,
+                                color: writeMsg.ok ? '#166534' : '#dc2626',
+                                marginBottom: 12,
+                            }}
+                        >
+                            {writeMsg.ok ? '✅ ' : '⚠️ '}
+                            {writeMsg.text}
+                        </div>
+                    )}
                 </>
             )}
 
