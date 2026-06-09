@@ -32,3 +32,69 @@ export function buildScheduleGrid(assignments: DayAssignment[], month: ScheduleM
     }
     return grid;
 }
+
+const API = 'https://sheets.googleapis.com/v4/spreadsheets';
+
+async function fetchTitles(sheetId: string, token: string): Promise<string[]> {
+    const res = await fetch(`${API}/${sheetId}?fields=sheets.properties.title`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error(`구글 시트 API 오류 (${res.status})`);
+    const data = await res.json();
+    const sheets: Array<{ properties?: { title?: string } }> = data.sheets ?? [];
+    return sheets.map((s) => s.properties?.title ?? '');
+}
+
+/** 기존 탭과 겹치지 않는 탭 이름 결정 (충돌 시 base2, base3 …) */
+export async function resolveTabName(
+    sheetId: string,
+    token: string,
+    baseName: string
+): Promise<string> {
+    const titles = new Set(await fetchTitles(sheetId, token));
+    if (!titles.has(baseName)) return baseName;
+    for (let i = 2; ; i++) {
+        const name = `${baseName}${i}`;
+        if (!titles.has(name)) return name;
+    }
+}
+
+/** 새 탭 생성 */
+export async function createTab(sheetId: string, token: string, tabName: string): Promise<void> {
+    const res = await fetch(`${API}/${sheetId}:batchUpdate`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requests: [{ addSheet: { properties: { title: tabName } } }] }),
+    });
+    if (!res.ok) throw new Error(`구글 시트 API 오류 (${res.status})`);
+}
+
+/** 그리드를 탭의 A1부터 RAW로 기록 */
+export async function writeGrid(
+    sheetId: string,
+    token: string,
+    tabName: string,
+    grid: string[][]
+): Promise<void> {
+    const range = encodeURIComponent(`${tabName}!A1`);
+    const res = await fetch(`${API}/${sheetId}/values/${range}?valueInputOption=RAW`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ values: grid }),
+    });
+    if (!res.ok) throw new Error(`구글 시트 API 오류 (${res.status})`);
+}
+
+/** 새 탭을 만들어 스케줄을 기록하고, 생성된 탭 이름을 반환 */
+export async function writeScheduleToNewTab(
+    sheetId: string,
+    token: string,
+    month: ScheduleMonth,
+    assignments: DayAssignment[]
+): Promise<string> {
+    const baseName = `${String(month.year).slice(-2)}.${String(month.month).padStart(2, '0')}_생성`;
+    const tabName = await resolveTabName(sheetId, token, baseName);
+    await createTab(sheetId, token, tabName);
+    await writeGrid(sheetId, token, tabName, buildScheduleGrid(assignments, month));
+    return tabName;
+}
