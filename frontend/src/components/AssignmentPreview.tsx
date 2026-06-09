@@ -29,7 +29,8 @@ function groupByWeek(assignments: DayAssignment[]): (DayAssignment | null)[][] {
     return weeks;
 }
 
-function CalendarCell({ assignment }: { assignment: DayAssignment | null }) {
+function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; col: number }) {
+    const isWeekend = col >= 5; // 5=토, 6=일
     const tdStyle: React.CSSProperties = {
         width: `${100 / 7}%`,
         verticalAlign: 'top',
@@ -41,20 +42,21 @@ function CalendarCell({ assignment }: { assignment: DayAssignment | null }) {
     };
 
     if (!assignment) {
-        return <td style={{ ...tdStyle, background: 'var(--color-tag-bg)' }} />;
+        return (
+            <td style={{ ...tdStyle, background: isWeekend ? '#fef2f2' : 'var(--color-tag-bg)' }} />
+        );
     }
 
-    const isWeekend = assignment.dayOfWeek === 0 || assignment.dayOfWeek === 6;
     const dayNum = parseInt(assignment.date.slice(-2), 10);
 
     return (
-        <td style={{ ...tdStyle, background: isWeekend ? '#f8f9fa' : 'var(--color-card)' }}>
+        <td style={{ ...tdStyle, background: isWeekend ? '#fef2f2' : 'var(--color-card)' }}>
             <div
                 style={{
                     fontSize: 12,
                     fontWeight: 700,
                     marginBottom: 4,
-                    color: isWeekend ? '#888' : 'var(--color-text)',
+                    color: isWeekend ? '#dc2626' : 'var(--color-text)',
                 }}
             >
                 {dayNum}
@@ -110,30 +112,33 @@ export function AssignmentPreview({ assignments }: Props) {
                 >
                     <thead>
                         <tr>
-                            {DAY_HEADERS.map((label, i) => (
-                                <th
-                                    key={label}
-                                    style={{
-                                        padding: '8px 4px',
-                                        textAlign: 'center',
-                                        fontSize: 12,
-                                        fontWeight: 600,
-                                        color: i >= 5 ? '#888' : 'var(--color-text-sub)',
-                                        background: 'var(--color-tag-bg)',
-                                        borderRight: '1px solid var(--color-border)',
-                                        borderBottom: '1px solid var(--color-border)',
-                                    }}
-                                >
-                                    {label}
-                                </th>
-                            ))}
+                            {DAY_HEADERS.map((label, i) => {
+                                const weekend = i >= 5; // 5=토, 6=일
+                                return (
+                                    <th
+                                        key={label}
+                                        style={{
+                                            padding: '8px 4px',
+                                            textAlign: 'center',
+                                            fontSize: 12,
+                                            fontWeight: weekend ? 700 : 600,
+                                            color: weekend ? '#dc2626' : 'var(--color-text-sub)',
+                                            background: weekend ? '#fef2f2' : 'var(--color-tag-bg)',
+                                            borderRight: '1px solid var(--color-border)',
+                                            borderBottom: '1px solid var(--color-border)',
+                                        }}
+                                    >
+                                        {label}
+                                    </th>
+                                );
+                            })}
                         </tr>
                     </thead>
                     <tbody>
                         {weeks.map((week, i) => (
                             <tr key={i}>
                                 {week.map((a, col) => (
-                                    <CalendarCell key={col} assignment={a} />
+                                    <CalendarCell key={col} assignment={a} col={col} />
                                 ))}
                             </tr>
                         ))}

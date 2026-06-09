@@ -337,33 +337,62 @@ function MainPage() {
             {generatedSchedule && <SchedulePreview schedule={generatedSchedule} />}
 
             {dayAssignments && (
-                <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        marginBottom: 12,
-                    }}
-                >
-                    <button
-                        onClick={() => {
-                            const next = Math.floor(Math.random() * 1_000_000_000) + 1;
-                            setSeed(next);
-                            void handleGenerate(next);
-                        }}
-                        disabled={isGenerating}
-                        className="header-action-btn"
+                <>
+                    <div
                         style={{
+                            background: '#f0fdf4',
+                            border: '1px solid #bbf7d0',
                             borderRadius: 8,
-                            padding: '8px 14px',
-                            fontSize: 13,
-                            fontWeight: 600,
-                            cursor: isGenerating ? 'default' : 'pointer',
-                            opacity: isGenerating ? 0.6 : 1,
+                            padding: '10px 12px',
+                            marginBottom: 12,
+                            fontSize: 12,
+                            color: 'var(--color-text-sub)',
+                            lineHeight: 1.65,
                         }}
                     >
-                        🔀 다시 섞기
-                    </button>
-                </div>
+                        <div
+                            style={{ fontWeight: 700, marginBottom: 4, color: 'var(--color-text)' }}
+                        >
+                            💡 두 버튼은 이렇게 달라요
+                        </div>
+                        <div>
+                            <b>🔀 다시 섞기</b> : 지금 짜인 표가 마음에 안 들 때 눌러요. 규칙(휴무
+                            일수·요일 등)은 그대로 지키면서 <b>사람 배치만 다르게</b> 새로 짜드려요.
+                            원하는 모양이 나올 때까지 여러 번 눌러도 됩니다.
+                        </div>
+                        <div style={{ marginTop: 2 }}>
+                            <b>스케줄 생성</b>(맨 위) : 시트(휴무 신청·원장님 일정)를 <b>고친 뒤</b>{' '}
+                            그 내용을 반영해 다시 만들 때 써요.
+                        </div>
+                    </div>
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                            marginBottom: 12,
+                        }}
+                    >
+                        <button
+                            onClick={() => {
+                                const next = Math.floor(Math.random() * 1_000_000_000) + 1;
+                                setSeed(next);
+                                void handleGenerate(next);
+                            }}
+                            disabled={isGenerating}
+                            className="header-action-btn"
+                            style={{
+                                borderRadius: 8,
+                                padding: '8px 14px',
+                                fontSize: 13,
+                                fontWeight: 600,
+                                cursor: isGenerating ? 'default' : 'pointer',
+                                opacity: isGenerating ? 0.6 : 1,
+                            }}
+                        >
+                            🔀 다시 섞기
+                        </button>
+                    </div>
+                </>
             )}
 
             {dayAssignments && <AssignmentPreview assignments={dayAssignments} />}
