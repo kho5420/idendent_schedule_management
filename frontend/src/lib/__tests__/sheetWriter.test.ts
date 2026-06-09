@@ -22,12 +22,13 @@ function mkDay(over: Partial<DayAssignment> & { date: string; dayOfWeek: number 
 const month: ScheduleMonth = { year: 2026, month: 7 };
 
 describe('buildScheduleGrid', () => {
-    it('헤더 4행을 기존 양식대로 만든다', () => {
+    it('헤더 4행을 기존 양식대로 만든다 (A열 여백, 요일은 B~H)', () => {
         const grid = buildScheduleGrid([], month);
-        expect(grid[0]).toEqual(['7月']);
-        expect(grid[1]).toEqual(['26.7.1']);
-        expect(grid[2]).toEqual([' ~ 26.7.31']);
+        expect(grid[0]).toEqual(['', '7月']);
+        expect(grid[1]).toEqual(['', '26.7.1']);
+        expect(grid[2]).toEqual(['', ' ~ 26.7.31']);
         expect(grid[3]).toEqual([
+            '',
             '월요일',
             '화요일',
             '수요일',
@@ -46,18 +47,18 @@ describe('buildScheduleGrid', () => {
             working: ['성민', '이은'],
         });
         const grid = buildScheduleGrid([wed], month);
-        expect(grid[4][2]).toBe('1 원장님 전체출근'); // 수=col2
-        expect(grid[4][0]).toBe(''); // 월 없음
+        expect(grid[4][0]).toBe(''); // A열 여백
+        expect(grid[4][3]).toBe('1 원장님 전체출근'); // 수=B~H 기준 4번째(col3)
         expect(grid[5]).toEqual([]); // 그룹행 빈칸
         expect(grid[6]).toEqual([]);
         expect(grid[7]).toEqual([]);
-        expect(grid[8][2]).toContain('성민,이은'); // 진료실=formatDayCell
+        expect(grid[8][3]).toContain('성민,이은'); // 진료실=formatDayCell
     });
 
     it('원장 코드가 있으면 "일 코드,코드" 형식으로 표기한다', () => {
         const thu = mkDay({ date: '2026-07-02', dayOfWeek: 4, doctorAliases: ['오', '신'] });
         const grid = buildScheduleGrid([thu], month);
-        expect(grid[4][3]).toBe('2 오,신'); // 목=col3
+        expect(grid[4][4]).toBe('2 오,신'); // 목=col4
     });
 });
 

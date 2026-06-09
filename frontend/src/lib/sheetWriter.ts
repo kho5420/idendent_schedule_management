@@ -11,24 +11,27 @@ function dateDoctorCell(a: DayAssignment): string {
     return `${dayNum}`;
 }
 
-/** dayAssignments를 기존 스케줄 시트 양식(헤더 4행 + 주별 5행 블록)의 2차원 셀 배열로 변환 */
+/**
+ * dayAssignments를 기존 스케줄 시트 양식(헤더 4행 + 주별 5행 블록)의 2차원 셀 배열로 변환.
+ * 기존 시트 정렬에 맞춰 A열은 빈 여백으로 두고 요일·날짜·진료실은 B~H열에 배치한다.
+ */
 export function buildScheduleGrid(assignments: DayAssignment[], month: ScheduleMonth): string[][] {
     const yy = String(month.year).slice(-2);
     const lastDay = new Date(month.year, month.month, 0).getDate();
     const grid: string[][] = [
-        [`${month.month}月`],
-        [`${yy}.${month.month}.1`],
-        [` ~ ${yy}.${month.month}.${lastDay}`],
-        [...DAY_NAME_ROW],
+        ['', `${month.month}月`],
+        ['', `${yy}.${month.month}.1`],
+        ['', ` ~ ${yy}.${month.month}.${lastDay}`],
+        ['', ...DAY_NAME_ROW],
     ];
 
     for (const week of groupAssignmentsByWeek(assignments)) {
-        // 블록행0: 날짜 + 원장 코드
-        grid.push(week.map((a) => (a ? dateDoctorCell(a) : '')));
+        // 블록행0: 날짜 + 원장 코드 (A열 여백 + B~H 요일)
+        grid.push(['', ...week.map((a) => (a ? dateDoctorCell(a) : ''))]);
         // 블록행1~3: 데스크·실장·위생사 (앱 미관리 → 빈 행)
         grid.push([], [], []);
         // 블록행4: 진료실 (미리보기와 동일한 formatDayCell)
-        grid.push(week.map((a) => (a ? formatDayCell(a) : '')));
+        grid.push(['', ...week.map((a) => (a ? formatDayCell(a) : ''))]);
     }
     return grid;
 }
