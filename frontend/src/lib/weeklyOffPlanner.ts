@@ -185,10 +185,22 @@ export function planWeeklyOffDays(
     for (let wi = 0; wi < weeks.length; wi++) {
         const week = weeks[wi];
 
-        // weekday_fixed: 토·일 off
+        // 평일 전체휴진(진료 없음)일 여부 — 있으면 그날이 그 주의 평일 휴무로 흡수된다. (SCHEDULE_RULE)
+        const hasClosureWeekday = week.weekdays.some((d) => {
+            const info = fullSchedule.find((i) => i.date === d);
+            return info != null && !info.isFullAttendance && info.doctorAliases.length === 0;
+        });
+
+        // weekday_fixed: 토·일 off. 단, 그 주에 평일 전체휴진(공휴일 등)이 있으면 평일 근무가
+        // 하루 줄어 주말 1일을 대체 근무한다 (토요일 우선 근무, SCHEDULE_RULE).
         for (const s of weekdayFixed) {
-            if (week.saturday) offDays.get(s.id)?.add(week.saturday);
-            if (week.sunday) offDays.get(s.id)?.add(week.sunday);
+            if (hasClosureWeekday) {
+                // 토·일이 모두 있으면 토요일 근무·일요일 off, 한쪽만 있으면 그날을 대체 근무
+                if (week.saturday && week.sunday) offDays.get(s.id)?.add(week.sunday);
+            } else {
+                if (week.saturday) offDays.get(s.id)?.add(week.saturday);
+                if (week.sunday) offDays.get(s.id)?.add(week.sunday);
+            }
         }
 
         // 대표원장(Y)이 없는 평일 탐색 (열린 날 중 Y가 오지 않는 날)
@@ -202,14 +214,8 @@ export function planWeeklyOffDays(
             );
         });
 
-        // 평일 전체휴진(진료 없음)일이 있으면 그날이 그 주의 평일 휴무(전원 '주차') →
-        // 다른 평일에 휴무를 분배하지 않는다 (표시는 assigner가 처리). (SCHEDULE_RULE)
-        const hasClosureWeekday = week.weekdays.some((d) => {
-            const info = fullSchedule.find((i) => i.date === d);
-            return info != null && !info.isFullAttendance && info.doctorAliases.length === 0;
-        });
-
-        // 회전직원: 평일 1일 off — 야간시프트 요일 제외 + min_staff 하한 기반 균형 배정
+        // 회전직원: 평일 1일 off — 야간시프트 요일 제외 + min_staff 하한 기반 균형 배정.
+        // 평일 전체휴진일이 있으면 그날이 그 주 평일 휴무를 흡수하므로 분배하지 않는다(표시는 assigner).
         const candidateWeekdays = week.weekdays.filter((d) => !isNightShiftDate(d));
         if (!hasClosureWeekday && candidateWeekdays.length > 0) {
             // 이번 주 후보 요일별 배정된 off 수 (출근 예상 인원 계산용)

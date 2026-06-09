@@ -378,4 +378,27 @@ describe('planWeeklyOffDays', () => {
             expect(week2Weekdays.filter((d) => offs.has(d))).toHaveLength(1);
         }
     });
+
+    it('평일 전체휴진일이 있으면 weekday_fixed 직원은 주말 1일(토요일)을 대체 근무한다', () => {
+        const 언경 = makeStaff({ name: '언경', is_weekday_fixed: true });
+        const week3Closure: DoctorDayInfo[] = [
+            makeDay('2026-07-13', 1),
+            makeDay('2026-07-14', 2),
+            makeDay('2026-07-15', 3),
+            makeDay('2026-07-16', 4),
+            { date: '2026-07-17', dayOfWeek: 5, doctorAliases: [], isFullAttendance: false },
+            makeDay('2026-07-18', 6),
+            makeDay('2026-07-19', 0),
+        ];
+        const result = planWeeklyOffDays([언경], week3Closure, [], makeSettings());
+
+        const offs = result.get(언경.id)!;
+        expect(offs.has('2026-07-18')).toBe(false); // 토요일 대체 근무
+        expect(offs.has('2026-07-19')).toBe(true); // 일요일 off
+
+        // 대조군: 휴진 없는 주는 토·일 모두 off
+        const normal = planWeeklyOffDays([언경], WEEK3, [], makeSettings());
+        expect(normal.get(언경.id)!.has('2026-07-18')).toBe(true);
+        expect(normal.get(언경.id)!.has('2026-07-19')).toBe(true);
+    });
 });
