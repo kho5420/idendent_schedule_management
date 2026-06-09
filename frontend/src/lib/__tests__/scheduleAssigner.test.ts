@@ -400,6 +400,52 @@ describe('assignDailySchedule', () => {
         expect(day.working).toEqual(['지수']);
     });
 
+    it('정기 휴무(plannedOff)로 빠진 인원도 주차로 표시한다', () => {
+        const staff = [지수, 혜수];
+        const plannedOff = new Map([[혜수.id, new Set(['2026-07-02'])]]); // 목요일(야간 아님)
+        const doctorSchedule: DoctorDayInfo[] = [
+            { date: '2026-07-02', dayOfWeek: 4, doctorAliases: ['오'], isFullAttendance: false },
+        ];
+
+        const [day] = assignDailySchedule(
+            staff,
+            [대표원장, 오원장],
+            [],
+            doctorSchedule,
+            scheduleSettings,
+            month,
+            plannedOff
+        );
+
+        expect(day.working).toEqual(['지수']); // 혜수는 off
+        expect(day.fullDayOff).toContainEqual({
+            date: '2026-07-02',
+            name: '혜수',
+            type: '주차',
+        });
+    });
+
+    it('전원출근일(야간시프트)에는 정기 휴무 인원을 주차로 표시하지 않는다', () => {
+        const staff = [지수, 혜수];
+        const plannedOff = new Map([[혜수.id, new Set(['2026-07-01'])]]); // 수요일(야간)
+        const doctorSchedule: DoctorDayInfo[] = [
+            { date: '2026-07-01', dayOfWeek: 3, doctorAliases: ['오'], isFullAttendance: false },
+        ];
+
+        const [day] = assignDailySchedule(
+            staff,
+            [대표원장, 오원장],
+            [],
+            doctorSchedule,
+            scheduleSettings,
+            month,
+            plannedOff
+        );
+
+        expect(day.working).toContain('혜수'); // 전원 출근
+        expect(day.fullDayOff).toHaveLength(0); // off 아님 → 주차 표시 없음
+    });
+
     it('일요일에 팀장(is_team_leader) 출근 여부를 표시한다', () => {
         const staffWithLeader = [지수, 윤정];
         const staffWithoutLeader = [지수, 혜수];

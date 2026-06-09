@@ -147,11 +147,31 @@ export function assignDailySchedule(
 
         const shiftSplit = hasNightShift ? splitDayNightShift(workingStaff) : EMPTY_SHIFT_SPLIT;
 
+        // 정기 휴무(plannedOff)로 빠진 인원도 '주차'로 표시 → 누가 off인지 보이게.
+        // 전원출근일 제외, 교정 보충 등으로 다시 출근한 인원·명시 휴무 인원은 제외.
+        const workingIds = new Set(workingStaff.map((s) => s.id));
+        const explicitOffKeys = new Set(fullDayOff.map((r) => r.name));
+        const plannedOffDisplay: LeaveRequest[] = forceAttendance
+            ? []
+            : clinicStaff
+                  .filter(
+                      (s) =>
+                          !s.is_on_leave &&
+                          !workingIds.has(s.id) &&
+                          plannedOffDays.get(s.id)?.has(doctorInfo.date)
+                  )
+                  .map((s) => ({
+                      date: doctorInfo.date,
+                      name: s.alias ?? s.name,
+                      type: '주차' as const,
+                  }))
+                  .filter((e) => !explicitOffKeys.has(e.name));
+
         return {
             date: doctorInfo.date,
             dayOfWeek: doctorInfo.dayOfWeek,
             working: workingStaff.map((s) => s.name),
-            fullDayOff,
+            fullDayOff: [...fullDayOff, ...plannedOffDisplay],
             halfDayOff,
             isOrthoDay,
             orthoStaffCount: workingStaff.filter((s) => s.is_ortho).length,
