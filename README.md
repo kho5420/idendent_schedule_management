@@ -25,7 +25,32 @@ cd frontend && npm run dev
 
 - 포트 **5173**: http://localhost:5173
 
-## 3. 코드 스타일
+## 3. 테스트
+
+테스트 러너는 **Vitest**다. 모두 `frontend/`에서 실행한다.
+
+```bash
+cd frontend
+
+npx vitest run     # 전체 테스트 1회 실행 후 종료 (CI/수동 검증용)
+npm test           # watch 모드 — 파일 변경을 감지해 자동 재실행 (개발 중)
+```
+
+> `npm test` 스크립트는 `vitest`이며 기본이 watch 모드다. watch 중에는 `a`(전체 재실행), `q`(종료), `p`(파일명 필터) 단축키를 쓸 수 있다.
+
+자주 쓰는 변형:
+```bash
+npx vitest run src/lib/__tests__/weeklyOffPlanner.test.ts   # 특정 파일만
+npx vitest run -t "전체휴진"                                 # 이름에 키워드가 포함된 테스트만
+npx vitest run --reporter=basic                            # PASS/FAIL 요약만 출력
+```
+
+타입 체크:
+```bash
+cd frontend && npx tsc --noEmit
+```
+
+## 4. 코드 스타일
 
 ### 들여쓰기 규칙
 
