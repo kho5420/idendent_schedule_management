@@ -172,8 +172,15 @@ export function planWeeklyOffDays(
     const fullDayLeavesByDate = countFullDayLeavesByDate(available, leaveRequests);
     const weekdayWorkerBase = available.length; // 평일에는 휴직 외 전원이 출근 후보
 
-    const sundayWorked = new Map<number, number>();
-    for (const s of rotatable) sundayWorked.set(s.id, 0);
+    // 개인별 토/일 근무 횟수 — 더 많이 일한 요일을 쉬게 해 주말 출근을 균등화한다.
+    const satWorked = new Map<number, number>();
+    const sunWorked = new Map<number, number>();
+    for (const s of rotatable) {
+        satWorked.set(s.id, 0);
+        sunWorked.set(s.id, 0);
+    }
+    const incSat = (id: number) => satWorked.set(id, (satWorked.get(id) ?? 0) + 1);
+    const incSun = (id: number) => sunWorked.set(id, (sunWorked.get(id) ?? 0) + 1);
 
     for (let wi = 0; wi < weeks.length; wi++) {
         const week = weeks[wi];
@@ -234,24 +241,23 @@ export function planWeeklyOffDays(
             }
         }
 
-        // 회전직원: 주말 1일 off
+        // 회전직원: 주말 1일 off — 개인별 토/일 근무량을 균등화해 특정 주말 쏠림 방지
         for (let si = 0; si < order.length; si++) {
             const s = order[si];
             const satJucha = week.saturday != null && hasJucha(s, week.saturday, leaveRequests);
             const sunJucha = week.sunday != null && hasJucha(s, week.sunday, leaveRequests);
 
-            // 이번 주 주말에 이미 주차가 있으면 그것이 주말 off → 추가 배정 건너뜀
+            // 명시적 주말 주차 → 그날 off. 반대 요일 근무로 집계해 다음 주 균등화에 반영.
             if (satJucha || sunJucha) {
-                // 토요일 주차 = 토 off, 일 근무 → 일요일 근무 카운트 증가
-                if (satJucha && week.sunday) {
-                    sundayWorked.set(s.id, (sundayWorked.get(s.id) ?? 0) + 1);
-                }
+                if (satJucha && !sunJucha && week.sunday) incSun(s.id);
+                if (sunJucha && !satJucha && week.saturday) incSat(s.id);
                 continue;
             }
 
-            // 신규: 일요일 고정 off
+            // 신규: 일요일 고정 off (토요일만 주말 근무)
             if (s.career === '신규') {
                 if (week.sunday) offDays.get(s.id)?.add(week.sunday);
+                if (week.saturday) incSat(s.id);
                 continue;
             }
 
@@ -265,17 +271,24 @@ export function planWeeklyOffDays(
             }
             if (!hasSun) {
                 offDays.get(s.id)?.add(week.saturday!);
+                incSat(s.id);
                 continue;
             }
 
-            const worked = sundayWorked.get(s.id) ?? 0;
-            const offSunday = worked >= MAX_SUNDAYS_PER_MONTH || (si + wi) % 2 === 1;
+            // 일요일 월 최대 MAX_SUNDAYS_PER_MONTH회 근무(룰). 상한 도달 시 일요일 off 강제.
+            // 그 외에는 더 많이 일한 요일을 쉬게 해(개인 균등) 일요일 근무를 주 전체에 분산 →
+            // 월말 토요일 쏠림 방지. 동률이면 (si+wi) 패리티로 분산.
+            const sat = satWorked.get(s.id) ?? 0;
+            const sun = sunWorked.get(s.id) ?? 0;
+            const offSunday =
+                sun >= MAX_SUNDAYS_PER_MONTH ? true : sat === sun ? (si + wi) % 2 === 1 : sat < sun;
 
             if (offSunday) {
                 offDays.get(s.id)?.add(week.sunday!);
+                incSat(s.id);
             } else {
                 offDays.get(s.id)?.add(week.saturday!);
-                sundayWorked.set(s.id, worked + 1);
+                incSun(s.id);
             }
         }
 
@@ -290,9 +303,11 @@ export function planWeeklyOffDays(
                 for (const leader of teamLeaders) {
                     const offs = offDays.get(leader.id);
                     if (offs?.has(sun)) {
+                        // 일요일 off → 토요일 off 로 교체: 토 근무 취소, 일 근무 집계
                         offs.delete(sun);
                         offs.add(sat);
-                        sundayWorked.set(leader.id, (sundayWorked.get(leader.id) ?? 0) + 1);
+                        satWorked.set(leader.id, Math.max(0, (satWorked.get(leader.id) ?? 0) - 1));
+                        incSun(leader.id);
                         break;
                     }
                 }
