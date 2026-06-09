@@ -6,6 +6,8 @@ function makeAssignment(overrides: Partial<DayAssignment>): DayAssignment {
     return {
         date: '2026-07-01',
         dayOfWeek: 3,
+        doctorAliases: [],
+        isFullAttendance: false,
         working: [],
         fullDayOff: [],
         halfDayOff: [],

@@ -48,6 +48,12 @@ function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; c
     }
 
     const dayNum = parseInt(assignment.date.slice(-2), 10);
+    // 그날 출근 원장님 (스케줄 시트처럼 검증용 표시)
+    const doctorLine = assignment.isFullAttendance
+        ? '원장 전체출근'
+        : assignment.doctorAliases.length > 0
+          ? `원장 ${assignment.doctorAliases.join(',')}`
+          : null;
 
     return (
         <td style={{ ...tdStyle, background: isWeekend ? '#fef2f2' : 'var(--color-card)' }}>
@@ -61,6 +67,20 @@ function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; c
             >
                 {dayNum}
             </div>
+            {doctorLine && (
+                <div
+                    style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        color: '#2563eb',
+                        marginBottom: 4,
+                        lineHeight: 1.4,
+                        wordBreak: 'break-all',
+                    }}
+                >
+                    {doctorLine}
+                </div>
+            )}
             <pre
                 style={{
                     margin: 0,

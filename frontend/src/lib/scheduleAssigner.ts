@@ -77,6 +77,8 @@ const ORTHO_FIXED_COUNT = 3;
 const EMPTY_DAY = (doctorInfo: DoctorDayInfo): DayAssignment => ({
     date: doctorInfo.date,
     dayOfWeek: doctorInfo.dayOfWeek,
+    doctorAliases: doctorInfo.doctorAliases,
+    isFullAttendance: doctorInfo.isFullAttendance,
     working: [],
     fullDayOff: [],
     halfDayOff: [],
@@ -186,6 +188,8 @@ export function assignDailySchedule(
         return {
             date: doctorInfo.date,
             dayOfWeek: doctorInfo.dayOfWeek,
+            doctorAliases: doctorInfo.doctorAliases,
+            isFullAttendance: doctorInfo.isFullAttendance,
             working: workingStaff.map((s) => s.alias ?? s.name),
             fullDayOff: [...fullDayOff, ...plannedOffDisplay],
             halfDayOff,

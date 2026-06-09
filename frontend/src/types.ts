@@ -25,6 +25,8 @@ export type DoctorDayInfo = {
 export type DayAssignment = {
     date: string; // "YYYY-MM-DD"
     dayOfWeek: number; // 0=일, 1=월, ..., 6=토
+    doctorAliases: string[]; // 그날 출근하는 원장님 alias 코드 (전체출근이면 빈 배열)
+    isFullAttendance: boolean; // 원장님 전체 출근 여부
     working: string[]; // 출근 인원 이름 (반차 포함)
     fullDayOff: LeaveRequest[]; // 연차/주차 (하루 휴무)
     halfDayOff: LeaveRequest[]; // 반차
