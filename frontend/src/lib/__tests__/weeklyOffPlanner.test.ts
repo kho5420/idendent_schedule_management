@@ -337,4 +337,45 @@ describe('planWeeklyOffDays', () => {
 
         expect(offs.has('2026-07-11') || offs.has('2026-07-12')).toBe(true); // 주말 off도 배정
     });
+
+    it('평일 전체휴진일이 있는 주는 다른 평일에 평일 off를 배정하지 않는다', () => {
+        const staff = [
+            makeStaff({ name: 'A' }),
+            makeStaff({ name: 'B' }),
+            makeStaff({ name: 'C' }),
+        ];
+        // WEEK3의 17일(금)을 전체휴진(진료 없음)으로 — 그 주 평일 off는 휴진일이 흡수
+        const week3Closure: DoctorDayInfo[] = [
+            makeDay('2026-07-13', 1),
+            makeDay('2026-07-14', 2),
+            makeDay('2026-07-15', 3),
+            makeDay('2026-07-16', 4),
+            { date: '2026-07-17', dayOfWeek: 5, doctorAliases: [], isFullAttendance: false },
+            makeDay('2026-07-18', 6),
+            makeDay('2026-07-19', 0),
+        ];
+        const result = planWeeklyOffDays(staff, [...WEEK2, ...week3Closure], makeSettings());
+
+        const week2Weekdays = [
+            '2026-07-06',
+            '2026-07-07',
+            '2026-07-08',
+            '2026-07-09',
+            '2026-07-10',
+        ];
+        const week3Weekdays = [
+            '2026-07-13',
+            '2026-07-14',
+            '2026-07-15',
+            '2026-07-16',
+            '2026-07-17',
+        ];
+        for (const s of staff) {
+            const offs = result.get(s.id)!;
+            // 휴진 주: 평일 off 미배정 (휴진일이 그 주 평일 휴무를 흡수)
+            expect(week3Weekdays.filter((d) => offs.has(d))).toHaveLength(0);
+            // 정상 주(대조군): 평일 off 1일 배정
+            expect(week2Weekdays.filter((d) => offs.has(d))).toHaveLength(1);
+        }
+    });
 });

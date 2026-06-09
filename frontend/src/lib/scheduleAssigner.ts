@@ -101,7 +101,23 @@ export function assignDailySchedule(
     return doctorSchedule.map((doctorInfo) => {
         // 병원 전체 휴무: 의사 없음 + 전체출근 아님 → 직원 배정 없음
         if (!doctorInfo.isFullAttendance && doctorInfo.doctorAliases.length === 0) {
-            return EMPTY_DAY(doctorInfo);
+            // 평일 전체휴진은 그날을 전원 '주차'로 간주한다 (SCHEDULE_RULE).
+            // 주말 휴진은 평일 휴무 규칙 대상이 아니므로 빈 날로 둔다.
+            const isWeekday = doctorInfo.dayOfWeek >= 1 && doctorInfo.dayOfWeek <= 5;
+            if (!isWeekday) return EMPTY_DAY(doctorInfo);
+
+            const explicitFullDayOff = leaveRequests.filter(
+                (r) => r.date === doctorInfo.date && FULL_DAY_OFF_TYPES.includes(r.type)
+            );
+            const explicitNames = new Set(explicitFullDayOff.map((r) => r.name));
+            // 명시적 연차는 그대로 두고, 나머지 재직 인원을 '주차'로 표시
+            const closureJucha: LeaveRequest[] = clinicStaff
+                .filter((s) => !s.is_on_leave && !explicitNames.has(s.alias ?? s.name))
+                .map((s) => ({ date: doctorInfo.date, name: s.alias ?? s.name, type: '주차' }));
+            return {
+                ...EMPTY_DAY(doctorInfo),
+                fullDayOff: [...explicitFullDayOff, ...closureJucha],
+            };
         }
 
         const leavesForDay = leaveRequests.filter((r) => r.date === doctorInfo.date);

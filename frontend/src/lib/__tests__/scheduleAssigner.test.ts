@@ -269,7 +269,7 @@ describe('assignDailySchedule', () => {
         expect(thu.hasNightShift).toBe(false);
     });
 
-    it('doctorAliases가 비어있고 isFullAttendance가 false이면 병원 전체 휴무로 처리한다', () => {
+    it('평일 전체휴진(진료 없음)은 출근 0명, 재직 인원 전원을 주차로 표시한다', () => {
         const staff = [지수, 혜수];
         const doctorSchedule: DoctorDayInfo[] = [
             { date: '2026-07-17', dayOfWeek: 5, doctorAliases: [], isFullAttendance: false },
@@ -283,6 +283,47 @@ describe('assignDailySchedule', () => {
             month
         );
         expect(day.working).toHaveLength(0);
+        expect(day.fullDayOff).toEqual([
+            { date: '2026-07-17', name: '지수', type: '주차' },
+            { date: '2026-07-17', name: '혜수', type: '주차' },
+        ]);
+    });
+
+    it('평일 전체휴진일의 명시적 연차는 연차로 유지하고 나머지만 주차로 표시한다', () => {
+        const staff = [지수, 혜수];
+        const leaveRequests: LeaveRequest[] = [{ date: '2026-07-17', name: '지수', type: '연차' }];
+        const doctorSchedule: DoctorDayInfo[] = [
+            { date: '2026-07-17', dayOfWeek: 5, doctorAliases: [], isFullAttendance: false },
+        ];
+        const [day] = assignDailySchedule(
+            staff,
+            [대표원장],
+            leaveRequests,
+            doctorSchedule,
+            scheduleSettings,
+            month
+        );
+        expect(day.fullDayOff).toEqual([
+            { date: '2026-07-17', name: '지수', type: '연차' },
+            { date: '2026-07-17', name: '혜수', type: '주차' },
+        ]);
+    });
+
+    it('주말 휴진은 평일 휴무 규칙 대상이 아니므로 빈 날로 둔다', () => {
+        const staff = [지수, 혜수];
+        const doctorSchedule: DoctorDayInfo[] = [
+            { date: '2026-07-18', dayOfWeek: 6, doctorAliases: [], isFullAttendance: false },
+        ];
+        const [day] = assignDailySchedule(
+            staff,
+            [대표원장],
+            [],
+            doctorSchedule,
+            scheduleSettings,
+            month
+        );
+        expect(day.working).toHaveLength(0);
+        expect(day.fullDayOff).toHaveLength(0);
     });
 
     it('교정과 진료일에 is_ortho 인원이 3명을 초과하면 3명으로 제한한다', () => {

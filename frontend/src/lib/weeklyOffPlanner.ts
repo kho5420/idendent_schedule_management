@@ -202,9 +202,16 @@ export function planWeeklyOffDays(
             );
         });
 
+        // 평일 전체휴진(진료 없음)일이 있으면 그날이 그 주의 평일 휴무(전원 '주차') →
+        // 다른 평일에 휴무를 분배하지 않는다 (표시는 assigner가 처리). (SCHEDULE_RULE)
+        const hasClosureWeekday = week.weekdays.some((d) => {
+            const info = fullSchedule.find((i) => i.date === d);
+            return info != null && !info.isFullAttendance && info.doctorAliases.length === 0;
+        });
+
         // 회전직원: 평일 1일 off — 야간시프트 요일 제외 + min_staff 하한 기반 균형 배정
         const candidateWeekdays = week.weekdays.filter((d) => !isNightShiftDate(d));
-        if (candidateWeekdays.length > 0) {
+        if (!hasClosureWeekday && candidateWeekdays.length > 0) {
             // 이번 주 후보 요일별 배정된 off 수 (출근 예상 인원 계산용)
             const offCount = new Map<string, number>(candidateWeekdays.map((d) => [d, 0]));
             const projectedWorking = (d: string): number =>
