@@ -5,6 +5,7 @@ import {
     duplicateSheet,
     clearRange,
     writeGrid,
+    setWrap,
 } from '../sheetWriter';
 import type { DayAssignment, ScheduleMonth } from '../../types';
 
@@ -83,12 +84,15 @@ describe('pickTabName', () => {
 });
 
 describe('duplicateSheet', () => {
-    it('insertSheetIndex를 포함해 duplicateSheet 요청을 POST한다', async () => {
+    it('insertSheetIndex 포함 요청을 POST하고 새 탭 sheetId를 반환한다', async () => {
         const spy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
             ok: true,
-            json: async () => ({}),
+            json: async () => ({
+                replies: [{ duplicateSheet: { properties: { sheetId: 777 } } }],
+            }),
         } as Response);
-        await duplicateSheet('SID', 'TOK', 99, '26.07_생성', 48);
+        const newId = await duplicateSheet('SID', 'TOK', 99, '26.07_생성', 48);
+        expect(newId).toBe(777);
         const [url, opts] = spy.mock.calls[0] as [string, RequestInit];
         expect(url).toContain('/SID:batchUpdate');
         expect(opts.method).toBe('POST');
@@ -103,6 +107,19 @@ describe('duplicateSheet', () => {
                 },
             ],
         });
+    });
+});
+
+describe('setWrap', () => {
+    it('데이터 영역에 WRAP 서식을 repeatCell로 적용한다', async () => {
+        const spy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+            ok: true,
+            json: async () => ({}),
+        } as Response);
+        await setWrap('SID', 'TOK', 777);
+        const body = JSON.parse((spy.mock.calls[0] as [string, RequestInit])[1].body as string);
+        expect(body.requests[0].repeatCell.range.sheetId).toBe(777);
+        expect(body.requests[0].repeatCell.cell.userEnteredFormat.wrapStrategy).toBe('WRAP');
     });
 });
 

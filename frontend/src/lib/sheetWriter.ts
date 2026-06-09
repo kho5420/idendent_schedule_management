@@ -72,6 +72,7 @@ export function pickTabName(existingTitles: string[], baseName: string): string 
 /**
  * 원본 탭을 복제해 새 탭(newName) 생성 — 서식·열너비·메모를 그대로 유지.
  * insertSheetIndex로 삽입 위치 지정(미지정 시 원본 바로 뒤에 끼워져 찾기 어려움).
+ * 생성된 새 탭의 sheetId(gid)를 반환.
  */
 export async function duplicateSheet(
     sheetId: string,
@@ -79,7 +80,7 @@ export async function duplicateSheet(
     sourceSheetId: number,
     newName: string,
     insertSheetIndex?: number
-): Promise<void> {
+): Promise<number> {
     const duplicateSheetReq: Record<string, unknown> = {
         sourceSheetId,
         newSheetName: newName,
@@ -89,6 +90,36 @@ export async function duplicateSheet(
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ requests: [{ duplicateSheet: duplicateSheetReq }] }),
+    });
+    if (!res.ok) throw new Error(`구글 시트 API 오류 (${res.status})`);
+    const data = await res.json();
+    const newId = data.replies?.[0]?.duplicateSheet?.properties?.sheetId;
+    if (newId == null) throw new Error('복제된 탭 정보를 가져오지 못했습니다');
+    return newId as number;
+}
+
+/** 데이터 영역에 자동 줄바꿈(WRAP) 적용 — 긴 글자가 옆칸으로 넘쳐 테두리를 가리는 것 방지 */
+export async function setWrap(sheetId: string, token: string, tabSheetId: number): Promise<void> {
+    const res = await fetch(`${API}/${sheetId}:batchUpdate`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            requests: [
+                {
+                    repeatCell: {
+                        range: {
+                            sheetId: tabSheetId,
+                            startRowIndex: 0,
+                            endRowIndex: 60,
+                            startColumnIndex: 0,
+                            endColumnIndex: 8,
+                        },
+                        cell: { userEnteredFormat: { wrapStrategy: 'WRAP' } },
+                        fields: 'userEnteredFormat.wrapStrategy',
+                    },
+                },
+            ],
+        }),
     });
     if (!res.ok) throw new Error(`구글 시트 API 오류 (${res.status})`);
 }
@@ -146,8 +177,15 @@ export async function writeScheduleToNewTab(
     const template = sheets.find((s) => s.title === TEMPLATE_TAB);
     if (!template) throw new Error(`'${TEMPLATE_TAB}' 탭을 찾을 수 없습니다`);
     // 맨 끝에 삽입해 탭 목록에서 바로 찾을 수 있게 한다
-    await duplicateSheet(sheetId, token, template.sheetId, tabName, sheets.length);
+    const newSheetId = await duplicateSheet(
+        sheetId,
+        token,
+        template.sheetId,
+        tabName,
+        sheets.length
+    );
     await clearRange(sheetId, token, tabName, 'A1:H60');
     await writeGrid(sheetId, token, tabName, buildScheduleGrid(assignments, month));
+    await setWrap(sheetId, token, newSheetId);
     return tabName;
 }
