@@ -1,33 +1,12 @@
 import type { DayAssignment } from '../types';
 import { formatDayCell } from '../lib/scheduleFormatter';
+import { groupAssignmentsByWeek } from '../lib/weekGrouping';
 
 interface Props {
     assignments: DayAssignment[];
 }
 
 const DAY_HEADERS = ['월', '화', '수', '목', '금', '토', '일'];
-
-function dowToCol(dayOfWeek: number): number {
-    return dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-}
-
-function groupByWeek(assignments: DayAssignment[]): (DayAssignment | null)[][] {
-    const sorted = [...assignments].sort((a, b) => a.date.localeCompare(b.date));
-    const weeks: (DayAssignment | null)[][] = [];
-    let current: (DayAssignment | null)[] = new Array(7).fill(null);
-
-    for (const a of sorted) {
-        const col = dowToCol(a.dayOfWeek);
-        if (col === 0 && current.some((x) => x !== null)) {
-            weeks.push(current);
-            current = new Array(7).fill(null);
-        }
-        current[col] = a;
-    }
-    if (current.some((x) => x !== null)) weeks.push(current);
-
-    return weeks;
-}
 
 function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; col: number }) {
     const isWeekend = col >= 5; // 5=토, 6=일
@@ -99,7 +78,7 @@ function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; c
 }
 
 export function AssignmentPreview({ assignments }: Props) {
-    const weeks = groupByWeek(assignments);
+    const weeks = groupAssignmentsByWeek(assignments);
 
     return (
         <div
