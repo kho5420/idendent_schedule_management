@@ -354,7 +354,7 @@ describe('planWeeklyOffDays', () => {
             makeDay('2026-07-18', 6),
             makeDay('2026-07-19', 0),
         ];
-        const result = planWeeklyOffDays(staff, [...WEEK2, ...week3Closure], makeSettings());
+        const result = planWeeklyOffDays(staff, [...WEEK2, ...week3Closure], [], makeSettings());
 
         const week2Weekdays = [
             '2026-07-06',
