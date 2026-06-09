@@ -38,36 +38,73 @@ export function buildScheduleGrid(assignments: DayAssignment[], month: ScheduleM
 
 const API = 'https://sheets.googleapis.com/v4/spreadsheets';
 
-async function fetchTitles(sheetId: string, token: string): Promise<string[]> {
-    const res = await fetch(`${API}/${sheetId}?fields=sheets.properties.title`, {
+const TEMPLATE_TAB = '기본틀';
+
+interface SheetMeta {
+    sheetId: number;
+    title: string;
+}
+
+/** 스프레드시트의 모든 탭 메타(gid·제목) 조회 */
+async function fetchSheets(sheetId: string, token: string): Promise<SheetMeta[]> {
+    const res = await fetch(`${API}/${sheetId}?fields=sheets.properties(sheetId,title)`, {
         headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error(`구글 시트 API 오류 (${res.status})`);
     const data = await res.json();
-    const sheets: Array<{ properties?: { title?: string } }> = data.sheets ?? [];
-    return sheets.map((s) => s.properties?.title ?? '');
+    const sheets: Array<{ properties?: { sheetId?: number; title?: string } }> = data.sheets ?? [];
+    return sheets.map((s) => ({
+        sheetId: s.properties?.sheetId ?? -1,
+        title: s.properties?.title ?? '',
+    }));
 }
 
-/** 기존 탭과 겹치지 않는 탭 이름 결정 (충돌 시 base2, base3 …) */
-export async function resolveTabName(
-    sheetId: string,
-    token: string,
-    baseName: string
-): Promise<string> {
-    const titles = new Set(await fetchTitles(sheetId, token));
-    if (!titles.has(baseName)) return baseName;
+/** 기존 제목과 겹치지 않는 탭 이름 결정 (충돌 시 base2, base3 …) — 순수함수 */
+export function pickTabName(existingTitles: string[], baseName: string): string {
+    const set = new Set(existingTitles);
+    if (!set.has(baseName)) return baseName;
     for (let i = 2; ; i++) {
         const name = `${baseName}${i}`;
-        if (!titles.has(name)) return name;
+        if (!set.has(name)) return name;
     }
 }
 
-/** 새 탭 생성 */
-export async function createTab(sheetId: string, token: string, tabName: string): Promise<void> {
+/**
+ * 원본 탭을 복제해 새 탭(newName) 생성 — 서식·열너비·메모를 그대로 유지.
+ * insertSheetIndex로 삽입 위치 지정(미지정 시 원본 바로 뒤에 끼워져 찾기 어려움).
+ */
+export async function duplicateSheet(
+    sheetId: string,
+    token: string,
+    sourceSheetId: number,
+    newName: string,
+    insertSheetIndex?: number
+): Promise<void> {
+    const duplicateSheetReq: Record<string, unknown> = {
+        sourceSheetId,
+        newSheetName: newName,
+    };
+    if (insertSheetIndex != null) duplicateSheetReq.insertSheetIndex = insertSheetIndex;
     const res = await fetch(`${API}/${sheetId}:batchUpdate`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requests: [{ addSheet: { properties: { title: tabName } } }] }),
+        body: JSON.stringify({ requests: [{ duplicateSheet: duplicateSheetReq }] }),
+    });
+    if (!res.ok) throw new Error(`구글 시트 API 오류 (${res.status})`);
+}
+
+/** 지정 범위의 값만 비운다 (서식은 유지). range 예: 'A1:H60' */
+export async function clearRange(
+    sheetId: string,
+    token: string,
+    tabName: string,
+    range: string
+): Promise<void> {
+    const r = encodeURIComponent(`${tabName}!${range}`);
+    const res = await fetch(`${API}/${sheetId}/values/${r}:clear`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: '{}',
     });
     if (!res.ok) throw new Error(`구글 시트 API 오류 (${res.status})`);
 }
@@ -88,7 +125,12 @@ export async function writeGrid(
     if (!res.ok) throw new Error(`구글 시트 API 오류 (${res.status})`);
 }
 
-/** 새 탭을 만들어 스케줄을 기록하고, 생성된 탭 이름을 반환 */
+/**
+ * '기본틀' 탭을 복제(서식 유지)해 새 탭을 만들고 스케줄을 기록한다.
+ * 복제본의 데이터 영역(A~H) 값만 비운 뒤 그리드를 써넣어, 서식은 유지하고
+ * 템플릿의 샘플 값/그룹 행은 비운다. (J열 메모 등 A~H 밖은 보존)
+ * 생성된 탭 이름을 반환.
+ */
 export async function writeScheduleToNewTab(
     sheetId: string,
     token: string,
@@ -96,8 +138,16 @@ export async function writeScheduleToNewTab(
     assignments: DayAssignment[]
 ): Promise<string> {
     const baseName = `${String(month.year).slice(-2)}.${String(month.month).padStart(2, '0')}_생성`;
-    const tabName = await resolveTabName(sheetId, token, baseName);
-    await createTab(sheetId, token, tabName);
+    const sheets = await fetchSheets(sheetId, token);
+    const tabName = pickTabName(
+        sheets.map((s) => s.title),
+        baseName
+    );
+    const template = sheets.find((s) => s.title === TEMPLATE_TAB);
+    if (!template) throw new Error(`'${TEMPLATE_TAB}' 탭을 찾을 수 없습니다`);
+    // 맨 끝에 삽입해 탭 목록에서 바로 찾을 수 있게 한다
+    await duplicateSheet(sheetId, token, template.sheetId, tabName, sheets.length);
+    await clearRange(sheetId, token, tabName, 'A1:H60');
     await writeGrid(sheetId, token, tabName, buildScheduleGrid(assignments, month));
     return tabName;
 }

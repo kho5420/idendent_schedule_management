@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { buildScheduleGrid, resolveTabName, createTab, writeGrid } from '../sheetWriter';
+import {
+    buildScheduleGrid,
+    pickTabName,
+    duplicateSheet,
+    clearRange,
+    writeGrid,
+} from '../sheetWriter';
 import type { DayAssignment, ScheduleMonth } from '../../types';
 
 function mkDay(over: Partial<DayAssignment> & { date: string; dayOfWeek: number }): DayAssignment {
@@ -66,42 +72,51 @@ beforeEach(() => {
     vi.restoreAllMocks();
 });
 
-describe('resolveTabName', () => {
-    it('충돌이 없으면 baseName 그대로 반환', async () => {
-        vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
-            ok: true,
-            json: async () => ({ sheets: [{ properties: { title: '26.06' } }] }),
-        } as Response);
-        expect(await resolveTabName('id', 'tok', '26.07_생성')).toBe('26.07_생성');
+describe('pickTabName', () => {
+    it('충돌이 없으면 baseName 그대로 반환', () => {
+        expect(pickTabName(['26.06', '기본틀'], '26.07_생성')).toBe('26.07_생성');
     });
 
-    it('충돌하면 다음 번호를 붙인다', async () => {
-        vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
-            ok: true,
-            json: async () => ({
-                sheets: [
-                    { properties: { title: '26.07_생성' } },
-                    { properties: { title: '26.07_생성2' } },
-                ],
-            }),
-        } as Response);
-        expect(await resolveTabName('id', 'tok', '26.07_생성')).toBe('26.07_생성3');
+    it('충돌하면 다음 번호를 붙인다', () => {
+        expect(pickTabName(['26.07_생성', '26.07_생성2'], '26.07_생성')).toBe('26.07_생성3');
     });
 });
 
-describe('createTab', () => {
-    it('addSheet 요청을 POST한다', async () => {
+describe('duplicateSheet', () => {
+    it('insertSheetIndex를 포함해 duplicateSheet 요청을 POST한다', async () => {
         const spy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
             ok: true,
             json: async () => ({}),
         } as Response);
-        await createTab('SID', 'TOK', '새탭');
+        await duplicateSheet('SID', 'TOK', 99, '26.07_생성', 48);
         const [url, opts] = spy.mock.calls[0] as [string, RequestInit];
         expect(url).toContain('/SID:batchUpdate');
         expect(opts.method).toBe('POST');
         expect(JSON.parse(opts.body as string)).toEqual({
-            requests: [{ addSheet: { properties: { title: '새탭' } } }],
+            requests: [
+                {
+                    duplicateSheet: {
+                        sourceSheetId: 99,
+                        newSheetName: '26.07_생성',
+                        insertSheetIndex: 48,
+                    },
+                },
+            ],
         });
+    });
+});
+
+describe('clearRange', () => {
+    it('지정 범위의 값을 clear로 비운다 (서식 유지)', async () => {
+        const spy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+            ok: true,
+            json: async () => ({}),
+        } as Response);
+        await clearRange('SID', 'TOK', '26.07_생성', 'A1:H60');
+        const [url, opts] = spy.mock.calls[0] as [string, RequestInit];
+        expect(url).toContain('/SID/values/');
+        expect(url).toContain(':clear');
+        expect(opts.method).toBe('POST');
     });
 });
 
