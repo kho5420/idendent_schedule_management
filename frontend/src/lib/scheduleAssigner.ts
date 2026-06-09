@@ -44,7 +44,7 @@ function splitDayNightShift(workingStaff: StaffRow[]): { day: string[]; night: s
         else night.push(staffMember);
     }
 
-    return { day: day.map((s) => s.name), night: night.map((s) => s.name) };
+    return { day: day.map((s) => s.alias ?? s.name), night: night.map((s) => s.alias ?? s.name) };
 }
 
 function isWorkingThatDay(
@@ -170,12 +170,14 @@ export function assignDailySchedule(
         return {
             date: doctorInfo.date,
             dayOfWeek: doctorInfo.dayOfWeek,
-            working: workingStaff.map((s) => s.name),
+            working: workingStaff.map((s) => s.alias ?? s.name),
             fullDayOff: [...fullDayOff, ...plannedOffDisplay],
             halfDayOff,
             isOrthoDay,
             orthoStaffCount: workingStaff.filter((s) => s.is_ortho).length,
-            nightFixedStaff: workingStaff.filter((s) => s.is_night_fixed).map((s) => s.name),
+            nightFixedStaff: workingStaff
+                .filter((s) => s.is_night_fixed)
+                .map((s) => s.alias ?? s.name),
             hasTeamLeader: workingStaff.some((s) => s.is_team_leader),
             hasNightShift,
             dayShiftStaff: shiftSplit.day,
