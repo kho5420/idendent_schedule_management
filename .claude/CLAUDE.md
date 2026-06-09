@@ -66,6 +66,9 @@ GitHub Actions Secrets: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `GOOGLE_CLIENT_ID` 
 
 ## 업데이트 내역 관리
 `frontend/CHANGELOG.md` 수정 시 `## vX.Y.Z — YYYY-MM-DD` 형식, 항목은 `- ` 로 시작
+- 이 파일은 앱의 **'업데이트 내역'으로 일반 사용자(비개발자)에게 그대로 노출**된다 (빌드 시 파싱 → 모달 표시)
+- 따라서 **코드 용어 금지**: 컬럼·변수·영문 약어(off, alias, `schedule_setting`, weekday_fixed, UI, DB, 모달 등)를 쓰지 말고 일상어로 작성
+- 단, 병원 도메인 용어(주차/연차/반차/교정/야간진료/원장님/시트)는 사용자가 아는 말이므로 사용 가능
 
 ## 작업 규칙
 - **`git commit`은 절대 먼저 하지 말 것. 사용자가 명시적으로 "커밋해줘"라고 요청한 경우에만 커밋한다.** 작업 단계마다, 또는 서브에이전트 워크플로 도중에 "관행적으로" 커밋하는 것 금지 — 매번 사용자 승인 필요
