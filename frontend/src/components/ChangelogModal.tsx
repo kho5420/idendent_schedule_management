@@ -108,7 +108,8 @@ export function ChangelogModal({ isOpen, onClose }: Props) {
                             <ul
                                 style={{
                                     margin: 0,
-                                    paddingLeft: 18,
+                                    padding: 0,
+                                    listStyle: 'none',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     gap: 4,
@@ -118,12 +119,17 @@ export function ChangelogModal({ isOpen, onClose }: Props) {
                                     <li
                                         key={j}
                                         style={{
+                                            display: 'flex',
+                                            gap: 6,
                                             fontSize: 13,
                                             color: 'var(--color-text-sub)',
                                             lineHeight: 1.5,
                                         }}
                                     >
-                                        {item}
+                                        <span aria-hidden="true" style={{ flexShrink: 0 }}>
+                                            -
+                                        </span>
+                                        <span>{item}</span>
                                     </li>
                                 ))}
                             </ul>

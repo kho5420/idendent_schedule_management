@@ -1,8 +1,27 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 interface GuideStep {
     title: string;
     items: string[];
+}
+
+/** 항목 문자열 안의 URL을 클릭 가능한 링크로 변환 */
+function linkify(text: string): ReactNode[] {
+    return text.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+        part.startsWith('http') ? (
+            <a
+                key={i}
+                href={part}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#2563eb', textDecoration: 'underline', wordBreak: 'break-all' }}
+            >
+                {part}
+            </a>
+        ) : (
+            part
+        )
+    );
 }
 
 const STEPS: GuideStep[] = [
@@ -216,7 +235,7 @@ export function SheetGuideModal({ isOpen, onClose }: Props) {
                                     lineHeight: 1.6,
                                 }}
                             >
-                                {item}
+                                {linkify(item)}
                             </li>
                         ))}
                     </ol>
