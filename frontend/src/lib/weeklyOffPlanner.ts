@@ -33,6 +33,29 @@ function groupByWeek(doctorSchedule: DoctorDayInfo[]): WeekDates[] {
     return weeks;
 }
 
+/** seed 기반 결정적 PRNG (mulberry32) — 같은 seed면 항상 같은 난수열 */
+function mulberry32(seed: number): () => number {
+    let a = seed >>> 0;
+    return () => {
+        a = (a + 0x6d2b79f5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+/** seed로 섞은 새 배열 반환 (Fisher-Yates). seed가 0/미지정이면 원본 순서 유지. */
+function seededShuffle<T>(items: T[], seed: number): T[] {
+    if (!seed) return items;
+    const rand = mulberry32(seed);
+    const arr = [...items];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
 function hasJucha(staff: StaffRow, date: string, leaveRequests: LeaveRequest[]): boolean {
     const key = staff.alias ?? staff.name;
     return leaveRequests.some((r) => r.date === date && r.name === key && r.type === '주차');
@@ -110,12 +133,16 @@ function countFullDayLeavesByDate(
  *
  * 주차(LeaveRequest.type === '주차')는 정기 off로 간주하여 중복 배정하지 않는다.
  * 연차는 정기 off와 별개이므로 무시하고 정상 배정한다.
+ *
+ * seed가 0/미지정이면 sort_order 순서로 결정적 배정(기본). seed가 주어지면 그 seed로
+ * 직원 처리 순서를 섞어 규칙을 지키는 다른 배치를 만든다(같은 seed면 같은 결과).
  */
 export function planWeeklyOffDays(
     clinicStaff: StaffRow[],
     doctorSchedule: DoctorDayInfo[],
     leaveRequests: LeaveRequest[],
-    scheduleSettings: ScheduleSetting[] = []
+    scheduleSettings: ScheduleSetting[] = [],
+    seed = 0
 ): Map<number, Set<string>> {
     const offDays = new Map<number, Set<string>>();
     for (const s of clinicStaff) offDays.set(s.id, new Set());
@@ -124,6 +151,8 @@ export function planWeeklyOffDays(
     const weekdayFixed = available.filter((s) => s.is_weekday_fixed);
     const rotatable = available.filter((s) => !s.is_weekday_fixed);
     const teamLeaders = rotatable.filter((s) => s.is_team_leader);
+    // 평일·주말 off 배정 순서 (seed로 섞어 다양성 확보)
+    const order = seededShuffle(rotatable, seed);
 
     const fullSchedule = padScheduleToFullWeeks(doctorSchedule);
     const weeks = groupByWeek(fullSchedule);
@@ -174,7 +203,7 @@ export function planWeeklyOffDays(
             const projectedWorking = (d: string): number =>
                 weekdayWorkerBase - (offCount.get(d) ?? 0) - (fullDayLeavesByDate.get(d) ?? 0);
 
-            for (const s of rotatable) {
+            for (const s of order) {
                 // 이번 주 평일에 이미 주차가 있으면 그것이 평일 off → 추가 배정 건너뜀
                 if (week.weekdays.some((d) => hasJucha(s, d, leaveRequests))) continue;
 
@@ -206,8 +235,8 @@ export function planWeeklyOffDays(
         }
 
         // 회전직원: 주말 1일 off
-        for (let si = 0; si < rotatable.length; si++) {
-            const s = rotatable[si];
+        for (let si = 0; si < order.length; si++) {
+            const s = order[si];
             const satJucha = week.saturday != null && hasJucha(s, week.saturday, leaveRequests);
             const sunJucha = week.sunday != null && hasJucha(s, week.sunday, leaveRequests);
 

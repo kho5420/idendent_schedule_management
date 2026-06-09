@@ -298,6 +298,26 @@ describe('planWeeklyOffDays', () => {
         }
     });
 
+    it('같은 seed면 평일 off 배치가 동일하다 (재현성)', () => {
+        const staff = ['A', 'B', 'C', 'D', 'E'].map((name) => makeStaff({ name }));
+        const r1 = planWeeklyOffDays(staff, WEEK2, [], makeSettings(), 42);
+        const r2 = planWeeklyOffDays(staff, WEEK2, [], makeSettings(), 42);
+        for (const s of staff) {
+            expect([...r1.get(s.id)!].sort()).toEqual([...r2.get(s.id)!].sort());
+        }
+    });
+
+    it('seed가 다르면 평일 off 요일이 달라질 수 있다', () => {
+        const staff = ['A', 'B', 'C', 'D', 'E'].map((name) => makeStaff({ name }));
+        const weekdays = ['2026-07-06', '2026-07-07', '2026-07-08', '2026-07-09', '2026-07-10'];
+        const offDateOfA = (seed: number) => {
+            const r = planWeeklyOffDays(staff, WEEK2, [], makeSettings(), seed);
+            return weekdays.find((d) => r.get(staff[0].id)!.has(d));
+        };
+        const distinct = new Set([1, 2, 3, 4, 5, 6, 7, 8].map(offDateOfA));
+        expect(distinct.size).toBeGreaterThan(1);
+    });
+
     it('연차는 정기 off 배정에 영향을 주지 않는다', () => {
         const 갑 = makeStaff({ name: '갑' });
         // 갑이 수요일(Jul 8)에 연차 → 플래너는 이를 무시하고 평일/주말 off를 정상 배정

@@ -46,6 +46,7 @@ function MainPage() {
     const [generatedSchedule] = useState<GeneratedSchedule | null>(null);
     const [dayAssignments, setDayAssignments] = useState<DayAssignment[] | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [seed, setSeed] = useState(0);
     const [error, setError] = useState<string | null>(null);
     const [comingSoon, setComingSoon] = useState(false);
     const [isChangelogOpen, setIsChangelogOpen] = useState(false);
@@ -59,7 +60,7 @@ function MainPage() {
               ? googleToken !== null && scheduleSheet !== null
               : false;
 
-    async function handleGenerate() {
+    async function handleGenerate(genSeed: number = seed) {
         if (!isReady || !inputMethod) return;
 
         if (inputMethod !== 'google' || !googleToken || !scheduleSheet) {
@@ -101,7 +102,8 @@ function MainPage() {
                 clinicStaff,
                 doctorSchedule,
                 leaveRequests,
-                scheduleSettings
+                scheduleSettings,
+                genSeed
             );
             setDayAssignments(
                 assignDailySchedule(
@@ -299,7 +301,7 @@ function MainPage() {
                 month={selectedMonth}
                 isReady={isReady}
                 isLoading={isGenerating}
-                onClick={handleGenerate}
+                onClick={() => void handleGenerate()}
             />
 
             {comingSoon && (
@@ -333,6 +335,36 @@ function MainPage() {
             )}
 
             {generatedSchedule && <SchedulePreview schedule={generatedSchedule} />}
+
+            {dayAssignments && (
+                <div
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        marginBottom: 12,
+                    }}
+                >
+                    <button
+                        onClick={() => {
+                            const next = Math.floor(Math.random() * 1_000_000_000) + 1;
+                            setSeed(next);
+                            void handleGenerate(next);
+                        }}
+                        disabled={isGenerating}
+                        className="header-action-btn"
+                        style={{
+                            borderRadius: 8,
+                            padding: '8px 14px',
+                            fontSize: 13,
+                            fontWeight: 600,
+                            cursor: isGenerating ? 'default' : 'pointer',
+                            opacity: isGenerating ? 0.6 : 1,
+                        }}
+                    >
+                        🔀 다시 섞기
+                    </button>
+                </div>
+            )}
 
             {dayAssignments && <AssignmentPreview assignments={dayAssignments} />}
 
