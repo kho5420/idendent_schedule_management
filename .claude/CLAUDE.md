@@ -23,10 +23,12 @@ base_data/      # 스케줄 규칙, 진료실 정보 문서
 
 ```bash
 cd frontend && npm run dev        # 개발 서버 (localhost:5173)
-cd frontend && npm test           # 테스트 실행
-cd frontend && npx tsc --noEmit   # 타입 체크
+cd frontend && npx vitest run     # 테스트 1회 실행 (npm test는 watch 모드)
+cd frontend && npx tsc -b         # 타입 체크 (배포와 동일 — --noEmit 쓰지 말 것)
 cd frontend && npm run lint       # ESLint 검사
 ```
+
+> ⚠️ 타입 검증은 반드시 **`npx tsc -b`** 로 한다. `tsc --noEmit`은 테스트 파일/프로젝트 레퍼런스를 배포(`tsc -b`)와 동일하게 검사하지 않아, 통과하더라도 배포에서 타입 에러가 날 수 있다.
 
 ## 라우트
 - `/` — 메인 (스케줄 생성)
@@ -69,4 +71,4 @@ GitHub Actions Secrets: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `GOOGLE_CLIENT_ID` 
 - **`git commit`은 절대 먼저 하지 말 것. 사용자가 명시적으로 "커밋해줘"라고 요청한 경우에만 커밋한다.** 작업 단계마다, 또는 서브에이전트 워크플로 도중에 "관행적으로" 커밋하는 것 금지 — 매번 사용자 승인 필요
 - **작업용 브랜치(feature branch)를 임의로 만들지 말 것.** 별도 브랜치가 필요하다고 판단되어도 먼저 사용자에게 묻고, 명시적 동의 후에만 생성한다. 항상 main에서 직접 작업
 - `git config` 수정 금지
-- 빌드확인은 하지 말것
+- 전체 빌드(`npm run build`/`vite build`) 확인은 하지 말 것. 단 타입 검증은 `npx tsc -b`로 한다 (`--noEmit`은 배포와 검사 범위가 달라 에러를 놓침)
