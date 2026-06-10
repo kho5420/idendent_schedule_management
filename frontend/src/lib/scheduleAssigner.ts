@@ -142,15 +142,12 @@ export function assignDailySchedule(
             )
         );
 
-        // 교정과 진료일: is_ortho 인원 정확히 ORTHO_FIXED_COUNT명
+        // 교정과 진료일: is_ortho 인원 최소 ORTHO_FIXED_COUNT명 보장 (SCHEDULE_RULE).
+        // 상한은 없다 — 3명을 초과하는 교정 인원도 정상 근무한다.
         const isOrthoDay = isOrthoDoctorPresent(doctorInfo, doctors);
         if (isOrthoDay) {
             const orthoWorking = workingStaff.filter((s) => s.is_ortho);
-            // 전원출근일(전체출근·야간시프트)에는 초과 인원을 잘라내지 않는다 (3명은 최소 보장)
-            if (!forceAttendance && orthoWorking.length > ORTHO_FIXED_COUNT) {
-                const nonOrtho = workingStaff.filter((s) => !s.is_ortho);
-                workingStaff = [...nonOrtho, ...orthoWorking.slice(0, ORTHO_FIXED_COUNT)];
-            } else if (orthoWorking.length < ORTHO_FIXED_COUNT) {
+            if (orthoWorking.length < ORTHO_FIXED_COUNT) {
                 const needed = ORTHO_FIXED_COUNT - orthoWorking.length;
                 const workingIds = new Set(workingStaff.map((s) => s.id));
                 // plannedOff는 교정 필수 인원 확보를 위해 override, 명시적 연차/주차는 유지

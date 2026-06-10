@@ -326,7 +326,7 @@ describe('assignDailySchedule', () => {
         expect(day.fullDayOff).toHaveLength(0);
     });
 
-    it('교정과 진료일에 is_ortho 인원이 3명을 초과하면 3명으로 제한한다', () => {
+    it('교정과 진료일에 is_ortho 인원이 3명을 초과해도 전원 정상 근무한다(최소 3명 보장, 상한 없음)', () => {
         const o1 = makeStaff({ name: 'o1', is_ortho: true });
         const o2 = makeStaff({ name: 'o2', is_ortho: true });
         const o3 = makeStaff({ name: 'o3', is_ortho: true });
@@ -344,7 +344,9 @@ describe('assignDailySchedule', () => {
             scheduleSettings,
             month
         );
-        expect(day.orthoStaffCount).toBe(3);
+        // 교정 4명 전원 근무 — 잘려나가 사라지는 인원이 없어야 한다
+        expect(day.orthoStaffCount).toBe(4);
+        expect(day.working).toEqual(expect.arrayContaining(['o1', 'o2', 'o3', 'o4', 'n1']));
     });
 
     it('교정과 진료일에 is_ortho 인원이 3명 미만이면 plannedOff 인원에서 추가한다', () => {
