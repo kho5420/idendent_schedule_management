@@ -211,6 +211,23 @@ describe('planWeeklyOffDays', () => {
         expect(offs.has('2026-07-11') || offs.has('2026-07-12')).toBe(true);
     });
 
+    it('평일 주차가 2회면 그 주 주말 off를 배정하지 않는다(평일 2회가 정기 휴무를 모두 대체)', () => {
+        const 갑 = makeStaff({ name: '갑' });
+        // 갑이 목·금(Jul 9·10)에 평일 주차 2회 → 평일·주말 추가 off 없음, 주말은 정상 근무
+        const leaves = [
+            { date: '2026-07-09', name: '갑', type: '주차' as const },
+            { date: '2026-07-10', name: '갑', type: '주차' as const },
+        ];
+        const result = planWeeklyOffDays([갑], WEEK2, leaves);
+
+        const offs = result.get(갑.id)!;
+        // 플래너가 추가한 off가 없어야 한다 (명시 주차 2일 외에는 비어 있음)
+        expect(offs.has('2026-07-11')).toBe(false); // 토 근무
+        expect(offs.has('2026-07-12')).toBe(false); // 일 근무
+        const week2Weekdays = ['2026-07-06', '2026-07-07', '2026-07-08'];
+        expect(week2Weekdays.filter((d) => offs.has(d))).toHaveLength(0);
+    });
+
     it('주차(주말)가 있으면 그 주 주말 off를 별도 배정하지 않는다', () => {
         const 갑 = makeStaff({ name: '갑' });
         // 갑이 토요일(Jul 11)에 주차 → 플래너 주말 off 추가 없음

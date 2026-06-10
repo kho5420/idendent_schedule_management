@@ -257,6 +257,14 @@ export function planWeeklyOffDays(
         // 회전직원: 주말 1일 off — 개인별 토/일 근무량을 균등화해 특정 주말 쏠림 방지
         for (let si = 0; si < order.length; si++) {
             const s = order[si];
+
+            // 평일 주차를 2회 이상 명시 신청한 경우: 그 2회가 그 주 정기 휴무(평일1+주말1)를
+            // 모두 대체하므로 주말 주차는 배정하지 않는다 (주말은 정상 근무).
+            const weekdayJuchaCount = week.weekdays.filter((d) =>
+                hasJucha(s, d, leaveRequests)
+            ).length;
+            if (weekdayJuchaCount >= 2) continue;
+
             const satJucha = week.saturday != null && hasJucha(s, week.saturday, leaveRequests);
             const sunJucha = week.sunday != null && hasJucha(s, week.sunday, leaveRequests);
 
