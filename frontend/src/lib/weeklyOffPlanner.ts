@@ -227,6 +227,13 @@ export function planWeeklyOffDays(
                 // 이번 주 평일에 이미 주차가 있으면 그것이 평일 off → 추가 배정 건너뜀
                 if (week.weekdays.some((d) => hasJucha(s, d, leaveRequests))) continue;
 
+                // 주말 주차를 2회(토·일 모두) 신청한 경우: 그 2회가 그 주 정기 휴무(평일1+주말1)를
+                // 모두 대체하므로 평일 off는 배정하지 않는다 (평일 정상 근무). 평일 주차 2회와 대칭.
+                const weekendJuchaCount =
+                    (week.saturday != null && hasJucha(s, week.saturday, leaveRequests) ? 1 : 0) +
+                    (week.sunday != null && hasJucha(s, week.sunday, leaveRequests) ? 1 : 0);
+                if (weekendJuchaCount >= 2) continue;
+
                 let offDate: string;
                 if (
                     s.is_head_dentist_pick &&
