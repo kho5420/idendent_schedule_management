@@ -308,7 +308,7 @@ describe('appendScheduleSheet', () => {
         expect(name).toBe('26.07_생성');
         expect(listSheetNames(wb)).toContain('26.07_생성');
         const rows = sheetToRows(wb, '26.07_생성');
-        expect(rows[0]).toEqual(['', '7月']);
+        expect(rows[0].slice(0, 2)).toEqual(['', '7月']); // sheet_to_json이 최대 열폭으로 패딩하므로 앞 2칸만 비교
         expect(rows[4][3]).toBe('1 원장님 전체출근');
     });
 
