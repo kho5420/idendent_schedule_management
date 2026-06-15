@@ -3,7 +3,6 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import type {
     ScheduleMonth,
     InputMethod,
-    GeneratedSchedule,
     SheetConnection,
     ExcelConnection,
     DayAssignment,
@@ -11,7 +10,6 @@ import type {
 import { MonthSelector } from './components/MonthSelector';
 import { InputMethodCard } from './components/InputMethodCard';
 import { GenerateButton } from './components/GenerateButton';
-import { SchedulePreview } from './components/SchedulePreview';
 import { AssignmentPreview } from './components/AssignmentPreview';
 import { ChangelogModal } from './components/ChangelogModal';
 import { SheetGuideModal } from './components/SheetGuideModal';
@@ -52,7 +50,6 @@ function MainPage() {
     const [googleToken, setGoogleToken] = useState<string | null>(null);
     const [scheduleSheet, setScheduleSheet] = useState<SheetConnection>(null);
     const [leaveRequestSheet, setLeaveRequestSheet] = useState<SheetConnection>(null);
-    const [generatedSchedule] = useState<GeneratedSchedule | null>(null);
     const [dayAssignments, setDayAssignments] = useState<DayAssignment[] | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [seed, setSeed] = useState(0);
@@ -391,8 +388,6 @@ function MainPage() {
                     ⚠️ {error}
                 </div>
             )}
-
-            {generatedSchedule && <SchedulePreview schedule={generatedSchedule} />}
 
             {dayAssignments && (
                 <>

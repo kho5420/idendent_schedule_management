@@ -3,10 +3,9 @@ import { useRef, useState } from 'react';
 interface Props {
     file: File | null;
     onFileChange: (file: File | null) => void;
-    isLoading?: boolean;
 }
 
-export function ExcelUploader({ file, onFileChange, isLoading }: Props) {
+export function ExcelUploader({ file, onFileChange }: Props) {
     const inputRef = useRef<HTMLInputElement>(null);
     const [isDragging, setIsDragging] = useState(false);
 
@@ -28,7 +27,7 @@ export function ExcelUploader({ file, onFileChange, isLoading }: Props) {
         if (inputRef.current) inputRef.current.value = '';
     }
 
-    const clickable = !isLoading && !file;
+    const clickable = !file;
 
     return (
         <div>
@@ -42,12 +41,12 @@ export function ExcelUploader({ file, onFileChange, isLoading }: Props) {
             <div
                 onClick={() => clickable && inputRef.current?.click()}
                 onDragOver={(e) => {
-                    if (isLoading || file) return;
+                    if (file) return;
                     e.preventDefault();
                     setIsDragging(true);
                 }}
                 onDragLeave={() => setIsDragging(false)}
-                onDrop={isLoading || file ? undefined : handleDrop}
+                onDrop={file ? undefined : handleDrop}
                 style={{
                     border: `1.5px dashed ${isDragging ? 'var(--color-accent-from)' : 'var(--color-border-hover)'}`,
                     borderRadius: 8,
@@ -58,31 +57,7 @@ export function ExcelUploader({ file, onFileChange, isLoading }: Props) {
                     transition: 'all 0.2s',
                 }}
             >
-                {isLoading ? (
-                    <div
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: 8,
-                        }}
-                    >
-                        <span
-                            style={{
-                                width: 14,
-                                height: 14,
-                                border: '2px solid rgba(0,0,0,0.1)',
-                                borderTopColor: 'var(--color-accent-from)',
-                                borderRadius: '50%',
-                                display: 'inline-block',
-                                animation: 'spin 0.8s linear infinite',
-                            }}
-                        />
-                        <span style={{ fontSize: 13, color: 'var(--color-text-sub)' }}>
-                            처리 중...
-                        </span>
-                    </div>
-                ) : file ? (
+                {file ? (
                     <div
                         style={{
                             display: 'flex',
