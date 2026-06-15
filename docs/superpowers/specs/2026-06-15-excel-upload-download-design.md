@@ -74,6 +74,14 @@
   확인 시 워크북을 읽어 해당 탭 존재 여부를 검사하고 상태(연결됨/에러)를 표시한다.
 - `ExcelFilePicker`: 스케줄 `ExcelFileField` + 휴무 `ExcelFileField`(선택)를 묶음.
 
+#### 탭 이름 기억 (localStorage)
+
+탭 이름은 매달 거의 동일하므로 마지막 입력값을 `localStorage`에 저장한다
+(필드별 `storageKey`, 예: `excel-schedule-tab` / `excel-leave-tab`). 다음 방문 시
+탭이름 입력칸을 자동으로 채운다. 단, 파일은 보안상 저장 불가하므로 **다시 업로드해야**
+하고, 검사·연결은 파일을 올린 뒤 "확인"을 눌렀을 때 수행한다(자동 재연결 없음).
+`SheetConnectionField`가 `{url, tabName}`을 저장하는 패턴의 엑셀판(`tabName`만 저장).
+
 ### 타입 (`types.ts`)
 
 ```ts
@@ -126,4 +134,3 @@ export type ExcelConnection = { file: File; tabName: string } | null;
 
 - 서식(색·테두리·병합) 보존 — 라이브러리 한계로 제외
 - 엑셀 출력 파일에 휴무신청 시트 반영 — 출력은 스케줄 워크북에만
-- 탭 이름 localStorage 영속화 — 우선 제외(필요 시 후속)
