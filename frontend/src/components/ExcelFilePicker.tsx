@@ -20,8 +20,8 @@ export function ExcelFilePicker({ onScheduleChange, onLeaveChange }: Props) {
                     lineHeight: 1.5,
                 }}
             >
-                ⚠️ 다운로드 시 기존 시트의 서식(색·테두리·병합)은 사라질 수 있어요. 글자(값)는
-                그대로 유지됩니다.
+                ⚠️ 다운로드 시 기존 시트의 서식(색·테두리·병합)은 사라질 수 있어요.
+                <br></br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;글자(값)는 그대로 유지됩니다.
             </div>
             <ExcelFileField
                 label="📅 스케줄 파일"
