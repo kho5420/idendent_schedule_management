@@ -58,6 +58,18 @@ describe('sheetToRows', () => {
         expect(() => sheetToRows(wb, '없는탭')).toThrow('없는탭');
     });
 
+    it('빈 병합 셀이 있어도 던지지 않고 빈 문자열로 읽는다', () => {
+        const wb = new ExcelJS.Workbook();
+        const ws = wb.addWorksheet('26.07');
+        ws.getCell('B2').value = '값';
+        ws.mergeCells('A1:C1'); // 마스터(A1)가 비어있는 병합 — 슬레이브 cell.text가 던지던 케이스
+
+        const rows = sheetToRows(wb, '26.07');
+        expect(rows[0][0]).toBe(''); // A1 (빈 마스터)
+        expect(rows[0][1]).toBe(''); // B1 (빈 병합 슬레이브)
+        expect(rows[1][1]).toBe('값'); // B2 (일반 셀)
+    });
+
     it('읽은 행을 parseDoctorSchedule에 넣으면 정상 파싱된다 (왕복)', () => {
         const wb = wbWithSheet('26.07', [
             ['', '1 Y', '2 오', '3 원장님 전체출근', '4 오', '5 Y', '6 오', '7 Y'],

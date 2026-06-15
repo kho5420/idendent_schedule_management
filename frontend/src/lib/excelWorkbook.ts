@@ -4,6 +4,20 @@ import { buildScheduleGrid, pickTabName } from './scheduleGrid';
 
 const DATA_COLS = 8; // A~H
 
+/**
+ * ExcelJS 셀의 표시 문자열을 안전하게 얻는다.
+ * 빈 병합 셀(마스터 값이 null)에서 cell.text가 내부적으로 null.toString()을 호출해
+ * 던지는 것을 방지한다. 값이 없으면 빈 문자열.
+ */
+function cellText(cell: ExcelJS.Cell): string {
+    if (cell.value == null) return '';
+    try {
+        return cell.text ?? '';
+    } catch {
+        return '';
+    }
+}
+
 /** 업로드한 .xlsx File을 워크북으로 읽는다(서식 포함). */
 export async function readWorkbook(file: File): Promise<ExcelJS.Workbook> {
     const buffer = await file.arrayBuffer();
@@ -27,7 +41,7 @@ export function sheetToRows(wb: ExcelJS.Workbook, tabName: string): unknown[][] 
         const row = ws.getRow(r);
         const arr: unknown[] = [];
         for (let c = 1; c <= colCount; c++) {
-            arr.push(row.getCell(c).text);
+            arr.push(cellText(row.getCell(c)));
         }
         rows.push(arr);
     }
