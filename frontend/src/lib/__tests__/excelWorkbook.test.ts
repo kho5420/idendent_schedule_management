@@ -1,14 +1,19 @@
 import { describe, it, expect } from 'vitest';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { sheetToRows, listSheetNames, appendScheduleSheet } from '../excelWorkbook';
 import { parseDoctorSchedule } from '../doctorScheduleParser';
 import type { DayAssignment, ScheduleMonth } from '../../types';
 
 const month: ScheduleMonth = { year: 2026, month: 7 };
 
-function wbWithSheet(name: string, aoa: unknown[][]): XLSX.WorkBook {
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), name);
+function wbWithSheet(name: string, aoa: unknown[][]): ExcelJS.Workbook {
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet(name);
+    aoa.forEach((row, r) => {
+        row.forEach((v, c) => {
+            ws.getRow(r + 1).getCell(c + 1).value = v as ExcelJS.CellValue;
+        });
+    });
     return wb;
 }
 
@@ -38,7 +43,7 @@ describe('listSheetNames', () => {
 });
 
 describe('sheetToRows', () => {
-    it('지정 탭을 행 배열로 변환한다', () => {
+    it('지정 탭을 0-based 행 배열(셀 표시문자열)로 변환한다', () => {
         const wb = wbWithSheet('26.07', [
             ['', '1 Y', '2 오'],
             ['', '성민', '이은'],
@@ -66,20 +71,40 @@ describe('sheetToRows', () => {
 });
 
 describe('appendScheduleSheet', () => {
-    it('생성 시트를 추가하고 그리드 내용을 기록한다', () => {
-        const wb = wbWithSheet('26.07', [['원본']]);
+    it('소스 탭을 복제해 서식(열너비·채움)을 보존하고 그리드를 기록하며 미관리 행은 비운다', () => {
+        const wb = new ExcelJS.Workbook();
+        const src = wb.addWorksheet('26.07');
+        src.getColumn(2).width = 17;
+        const headerCell = src.getRow(1).getCell(2);
+        headerCell.value = '기존제목';
+        headerCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } };
+        src.getRow(6).getCell(2).value = '데스크인원'; // 미관리 행(데스크) — 비워져야 함
+
         const wed = mkDay({ date: '2026-07-01', dayOfWeek: 3, isFullAttendance: true });
-        const name = appendScheduleSheet(wb, [wed], month);
+        const name = appendScheduleSheet(wb, '26.07', [wed], month);
+
         expect(name).toBe('26.07_생성');
-        expect(listSheetNames(wb)).toContain('26.07_생성');
-        const rows = sheetToRows(wb, '26.07_생성');
-        expect(rows[0].slice(0, 2)).toEqual(['', '7月']);
-        expect(rows[4][3]).toBe('1 원장님 전체출근');
+        const dest = wb.getWorksheet('26.07_생성')!;
+        // 서식 보존
+        expect(dest.getColumn(2).width).toBe(17);
+        expect(dest.getRow(1).getCell(2).fill).toMatchObject({ pattern: 'solid' });
+        // 그리드 기록: B1 = '7月', 날짜+원장 행(시트 5행) D열 = '1 원장님 전체출근'
+        expect(dest.getRow(1).getCell(2).text).toBe('7月');
+        expect(dest.getRow(5).getCell(4).text).toBe('1 원장님 전체출근');
+        // 미관리 행(데스크, 시트 6행)은 비워짐
+        expect(dest.getRow(6).getCell(2).text).toBe('');
     });
 
     it('생성 시트명이 이미 있으면 번호를 붙인다', () => {
-        const wb = wbWithSheet('26.07_생성', [['a']]);
-        const name = appendScheduleSheet(wb, [], month);
+        const wb = new ExcelJS.Workbook();
+        wb.addWorksheet('26.07');
+        wb.addWorksheet('26.07_생성');
+        const name = appendScheduleSheet(wb, '26.07', [], month);
         expect(name).toBe('26.07_생성2');
+    });
+
+    it('소스 탭이 없으면 에러를 던진다', () => {
+        const wb = wbWithSheet('26.07', [['a']]);
+        expect(() => appendScheduleSheet(wb, '없는탭', [], month)).toThrow('없는탭');
     });
 });

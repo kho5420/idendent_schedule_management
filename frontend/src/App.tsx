@@ -153,11 +153,16 @@ function MainPage() {
         void (async () => {
             try {
                 const wb = await readWorkbook(excelScheduleConn.file);
-                const tab = appendScheduleSheet(wb, dayAssignments, selectedMonth);
+                const tab = appendScheduleSheet(
+                    wb,
+                    excelScheduleConn.tabName,
+                    dayAssignments,
+                    selectedMonth
+                );
                 const fileName = `언제나이든치과_스케줄_${selectedMonth.year}_${String(
                     selectedMonth.month
                 ).padStart(2, '0')}.xlsx`;
-                downloadWorkbook(wb, fileName);
+                await downloadWorkbook(wb, fileName);
                 setWriteMsg({ ok: true, text: `'${tab}' 시트를 추가해 다운로드했어요` });
             } catch (e) {
                 setWriteMsg({
