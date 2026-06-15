@@ -7,6 +7,11 @@ export type SheetConnection = {
     tabName: string;
 } | null;
 
+export type ExcelConnection = {
+    file: File;
+    tabName: string;
+} | null;
+
 export type LeaveType = '연차' | '반차' | '주차';
 
 export type LeaveRequest = {
