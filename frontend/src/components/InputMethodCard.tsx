@@ -1,16 +1,15 @@
-import type { InputMethod, SheetConnection } from '../types';
-import { ExcelUploader } from './ExcelUploader';
+import type { InputMethod, SheetConnection, ExcelConnection } from '../types';
+import { ExcelFilePicker } from './ExcelFilePicker';
 import { GoogleSheetPicker } from './GoogleSheetPicker';
 
 interface Props {
     selected: InputMethod | null;
-    uploadedFile: File | null;
     googleToken: string | null;
     scheduleSheet: SheetConnection;
     leaveRequestSheet: SheetConnection;
-    isLoading?: boolean;
     onMethodSelect: (method: InputMethod) => void;
-    onFileChange: (file: File | null) => void;
+    onExcelScheduleChange: (connection: ExcelConnection) => void;
+    onExcelLeaveChange: (connection: ExcelConnection) => void;
     onTokenChange: (token: string | null) => void;
     onScheduleSheetChange: (connection: SheetConnection) => void;
     onLeaveRequestSheetChange: (connection: SheetConnection) => void;
@@ -60,13 +59,12 @@ function Card({ isSelected, onClick, icon, title, description, children }: CardP
 
 export function InputMethodCard({
     selected,
-    uploadedFile,
     googleToken,
     scheduleSheet,
     leaveRequestSheet,
-    isLoading,
     onMethodSelect,
-    onFileChange,
+    onExcelScheduleChange,
+    onExcelLeaveChange,
     onTokenChange,
     onScheduleSheetChange,
     onLeaveRequestSheetChange,
@@ -83,10 +81,9 @@ export function InputMethodCard({
                 title="엑셀 파일 업로드"
                 description="로컬 .xlsx 파일을 직접 업로드합니다"
             >
-                <ExcelUploader
-                    file={uploadedFile}
-                    onFileChange={onFileChange}
-                    isLoading={isLoading}
+                <ExcelFilePicker
+                    onScheduleChange={onExcelScheduleChange}
+                    onLeaveChange={onExcelLeaveChange}
                 />
             </Card>
             <Card

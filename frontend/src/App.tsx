@@ -5,6 +5,7 @@ import type {
     InputMethod,
     GeneratedSchedule,
     SheetConnection,
+    ExcelConnection,
     DayAssignment,
 } from './types';
 import { MonthSelector } from './components/MonthSelector';
@@ -25,6 +26,12 @@ import { parseDoctorSchedule } from './lib/doctorScheduleParser';
 import { assignDailySchedule } from './lib/scheduleAssigner';
 import { planWeeklyOffDays } from './lib/weeklyOffPlanner';
 import { writeScheduleToNewTab } from './lib/sheetWriter';
+import {
+    readWorkbook,
+    sheetToRows,
+    appendScheduleSheet,
+    downloadWorkbook,
+} from './lib/excelWorkbook';
 import './index.css';
 
 const DOCTOR_EMPLOYEE_TYPE_IDS = [1, 2];
@@ -40,7 +47,8 @@ function MainPage() {
     const navigate = useNavigate();
     const [selectedMonth, setSelectedMonth] = useState<ScheduleMonth>(getDefaultMonth);
     const [inputMethod, setInputMethod] = useState<InputMethod | null>(null);
-    const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+    const [excelScheduleConn, setExcelScheduleConn] = useState<ExcelConnection>(null);
+    const [excelLeaveConn, setExcelLeaveConn] = useState<ExcelConnection>(null);
     const [googleToken, setGoogleToken] = useState<string | null>(null);
     const [scheduleSheet, setScheduleSheet] = useState<SheetConnection>(null);
     const [leaveRequestSheet, setLeaveRequestSheet] = useState<SheetConnection>(null);
@@ -51,14 +59,13 @@ function MainPage() {
     const [isWriting, setIsWriting] = useState(false);
     const [writeMsg, setWriteMsg] = useState<{ ok: boolean; text: string } | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [comingSoon, setComingSoon] = useState(false);
     const [isChangelogOpen, setIsChangelogOpen] = useState(false);
     const [isSheetGuideOpen, setIsSheetGuideOpen] = useState(false);
     const [showBadge, setShowBadge] = useState(() => hasNewVersion());
 
     const isReady =
         inputMethod === 'excel'
-            ? uploadedFile !== null
+            ? excelScheduleConn !== null
             : inputMethod === 'google'
               ? googleToken !== null && scheduleSheet !== null
               : false;
@@ -66,28 +73,41 @@ function MainPage() {
     async function handleGenerate(genSeed: number = seed) {
         if (!isReady || !inputMethod) return;
 
-        if (inputMethod !== 'google' || !googleToken || !scheduleSheet) {
-            setComingSoon(true);
-            setTimeout(() => setComingSoon(false), 2000);
-            return;
-        }
-
         setError(null);
         setDayAssignments(null);
         setIsGenerating(true);
         try {
-            const [staff, scheduleSettings, scheduleRows, leaveRequestRows] = await Promise.all([
+            const [staff, scheduleSettings] = await Promise.all([
                 fetchStaff(),
                 fetchScheduleSettings(),
-                fetchSheetRows(scheduleSheet.sheetId, googleToken, scheduleSheet.tabName),
-                leaveRequestSheet
-                    ? fetchSheetRows(
-                          leaveRequestSheet.sheetId,
-                          googleToken,
-                          leaveRequestSheet.tabName
-                      )
-                    : Promise.resolve([]),
             ]);
+
+            let scheduleRows: unknown[][];
+            let leaveRequestRows: unknown[][];
+
+            if (inputMethod === 'google') {
+                if (!googleToken || !scheduleSheet) return;
+                [scheduleRows, leaveRequestRows] = await Promise.all([
+                    fetchSheetRows(scheduleSheet.sheetId, googleToken, scheduleSheet.tabName),
+                    leaveRequestSheet
+                        ? fetchSheetRows(
+                              leaveRequestSheet.sheetId,
+                              googleToken,
+                              leaveRequestSheet.tabName
+                          )
+                        : Promise.resolve([] as unknown[][]),
+                ]);
+            } else {
+                if (!excelScheduleConn) return;
+                const scheduleWb = await readWorkbook(excelScheduleConn.file);
+                scheduleRows = sheetToRows(scheduleWb, excelScheduleConn.tabName);
+                if (excelLeaveConn) {
+                    const leaveWb = await readWorkbook(excelLeaveConn.file);
+                    leaveRequestRows = sheetToRows(leaveWb, excelLeaveConn.tabName);
+                } else {
+                    leaveRequestRows = [];
+                }
+            }
 
             const clinicStaff = staff.filter(
                 (s) => s.employee_type_id === CLINIC_STAFF_EMPLOYEE_TYPE_ID
@@ -99,6 +119,9 @@ function MainPage() {
             );
 
             const doctorSchedule = parseDoctorSchedule(scheduleRows, selectedMonth);
+            if (doctorSchedule.length === 0) {
+                throw new Error('스케줄을 읽지 못했어요. 탭 이름·양식을 확인해 주세요');
+            }
             const leaveRequests = parseLeaveRequests(leaveRequestRows, selectedMonth);
 
             const plannedOffDays = planWeeklyOffDays(
@@ -124,6 +147,30 @@ function MainPage() {
         } finally {
             setIsGenerating(false);
         }
+    }
+
+    function handleDownloadExcel() {
+        if (!dayAssignments || !excelScheduleConn) return;
+        setWriteMsg(null);
+        setIsWriting(true);
+        void (async () => {
+            try {
+                const wb = await readWorkbook(excelScheduleConn.file);
+                const tab = appendScheduleSheet(wb, dayAssignments, selectedMonth);
+                const fileName = `언제나이든치과_스케줄_${selectedMonth.year}_${String(
+                    selectedMonth.month
+                ).padStart(2, '0')}.xlsx`;
+                downloadWorkbook(wb, fileName);
+                setWriteMsg({ ok: true, text: `'${tab}' 시트를 추가해 다운로드했어요` });
+            } catch (e) {
+                setWriteMsg({
+                    ok: false,
+                    text: e instanceof Error ? e.message : '다운로드 중 오류가 발생했습니다',
+                });
+            } finally {
+                setIsWriting(false);
+            }
+        })();
     }
 
     async function handleWriteToSheet() {
@@ -279,13 +326,12 @@ function MainPage() {
 
             <InputMethodCard
                 selected={inputMethod}
-                uploadedFile={uploadedFile}
                 googleToken={googleToken}
                 scheduleSheet={scheduleSheet}
                 leaveRequestSheet={leaveRequestSheet}
-                isLoading={isGenerating}
                 onMethodSelect={setInputMethod}
-                onFileChange={setUploadedFile}
+                onExcelScheduleChange={setExcelScheduleConn}
+                onExcelLeaveChange={setExcelLeaveConn}
                 onTokenChange={setGoogleToken}
                 onScheduleSheetChange={setScheduleSheet}
                 onLeaveRequestSheetChange={setLeaveRequestSheet}
@@ -329,20 +375,6 @@ function MainPage() {
                 isLoading={isGenerating}
                 onClick={() => void handleGenerate()}
             />
-
-            {comingSoon && (
-                <div
-                    style={{
-                        textAlign: 'center',
-                        fontSize: 13,
-                        color: 'var(--color-text-sub)',
-                        marginTop: -16,
-                        marginBottom: 16,
-                    }}
-                >
-                    🚧 준비 중입니다
-                </div>
-            )}
 
             {error && (
                 <div
@@ -389,7 +421,7 @@ function MainPage() {
                             원하는 모양이 나올 때까지 여러 번 눌러도 됩니다.
                         </div>
                         <div style={{ marginTop: 2 }}>
-                            <b>스케줄 생성</b>(맨 위) : 시트(휴무 신청·원장님 일정)를 <b>고친 뒤</b>{' '}
+                            <b>스케줄 생성</b>(맨 위) : 입력(휴무 신청·원장님 일정)을 <b>고친 뒤</b>{' '}
                             그 내용을 반영해 다시 만들 때 써요.
                         </div>
                     </div>
@@ -400,22 +432,41 @@ function MainPage() {
                             marginBottom: 12,
                         }}
                     >
-                        <button
-                            onClick={() => void handleWriteToSheet()}
-                            disabled={isWriting || isGenerating}
-                            className="header-action-btn"
-                            style={{
-                                borderRadius: 8,
-                                padding: '8px 14px',
-                                fontSize: 13,
-                                fontWeight: 600,
-                                marginRight: 8,
-                                cursor: isWriting || isGenerating ? 'default' : 'pointer',
-                                opacity: isWriting || isGenerating ? 0.6 : 1,
-                            }}
-                        >
-                            {isWriting ? '입력 중…' : '📝 시트에 입력'}
-                        </button>
+                        {inputMethod === 'google' ? (
+                            <button
+                                onClick={() => void handleWriteToSheet()}
+                                disabled={isWriting || isGenerating}
+                                className="header-action-btn"
+                                style={{
+                                    borderRadius: 8,
+                                    padding: '8px 14px',
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    marginRight: 8,
+                                    cursor: isWriting || isGenerating ? 'default' : 'pointer',
+                                    opacity: isWriting || isGenerating ? 0.6 : 1,
+                                }}
+                            >
+                                {isWriting ? '입력 중…' : '📝 시트에 입력'}
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handleDownloadExcel}
+                                disabled={isWriting || isGenerating}
+                                className="header-action-btn"
+                                style={{
+                                    borderRadius: 8,
+                                    padding: '8px 14px',
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    marginRight: 8,
+                                    cursor: isWriting || isGenerating ? 'default' : 'pointer',
+                                    opacity: isWriting || isGenerating ? 0.6 : 1,
+                                }}
+                            >
+                                {isWriting ? '다운로드 중…' : '📥 엑셀로 다운로드'}
+                            </button>
+                        )}
                         <button
                             onClick={() => {
                                 const next = Math.floor(Math.random() * 1_000_000_000) + 1;
