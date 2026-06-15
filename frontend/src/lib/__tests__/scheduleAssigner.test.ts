@@ -269,7 +269,7 @@ describe('assignDailySchedule', () => {
         expect(thu.hasNightShift).toBe(false);
     });
 
-    it('평일 전체휴진(진료 없음)은 출근 0명, 재직 인원 전원을 주차로 표시한다', () => {
+    it('평일 전체휴진(진료 없음)은 출근 0명, 자동 주차는 표시하지 않는다(휴무시트만 표시)', () => {
         const staff = [지수, 혜수];
         const doctorSchedule: DoctorDayInfo[] = [
             { date: '2026-07-17', dayOfWeek: 5, doctorAliases: [], isFullAttendance: false },
@@ -283,13 +283,11 @@ describe('assignDailySchedule', () => {
             month
         );
         expect(day.working).toHaveLength(0);
-        expect(day.fullDayOff).toEqual([
-            { date: '2026-07-17', name: '지수', type: '주차' },
-            { date: '2026-07-17', name: '혜수', type: '주차' },
-        ]);
+        // 전체휴진 자동 주차는 하단에 표시하지 않음 (명시 휴무 없으면 빈 배열)
+        expect(day.fullDayOff).toEqual([]);
     });
 
-    it('평일 전체휴진일의 명시적 연차는 연차로 유지하고 나머지만 주차로 표시한다', () => {
+    it('평일 전체휴진일은 휴무시트의 명시 휴무만 표시한다(자동 주차 제외)', () => {
         const staff = [지수, 혜수];
         const leaveRequests: LeaveRequest[] = [{ date: '2026-07-17', name: '지수', type: '연차' }];
         const doctorSchedule: DoctorDayInfo[] = [
@@ -303,10 +301,8 @@ describe('assignDailySchedule', () => {
             scheduleSettings,
             month
         );
-        expect(day.fullDayOff).toEqual([
-            { date: '2026-07-17', name: '지수', type: '연차' },
-            { date: '2026-07-17', name: '혜수', type: '주차' },
-        ]);
+        // 명시 연차(지수)만 표시, 자동 주차(혜수)는 제외
+        expect(day.fullDayOff).toEqual([{ date: '2026-07-17', name: '지수', type: '연차' }]);
     });
 
     it('주말 휴진은 평일 휴무 규칙 대상이 아니므로 빈 날로 둔다', () => {
@@ -443,7 +439,7 @@ describe('assignDailySchedule', () => {
         expect(day.working).toEqual(['지수']);
     });
 
-    it('정기 휴무(plannedOff)로 빠진 인원도 주차로 표시한다', () => {
+    it('정기 휴무(plannedOff)로 빠진 인원은 주차로 표시하지 않는다(휴무시트만 표시)', () => {
         const staff = [지수, 혜수];
         const plannedOff = new Map([[혜수.id, new Set(['2026-07-02'])]]); // 목요일(야간 아님)
         const doctorSchedule: DoctorDayInfo[] = [
@@ -460,12 +456,32 @@ describe('assignDailySchedule', () => {
             plannedOff
         );
 
-        expect(day.working).toEqual(['지수']); // 혜수는 off
-        expect(day.fullDayOff).toContainEqual({
-            date: '2026-07-02',
-            name: '혜수',
-            type: '주차',
-        });
+        expect(day.working).toEqual(['지수']); // 혜수는 off (출근 안 함)
+        expect(day.fullDayOff).toHaveLength(0); // 자동배정 off는 주차로 표시하지 않음
+    });
+
+    it('휴무시트의 명시 주차는 표시하고, 같은 날 자동배정 off는 표시하지 않는다', () => {
+        const staff = [지수, 혜수, 미연];
+        const leaveRequests: LeaveRequest[] = [{ date: '2026-07-02', name: '지수', type: '주차' }];
+        const plannedOff = new Map([[혜수.id, new Set(['2026-07-02'])]]); // 자동배정 off
+        const doctorSchedule: DoctorDayInfo[] = [
+            { date: '2026-07-02', dayOfWeek: 4, doctorAliases: ['오'], isFullAttendance: false },
+        ];
+
+        const [day] = assignDailySchedule(
+            staff,
+            [대표원장, 오원장],
+            leaveRequests,
+            doctorSchedule,
+            scheduleSettings,
+            month,
+            plannedOff
+        );
+
+        // 지수(명시 주차)·혜수(자동 off) 모두 출근 안 함, 미연만 근무
+        expect(day.working).toEqual(['미연']);
+        // 하단 주차에는 명시 주차(지수)만, 자동 off(혜수)는 제외
+        expect(day.fullDayOff).toEqual([{ date: '2026-07-02', name: '지수', type: '주차' }]);
     });
 
     it('전원출근일(야간시프트)에는 정기 휴무 인원을 주차로 표시하지 않는다', () => {

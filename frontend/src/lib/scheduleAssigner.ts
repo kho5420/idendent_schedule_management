@@ -108,17 +108,13 @@ export function assignDailySchedule(
             const isWeekday = doctorInfo.dayOfWeek >= 1 && doctorInfo.dayOfWeek <= 5;
             if (!isWeekday) return EMPTY_DAY(doctorInfo);
 
+            // 하단 휴무 표시는 휴무시트(명시 신청)만 — 전체휴진 자동 주차는 표시하지 않는다
             const explicitFullDayOff = leaveRequests.filter(
                 (r) => r.date === doctorInfo.date && FULL_DAY_OFF_TYPES.includes(r.type)
             );
-            const explicitNames = new Set(explicitFullDayOff.map((r) => r.name));
-            // 명시적 연차는 그대로 두고, 나머지 재직 인원을 '주차'로 표시
-            const closureJucha: LeaveRequest[] = clinicStaff
-                .filter((s) => !s.is_on_leave && !explicitNames.has(s.alias ?? s.name))
-                .map((s) => ({ date: doctorInfo.date, name: s.alias ?? s.name, type: '주차' }));
             return {
                 ...EMPTY_DAY(doctorInfo),
-                fullDayOff: [...explicitFullDayOff, ...closureJucha],
+                fullDayOff: explicitFullDayOff,
             };
         }
 
@@ -162,33 +158,15 @@ export function assignDailySchedule(
 
         const shiftSplit = hasNightShift ? splitDayNightShift(workingStaff) : EMPTY_SHIFT_SPLIT;
 
-        // 정기 휴무(plannedOff)로 빠진 인원도 '주차'로 표시 → 누가 off인지 보이게.
-        // 전원출근일 제외, 교정 보충 등으로 다시 출근한 인원·명시 휴무 인원은 제외.
-        const workingIds = new Set(workingStaff.map((s) => s.id));
-        const explicitOffKeys = new Set(fullDayOff.map((r) => r.name));
-        const plannedOffDisplay: LeaveRequest[] = forceAttendance
-            ? []
-            : clinicStaff
-                  .filter(
-                      (s) =>
-                          !s.is_on_leave &&
-                          !workingIds.has(s.id) &&
-                          plannedOffDays.get(s.id)?.has(doctorInfo.date)
-                  )
-                  .map((s) => ({
-                      date: doctorInfo.date,
-                      name: s.alias ?? s.name,
-                      type: '주차' as const,
-                  }))
-                  .filter((e) => !explicitOffKeys.has(e.name));
-
+        // 하단 휴무 표시는 휴무시트(명시 신청)만 — 자동배정 정기 휴무(plannedOff)는 표시하지 않는다.
+        // (자동 off 인원은 출근 명단에서 빠지는 것으로만 드러난다)
         return {
             date: doctorInfo.date,
             dayOfWeek: doctorInfo.dayOfWeek,
             doctorAliases: doctorInfo.doctorAliases,
             isFullAttendance: doctorInfo.isFullAttendance,
             working: workingStaff.map((s) => s.alias ?? s.name),
-            fullDayOff: [...fullDayOff, ...plannedOffDisplay],
+            fullDayOff,
             halfDayOff,
             isOrthoDay,
             orthoStaffCount: workingStaff.filter((s) => s.is_ortho).length,
