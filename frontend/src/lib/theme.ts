@@ -1,16 +1,16 @@
-export type ThemeId = 'default' | 'spotify';
-
 export interface ThemeMeta {
-    id: ThemeId;
+    id: string;
     label: string;
     /** 패널 미리보기 스와치 (배경, 카드/표면, 강조색) */
-    swatch: [string, string, string];
+    swatch: readonly [string, string, string];
 }
 
-export const THEMES: ThemeMeta[] = [
+export const THEMES = [
     { id: 'default', label: '기본', swatch: ['#f0fdf4', '#ffffff', '#16a34a'] },
     { id: 'spotify', label: 'Spotify', swatch: ['#121212', '#181818', '#1ed760'] },
-];
+] as const satisfies readonly ThemeMeta[];
+
+export type ThemeId = (typeof THEMES)[number]['id'];
 
 const STORAGE_KEY = 'app-theme';
 

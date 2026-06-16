@@ -31,4 +31,9 @@ describe('theme', () => {
         applyTheme('spotify');
         expect(document.documentElement.dataset.theme).toBe('spotify');
     });
+
+    it('applyTheme("default")가 html의 data-theme을 default로 설정한다', () => {
+        applyTheme('default');
+        expect(document.documentElement.dataset.theme).toBe('default');
+    });
 });
