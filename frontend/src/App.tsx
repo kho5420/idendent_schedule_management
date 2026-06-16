@@ -12,6 +12,7 @@ import { InputMethodCard } from './components/InputMethodCard';
 import { GenerateButton } from './components/GenerateButton';
 import { AssignmentPreview } from './components/AssignmentPreview';
 import { ChangelogModal } from './components/ChangelogModal';
+import { ThemePanel } from './components/ThemePanel';
 import { SheetGuideModal } from './components/SheetGuideModal';
 import { StaffSettingsPage } from './components/StaffSettingsPage';
 import { ScheduleSettingsPage } from './components/ScheduleSettingsPage';
@@ -57,6 +58,7 @@ function MainPage() {
     const [writeMsg, setWriteMsg] = useState<{ ok: boolean; text: string } | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isChangelogOpen, setIsChangelogOpen] = useState(false);
+    const [isThemeOpen, setIsThemeOpen] = useState(false);
     const [isSheetGuideOpen, setIsSheetGuideOpen] = useState(false);
     const [showBadge, setShowBadge] = useState(() => hasNewVersion());
 
@@ -218,7 +220,6 @@ function MainPage() {
                         className="header-action-btn"
                         style={{
                             position: 'relative',
-                            borderRadius: 8,
                             padding: '6px 10px',
                             fontSize: 12,
                             cursor: 'pointer',
@@ -248,7 +249,6 @@ function MainPage() {
                         onClick={() => navigate('/staff')}
                         className="header-action-btn"
                         style={{
-                            borderRadius: 8,
                             padding: '6px 10px',
                             fontSize: 12,
                             cursor: 'pointer',
@@ -260,13 +260,23 @@ function MainPage() {
                         onClick={() => navigate('/schedule-settings')}
                         className="header-action-btn"
                         style={{
-                            borderRadius: 8,
                             padding: '6px 10px',
                             fontSize: 12,
                             cursor: 'pointer',
                         }}
                     >
                         📅 스케줄 설정
+                    </button>
+                    <button
+                        onClick={() => setIsThemeOpen(true)}
+                        className="header-action-btn"
+                        style={{
+                            padding: '6px 10px',
+                            fontSize: 12,
+                            cursor: 'pointer',
+                        }}
+                    >
+                        🎨 테마
                     </button>
                 </div>
                 <div style={{ textAlign: 'center' }}>
@@ -510,6 +520,7 @@ function MainPage() {
 
             <ChangelogModal isOpen={isChangelogOpen} onClose={() => setIsChangelogOpen(false)} />
             <SheetGuideModal isOpen={isSheetGuideOpen} onClose={() => setIsSheetGuideOpen(false)} />
+            <ThemePanel isOpen={isThemeOpen} onClose={() => setIsThemeOpen(false)} />
         </div>
     );
 }
