@@ -16,7 +16,7 @@
     /* 형태 토큰 (테마별로 덮어씀) */
     --radius-btn: 10px;
     --radius-card: 16px;
-    --radius-chip: 8px;
+    --radius-chip: 20px;
     --shadow-card: none;
     --btn-transform: none;
     --btn-tracking: normal;

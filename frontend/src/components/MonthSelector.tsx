@@ -54,7 +54,6 @@ export function MonthSelector({ selected, onChange }: Props) {
                             className="month-chip"
                             style={{
                                 padding: '6px 16px',
-                                borderRadius: 20,
                                 fontSize: 13,
                                 fontWeight: isSelected ? 700 : 500,
                                 cursor: 'pointer',

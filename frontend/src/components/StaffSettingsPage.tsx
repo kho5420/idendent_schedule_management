@@ -419,7 +419,6 @@ export function StaffSettingsPage() {
                         className="staff-filter-chip"
                         style={{
                             fontSize: 11,
-                            borderRadius: 20,
                             padding: '3px 10px',
                             cursor: 'pointer',
                             fontWeight: filter === chip.value ? 700 : 400,
