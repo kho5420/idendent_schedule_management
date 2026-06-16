@@ -1,8 +1,50 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { duplicateSheet, clearRange, writeGrid, setWrap } from '../sheetWriter';
+import {
+    duplicateSheet,
+    clearRange,
+    writeGrid,
+    setWrap,
+    applyClosureBackgrounds,
+} from '../sheetWriter';
 
 beforeEach(() => {
     vi.restoreAllMocks();
+});
+
+describe('applyClosureBackgrounds', () => {
+    it("'전체 휴진' 칸이 있으면 그 열 블록(날짜~진료실 5행)에 배경색 repeatCell을 보낸다", async () => {
+        const spy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+            ok: true,
+            json: async () => ({}),
+        } as Response);
+        // grid[8] = 첫 주 진료실 행. 5번째 열(인덱스5, F)에 전체 휴진
+        const grid: string[][] = Array.from({ length: 9 }, () => []);
+        grid[8] = ['', '', '', '', '', '전체 휴진', '', ''];
+
+        await applyClosureBackgrounds('SID', 'TOK', 77, grid);
+
+        const body = JSON.parse((spy.mock.calls[0] as [string, RequestInit])[1].body as string);
+        expect(body.requests).toHaveLength(1);
+        const r = body.requests[0].repeatCell;
+        expect(r.range).toMatchObject({
+            sheetId: 77,
+            startRowIndex: 4,
+            endRowIndex: 9,
+            startColumnIndex: 5,
+            endColumnIndex: 6,
+        });
+        expect(r.fields).toBe('userEnteredFormat.backgroundColor');
+        expect(r.cell.userEnteredFormat.backgroundColor).toHaveProperty('red');
+    });
+
+    it('전체 휴진이 없으면 요청을 보내지 않는다', async () => {
+        const spy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+            ok: true,
+            json: async () => ({}),
+        } as Response);
+        await applyClosureBackgrounds('SID', 'TOK', 77, [['', '성민'], []]);
+        expect(spy).not.toHaveBeenCalled();
+    });
 });
 
 describe('duplicateSheet', () => {

@@ -1,7 +1,16 @@
 import type { DayAssignment, ScheduleMonth } from '../types';
 import { buildScheduleGrid, pickTabName } from './scheduleGrid';
+import { CLOSURE_LABEL, CLOSURE_BG_HEX } from './scheduleFormatter';
 
 const API = 'https://sheets.googleapis.com/v4/spreadsheets';
+
+/** 한 주 블록의 행 수: 날짜행 + 데스크·실장·위생사 3행 + 진료실행 */
+const WEEK_BLOCK_ROWS = 5;
+
+function hexToSheetColor(hex: string): { red: number; green: number; blue: number } {
+    const n = parseInt(hex.slice(1), 16);
+    return { red: ((n >> 16) & 255) / 255, green: ((n >> 8) & 255) / 255, blue: (n & 255) / 255 };
+}
 
 const TEMPLATE_TAB = '기본틀';
 
@@ -112,6 +121,45 @@ export async function writeGrid(
 }
 
 /**
+ * 그리드에서 '전체 휴진' 칸을 찾아 그 날 열 블록(날짜~진료실 5행)에 배경색을 칠한다.
+ * 전체휴진이 없으면 아무 요청도 보내지 않는다.
+ */
+export async function applyClosureBackgrounds(
+    sheetId: string,
+    token: string,
+    tabSheetId: number,
+    grid: string[][]
+): Promise<void> {
+    const color = hexToSheetColor(CLOSURE_BG_HEX);
+    const requests: unknown[] = [];
+    grid.forEach((rowVals, ri) => {
+        rowVals.forEach((val, ci) => {
+            if (val !== CLOSURE_LABEL) return;
+            requests.push({
+                repeatCell: {
+                    range: {
+                        sheetId: tabSheetId,
+                        startRowIndex: ri - (WEEK_BLOCK_ROWS - 1),
+                        endRowIndex: ri + 1,
+                        startColumnIndex: ci,
+                        endColumnIndex: ci + 1,
+                    },
+                    cell: { userEnteredFormat: { backgroundColor: color } },
+                    fields: 'userEnteredFormat.backgroundColor',
+                },
+            });
+        });
+    });
+    if (requests.length === 0) return;
+    const res = await fetch(`${API}/${sheetId}:batchUpdate`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requests }),
+    });
+    if (!res.ok) throw new Error(`구글 시트 API 오류 (${res.status})`);
+}
+
+/**
  * '기본틀' 탭을 복제(서식 유지)해 새 탭을 만들고 스케줄을 기록한다.
  * 복제본의 데이터 영역(A~H) 값만 비운 뒤 그리드를 써넣어, 서식은 유지하고
  * 템플릿의 샘플 값/그룹 행은 비운다. (J열 메모 등 A~H 밖은 보존)
@@ -139,8 +187,10 @@ export async function writeScheduleToNewTab(
         tabName,
         sheets.length
     );
+    const grid = buildScheduleGrid(assignments, month);
     await clearRange(sheetId, token, tabName, 'A1:H60');
-    await writeGrid(sheetId, token, tabName, buildScheduleGrid(assignments, month));
+    await writeGrid(sheetId, token, tabName, grid);
     await setWrap(sheetId, token, newSheetId);
+    await applyClosureBackgrounds(sheetId, token, newSheetId, grid);
     return tabName;
 }

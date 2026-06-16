@@ -5,6 +5,9 @@ const NAMES_PER_LINE = 4;
 /** 평일 전체휴진 셀에 표기하는 문구 (출력 단계에서 배경색 칠할 때도 이 문구로 식별) */
 export const CLOSURE_LABEL = '전체 휴진';
 
+/** 전체휴진 칸 배경색 — 미리보기·엑셀·구글 시트가 모두 이 한 색을 쓴다 */
+export const CLOSURE_BG_HEX = '#fde7ea';
+
 function chunk<T>(items: T[], size: number): T[][] {
     const chunks: T[][] = [];
     for (let i = 0; i < items.length; i += size) {
@@ -59,7 +62,7 @@ function formatAnnotations(assignment: DayAssignment): string | null {
 }
 
 /** 평일 전체휴진(진료 없음·출근 0명)일 때 — 셀에 인원수 대신 '전체 휴진'을 표기 */
-function isClosureDay(a: DayAssignment): boolean {
+export function isClosureDay(a: DayAssignment): boolean {
     return (
         a.working.length === 0 &&
         a.doctorAliases.length === 0 &&

@@ -1,14 +1,17 @@
 import ExcelJS from 'exceljs';
 import type { DayAssignment, ScheduleMonth } from '../types';
 import { buildScheduleGrid } from './scheduleGrid';
-import { CLOSURE_LABEL } from './scheduleFormatter';
+import { CLOSURE_LABEL, CLOSURE_BG_HEX } from './scheduleFormatter';
 
-/** 전체휴진 셀 배경색 (연한 분홍) */
+/** 전체휴진 칸 배경색 (공유 상수에서 파생, ARGB) */
 const CLOSURE_FILL: ExcelJS.Fill = {
     type: 'pattern',
     pattern: 'solid',
-    fgColor: { argb: 'FFFDE7EA' },
+    fgColor: { argb: `FF${CLOSURE_BG_HEX.slice(1).toUpperCase()}` },
 };
+
+/** 한 주 블록의 행 수: 날짜행 + 데스크·실장·위생사 3행 + 진료실행 */
+const WEEK_BLOCK_ROWS = 5;
 
 /**
  * ExcelJS 셀의 표시 문자열을 안전하게 얻는다.
@@ -101,14 +104,19 @@ export function buildScheduleWorkbook(
     const merges: string[] = source.model.merges ?? [];
     for (const range of merges) dest.mergeCells(range);
 
-    // 전체휴진 칸 배경색 (병합 시 마스터 셀에 적용, 병합으로 값이 사라지지 않게 다시 기록)
-    grid.forEach((rowVals, ri) => {
+    // 전체휴진: 그 날 열 블록(날짜~진료실 5행) 전체를 한 색으로 칠해 두 톤을 없앤다.
+    // 진료실 행에는 '전체 휴진' 문구를 기록(병합 시 마스터에 적용해 값이 사라지지 않게).
+    grid.forEach((rowVals, clinicRowIdx) => {
         rowVals.forEach((val, ci) => {
             if (val !== CLOSURE_LABEL) return;
-            const target = dest.getCell(ri + 1, ci + 1).master;
-            target.value = CLOSURE_LABEL;
-            target.fill = CLOSURE_FILL;
-            target.alignment = { horizontal: 'center', vertical: 'middle' };
+            const clinicRow = clinicRowIdx + 1; // 진료실 행(1-based)
+            const blockTop = clinicRow - (WEEK_BLOCK_ROWS - 1); // 날짜 행
+            for (let r = blockTop; r <= clinicRow; r++) {
+                dest.getCell(r, ci + 1).master.fill = CLOSURE_FILL;
+            }
+            const label = dest.getCell(clinicRow, ci + 1).master;
+            label.value = CLOSURE_LABEL;
+            label.alignment = { horizontal: 'center', vertical: 'middle' };
         });
     });
 

@@ -1,5 +1,5 @@
 import type { DayAssignment } from '../types';
-import { formatDayCell } from '../lib/scheduleFormatter';
+import { formatDayCell, isClosureDay, CLOSURE_BG_HEX } from '../lib/scheduleFormatter';
 import { groupAssignmentsByWeek } from '../lib/weekGrouping';
 
 interface Props {
@@ -27,6 +27,7 @@ function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; c
     }
 
     const dayNum = parseInt(assignment.date.slice(-2), 10);
+    const closure = isClosureDay(assignment);
     // 그날 출근 원장님 (스케줄 시트처럼 검증용 표시)
     const doctorLine = assignment.isFullAttendance
         ? '원장 전체출근'
@@ -34,8 +35,10 @@ function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; c
           ? `원장 ${assignment.doctorAliases.join(',')}`
           : null;
 
+    const cellBg = closure ? CLOSURE_BG_HEX : isWeekend ? '#fef2f2' : 'var(--color-card)';
+
     return (
-        <td style={{ ...tdStyle, background: isWeekend ? '#fef2f2' : 'var(--color-card)' }}>
+        <td style={{ ...tdStyle, background: cellBg }}>
             <div
                 style={{
                     fontSize: 12,
