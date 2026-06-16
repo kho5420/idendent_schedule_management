@@ -1,8 +1,6 @@
 import ExcelJS from 'exceljs';
 import type { DayAssignment, ScheduleMonth } from '../types';
-import { buildScheduleGrid, pickTabName } from './scheduleGrid';
-
-const DATA_COLS = 8; // A~H
+import { buildScheduleGrid } from './scheduleGrid';
 
 /**
  * ExcelJS 셀의 표시 문자열을 안전하게 얻는다.
@@ -49,29 +47,32 @@ export function sheetToRows(wb: ExcelJS.Workbook, tabName: string): unknown[][] 
 }
 
 /**
- * 소스 탭(sourceTabName)을 서식째 복제해 'YY.MM_생성' 시트를 만들고,
- * 데이터 영역(A~H)을 비운 뒤 생성 스케줄 그리드를 써넣는다(서식 유지).
- * 추가된 시트 이름을 반환. 소스 탭이 없으면 에러.
+ * 소스 탭(sourceTabName)의 서식만 복제한, 생성 스케줄 시트 하나만 담은
+ * **새 워크북**을 만든다. 원본 워크북은 읽기만 하고 다시 쓰지 않으므로
+ * 원본의 표·도형·다른 시트가 손상되지 않는다(ExcelJS 라운드트립 회피).
+ *
+ * 복제: 열너비·행높이·셀 서식·병합. 값은 생성 그리드로 채우고, 앱이 관리하지
+ * 않는 행(데스크·실장·위생사)은 빈칸으로 남는다. 소스 탭이 없으면 에러.
  */
-export function appendScheduleSheet(
-    wb: ExcelJS.Workbook,
+export function buildScheduleWorkbook(
+    sourceWb: ExcelJS.Workbook,
     sourceTabName: string,
     assignments: DayAssignment[],
     month: ScheduleMonth
-): string {
-    const source = wb.getWorksheet(sourceTabName);
+): { workbook: ExcelJS.Workbook; sheetName: string } {
+    const source = sourceWb.getWorksheet(sourceTabName);
     if (!source) throw new Error(`'${sourceTabName}' 탭을 파일에서 찾을 수 없습니다`);
 
-    const baseName = `${String(month.year).slice(-2)}.${String(month.month).padStart(2, '0')}_생성`;
-    const tabName = pickTabName(listSheetNames(wb), baseName);
-    const dest = wb.addWorksheet(tabName);
+    const sheetName = `${String(month.year).slice(-2)}.${String(month.month).padStart(2, '0')}_생성`;
+    const workbook = new ExcelJS.Workbook();
+    const dest = workbook.addWorksheet(sheetName);
 
     // 열너비 복사
     for (let c = 1; c <= source.columnCount; c++) {
         const w = source.getColumn(c).width;
         if (w != null) dest.getColumn(c).width = w;
     }
-    // 행높이 + 셀 서식 복사
+    // 행높이 + 셀 서식 복사 (값은 제외 — 아래 그리드로 채움)
     source.eachRow({ includeEmpty: true }, (row, r) => {
         const destRow = dest.getRow(r);
         if (row.height != null) destRow.height = row.height;
@@ -80,15 +81,8 @@ export function appendScheduleSheet(
         });
     });
 
-    // 데이터 영역(A~H) 값 비우기 (서식 유지)
+    // 생성 그리드 기록 (관리 행만 값이 들어가고 미관리 행은 빈칸 유지)
     const grid = buildScheduleGrid(assignments, month);
-    const lastRow = Math.max(source.rowCount, grid.length);
-    for (let r = 1; r <= lastRow; r++) {
-        for (let c = 1; c <= DATA_COLS; c++) {
-            dest.getRow(r).getCell(c).value = null;
-        }
-    }
-    // 그리드 기록 (빈 칸은 그대로 비움)
     grid.forEach((rowVals, ri) => {
         rowVals.forEach((val, ci) => {
             if (val !== '') dest.getRow(ri + 1).getCell(ci + 1).value = val;
@@ -99,7 +93,7 @@ export function appendScheduleSheet(
     const merges: string[] = source.model.merges ?? [];
     for (const range of merges) dest.mergeCells(range);
 
-    return tabName;
+    return { workbook, sheetName };
 }
 
 /** 워크북을 .xlsx로 직렬화해 브라우저 다운로드를 트리거한다. */

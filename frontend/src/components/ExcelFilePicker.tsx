@@ -12,16 +12,16 @@ export function ExcelFilePicker({ onScheduleChange, onLeaveChange }: Props) {
             <div
                 style={{
                     fontSize: 11,
-                    color: '#92400e',
-                    background: '#fefce8',
-                    border: '1px solid #fde68a',
+                    color: '#1e40af',
+                    background: '#eff6ff',
+                    border: '1px solid #bfdbfe',
                     borderRadius: 6,
                     padding: '6px 8px',
                     lineHeight: 1.5,
                 }}
             >
-                ⚠️ 다운로드 시 기존 시트의 서식(색·테두리·병합)은 사라질 수 있어요.
-                <br></br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;글자(값)는 그대로 유지됩니다.
+                📄 다운로드하면 입력한 스케줄 탭의 서식을 그대로 복제한, 생성 스케줄만 담긴 새 엑셀
+                파일을 받아요. (원본 파일은 바뀌지 않아요)
             </div>
             <ExcelFileField
                 label="📅 스케줄 파일"

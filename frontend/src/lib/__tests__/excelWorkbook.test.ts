@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import ExcelJS from 'exceljs';
-import { sheetToRows, listSheetNames, appendScheduleSheet } from '../excelWorkbook';
+import { sheetToRows, listSheetNames, buildScheduleWorkbook } from '../excelWorkbook';
 import { parseDoctorSchedule } from '../doctorScheduleParser';
 import type { DayAssignment, ScheduleMonth } from '../../types';
 
@@ -82,10 +82,10 @@ describe('sheetToRows', () => {
     });
 });
 
-describe('appendScheduleSheet', () => {
-    it('소스 탭을 복제해 서식(열너비·채움)을 보존하고 그리드를 기록하며 미관리 행은 비운다', () => {
-        const wb = new ExcelJS.Workbook();
-        const src = wb.addWorksheet('26.07');
+describe('buildScheduleWorkbook', () => {
+    it('소스 탭 서식을 복제한, 생성 시트만 담긴 새 워크북을 만든다', () => {
+        const srcWb = new ExcelJS.Workbook();
+        const src = srcWb.addWorksheet('26.07');
         src.getColumn(2).width = 17;
         const headerCell = src.getRow(1).getCell(2);
         headerCell.value = '기존제목';
@@ -93,11 +93,16 @@ describe('appendScheduleSheet', () => {
         src.getRow(6).getCell(2).value = '데스크인원'; // 미관리 행(데스크) — 비워져야 함
 
         const wed = mkDay({ date: '2026-07-01', dayOfWeek: 3, isFullAttendance: true });
-        const name = appendScheduleSheet(wb, '26.07', [wed], month);
+        const { workbook, sheetName } = buildScheduleWorkbook(srcWb, '26.07', [wed], month);
 
-        expect(name).toBe('26.07_생성');
-        const dest = wb.getWorksheet('26.07_생성')!;
-        // 서식 보존
+        expect(sheetName).toBe('26.07_생성');
+        // 새 워크북엔 생성 시트만 (원본 시트들은 들어가지 않음 → 표·도형 손상 없음)
+        expect(workbook.worksheets.map((ws) => ws.name)).toEqual(['26.07_생성']);
+        // 원본 워크북은 손대지 않음
+        expect(srcWb.worksheets.map((ws) => ws.name)).toEqual(['26.07']);
+
+        const dest = workbook.getWorksheet('26.07_생성')!;
+        // 서식 복제
         expect(dest.getColumn(2).width).toBe(17);
         expect(dest.getRow(1).getCell(2).fill).toMatchObject({ pattern: 'solid' });
         // 그리드 기록: B1 = '7月', 날짜+원장 행(시트 5행) D열 = '1 원장님 전체출근'
@@ -107,16 +112,8 @@ describe('appendScheduleSheet', () => {
         expect(dest.getRow(6).getCell(2).text).toBe('');
     });
 
-    it('생성 시트명이 이미 있으면 번호를 붙인다', () => {
-        const wb = new ExcelJS.Workbook();
-        wb.addWorksheet('26.07');
-        wb.addWorksheet('26.07_생성');
-        const name = appendScheduleSheet(wb, '26.07', [], month);
-        expect(name).toBe('26.07_생성2');
-    });
-
     it('소스 탭이 없으면 에러를 던진다', () => {
-        const wb = wbWithSheet('26.07', [['a']]);
-        expect(() => appendScheduleSheet(wb, '없는탭', [], month)).toThrow('없는탭');
+        const srcWb = wbWithSheet('26.07', [['a']]);
+        expect(() => buildScheduleWorkbook(srcWb, '없는탭', [], month)).toThrow('없는탭');
     });
 });

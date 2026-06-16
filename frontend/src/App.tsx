@@ -27,7 +27,7 @@ import { writeScheduleToNewTab } from './lib/sheetWriter';
 import {
     readWorkbook,
     sheetToRows,
-    appendScheduleSheet,
+    buildScheduleWorkbook,
     downloadWorkbook,
 } from './lib/excelWorkbook';
 import './index.css';
@@ -152,9 +152,9 @@ function MainPage() {
         setIsWriting(true);
         void (async () => {
             try {
-                const wb = await readWorkbook(excelScheduleConn.file);
-                const tab = appendScheduleSheet(
-                    wb,
+                const sourceWb = await readWorkbook(excelScheduleConn.file);
+                const { workbook, sheetName } = buildScheduleWorkbook(
+                    sourceWb,
                     excelScheduleConn.tabName,
                     dayAssignments,
                     selectedMonth
@@ -162,8 +162,8 @@ function MainPage() {
                 const fileName = `언제나이든치과_스케줄_${selectedMonth.year}_${String(
                     selectedMonth.month
                 ).padStart(2, '0')}.xlsx`;
-                await downloadWorkbook(wb, fileName);
-                setWriteMsg({ ok: true, text: `'${tab}' 시트를 추가해 다운로드했어요` });
+                await downloadWorkbook(workbook, fileName);
+                setWriteMsg({ ok: true, text: `'${sheetName}' 시트로 새 엑셀 파일을 받았어요` });
             } catch (e) {
                 setWriteMsg({
                     ok: false,
