@@ -2,6 +2,9 @@ import type { DayAssignment, LeaveRequest } from '../types';
 
 const NAMES_PER_LINE = 4;
 
+/** 평일 전체휴진 셀에 표기하는 문구 (출력 단계에서 배경색 칠할 때도 이 문구로 식별) */
+export const CLOSURE_LABEL = '전체 휴진';
+
 function chunk<T>(items: T[], size: number): T[][] {
     const chunks: T[][] = [];
     for (let i = 0; i < items.length; i += size) {
@@ -68,7 +71,7 @@ function isClosureDay(a: DayAssignment): boolean {
 
 export function formatDayCell(assignment: DayAssignment): string {
     const blocks = isClosureDay(assignment)
-        ? ['전체 휴진']
+        ? [CLOSURE_LABEL]
         : assignment.hasNightShift
           ? [formatNightShiftCell(assignment)]
           : [

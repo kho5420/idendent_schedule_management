@@ -1,6 +1,14 @@
 import ExcelJS from 'exceljs';
 import type { DayAssignment, ScheduleMonth } from '../types';
 import { buildScheduleGrid } from './scheduleGrid';
+import { CLOSURE_LABEL } from './scheduleFormatter';
+
+/** 전체휴진 셀 배경색 (연한 분홍) */
+const CLOSURE_FILL: ExcelJS.Fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFFDE7EA' },
+};
 
 /**
  * ExcelJS 셀의 표시 문자열을 안전하게 얻는다.
@@ -92,6 +100,17 @@ export function buildScheduleWorkbook(
     // 병합 복사 (값 기록 후 적용)
     const merges: string[] = source.model.merges ?? [];
     for (const range of merges) dest.mergeCells(range);
+
+    // 전체휴진 칸 배경색 (병합 시 마스터 셀에 적용, 병합으로 값이 사라지지 않게 다시 기록)
+    grid.forEach((rowVals, ri) => {
+        rowVals.forEach((val, ci) => {
+            if (val !== CLOSURE_LABEL) return;
+            const target = dest.getCell(ri + 1, ci + 1).master;
+            target.value = CLOSURE_LABEL;
+            target.fill = CLOSURE_FILL;
+            target.alignment = { horizontal: 'center', vertical: 'middle' };
+        });
+    });
 
     return { workbook, sheetName };
 }

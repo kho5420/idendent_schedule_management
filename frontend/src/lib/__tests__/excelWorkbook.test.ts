@@ -116,4 +116,23 @@ describe('buildScheduleWorkbook', () => {
         const srcWb = wbWithSheet('26.07', [['a']]);
         expect(() => buildScheduleWorkbook(srcWb, '없는탭', [], month)).toThrow('없는탭');
     });
+
+    it('전체 휴진 칸에 배경색을 입힌다', () => {
+        const srcWb = new ExcelJS.Workbook();
+        srcWb.addWorksheet('26.07');
+        const fri = mkDay({
+            date: '2026-07-17',
+            dayOfWeek: 5, // 금요일 → 주 블록의 금요일 열(F=6)
+            working: [],
+            doctorAliases: [],
+            isFullAttendance: false,
+        });
+
+        const { workbook } = buildScheduleWorkbook(srcWb, '26.07', [fri], month);
+        const dest = workbook.getWorksheet('26.07_생성')!;
+        // 헤더 4행 + [날짜행, 빈3, 진료실행] → 진료실행 = 시트 9행, 금요일 열 = 6(F)
+        const cell = dest.getRow(9).getCell(6);
+        expect(cell.text).toBe('전체 휴진');
+        expect(cell.fill).toMatchObject({ pattern: 'solid' });
+    });
 });
