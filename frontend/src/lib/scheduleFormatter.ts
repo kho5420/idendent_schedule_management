@@ -55,17 +55,30 @@ function formatAnnotations(assignment: DayAssignment): string | null {
     return lines.length > 0 ? lines.join('\n') : null;
 }
 
+/** 평일 전체휴진(진료 없음·출근 0명)일 때 — 셀에 인원수 대신 '전체 휴진'을 표기 */
+function isClosureDay(a: DayAssignment): boolean {
+    return (
+        a.working.length === 0 &&
+        a.doctorAliases.length === 0 &&
+        !a.isFullAttendance &&
+        a.dayOfWeek >= 1 &&
+        a.dayOfWeek <= 5
+    );
+}
+
 export function formatDayCell(assignment: DayAssignment): string {
-    const blocks = assignment.hasNightShift
-        ? [formatNightShiftCell(assignment)]
-        : [
-              formatNameLines(assignment.working),
-              formatCount(
-                  assignment.working.length,
-                  assignment.isOrthoDay,
-                  assignment.orthoStaffCount
-              ),
-          ];
+    const blocks = isClosureDay(assignment)
+        ? ['전체 휴진']
+        : assignment.hasNightShift
+          ? [formatNightShiftCell(assignment)]
+          : [
+                formatNameLines(assignment.working),
+                formatCount(
+                    assignment.working.length,
+                    assignment.isOrthoDay,
+                    assignment.orthoStaffCount
+                ),
+            ];
 
     const annotations = formatAnnotations(assignment);
     if (annotations) blocks.push(annotations);

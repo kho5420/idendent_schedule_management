@@ -90,6 +90,31 @@ describe('formatDayCell', () => {
         expect(cell).toBe('지수,혜수\n\n(2)');
     });
 
+    it('평일 전체휴진(진료·출근 없음)은 "전체 휴진"으로 표기한다', () => {
+        const cell = formatDayCell(
+            makeAssignment({
+                dayOfWeek: 5,
+                working: [],
+                doctorAliases: [],
+                isFullAttendance: false,
+            })
+        );
+
+        expect(cell).toBe('전체 휴진');
+    });
+
+    it('전체휴진일에 명시 연차가 있으면 함께 표기한다', () => {
+        const cell = formatDayCell(
+            makeAssignment({
+                dayOfWeek: 5,
+                working: [],
+                fullDayOff: [{ date: '2026-07-17', name: '예진', type: '연차' }],
+            })
+        );
+
+        expect(cell).toBe('전체 휴진\n\n연차:예진');
+    });
+
     it('야간 분리 요일은 주간/야간 배정 인원을 "주)", "야)"로 나누어 표기한다', () => {
         const cell = formatDayCell(
             makeAssignment({
