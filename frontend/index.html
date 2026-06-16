@@ -11,6 +11,17 @@
         }
       })();
     </script>
+    <script>
+      // 첫 페인트 전에 저장된 테마를 적용해 깜빡임(FOUC) 방지
+      (function () {
+        try {
+          var t = localStorage.getItem('app-theme');
+          if (t === 'spotify') {
+            document.documentElement.setAttribute('data-theme', t);
+          }
+        } catch (e) {}
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>진료실 스케줄 관리 | 언제나이든치과</title>
