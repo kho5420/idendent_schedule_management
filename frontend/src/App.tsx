@@ -448,7 +448,6 @@ function MainPage() {
                                 disabled={isWriting || isGenerating}
                                 className="header-action-btn"
                                 style={{
-                                    borderRadius: 8,
                                     padding: '8px 14px',
                                     fontSize: 13,
                                     fontWeight: 600,
@@ -465,7 +464,6 @@ function MainPage() {
                                 disabled={isWriting || isGenerating}
                                 className="header-action-btn"
                                 style={{
-                                    borderRadius: 8,
                                     padding: '8px 14px',
                                     fontSize: 13,
                                     fontWeight: 600,
@@ -486,7 +484,6 @@ function MainPage() {
                             disabled={isGenerating}
                             className="header-action-btn"
                             style={{
-                                borderRadius: 8,
                                 padding: '8px 14px',
                                 fontSize: 13,
                                 fontWeight: 600,

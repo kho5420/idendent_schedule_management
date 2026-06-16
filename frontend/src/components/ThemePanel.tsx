@@ -30,6 +30,7 @@ export function ThemePanel({ isOpen, onClose }: Props) {
                     background: 'var(--color-card)',
                     border: '1px solid var(--color-border-hover)',
                     borderRadius: 'var(--radius-card)',
+                    boxShadow: 'var(--shadow-card)',
                     padding: 24,
                     width: '100%',
                     maxWidth: 360,

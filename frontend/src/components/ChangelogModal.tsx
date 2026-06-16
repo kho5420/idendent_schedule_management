@@ -28,6 +28,7 @@ export function ChangelogModal({ isOpen, onClose }: Props) {
                     background: 'var(--color-card)',
                     border: '1px solid var(--color-border-hover)',
                     borderRadius: 16,
+                    boxShadow: 'var(--shadow-card)',
                     padding: 24,
                     width: '100%',
                     maxWidth: 420,
