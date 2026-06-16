@@ -12,14 +12,47 @@
     --color-success: #16a34a;
     --color-tag-bg: #dcfce7;
     --color-tag-text: #166534;
+
+    /* 형태 토큰 (테마별로 덮어씀) */
+    --radius-btn: 10px;
+    --radius-card: 16px;
+    --radius-chip: 8px;
+    --shadow-card: none;
+    --btn-transform: none;
+    --btn-tracking: normal;
+    --font-ui: 'Pretendard Variable', Pretendard, 'Noto Sans KR', system-ui, sans-serif;
 }
 
 body {
     background-color: var(--color-bg);
     color: var(--color-text);
-    font-family: 'Pretendard Variable', Pretendard, 'Noto Sans KR', system-ui, sans-serif;
+    font-family: var(--font-ui);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
+}
+
+[data-theme='spotify'] {
+    --color-bg: #121212;
+    --color-card: #181818;
+    --color-border: #4d4d4d;
+    --color-border-hover: #7c7c7c;
+    --color-accent-from: #1ed760;
+    --color-accent-to: #1ed760;
+    --color-text: #ffffff;
+    --color-text-sub: #b3b3b3;
+    --color-success: #1ed760;
+    --color-tag-bg: #1f1f1f;
+    --color-tag-text: #b3b3b3;
+
+    --radius-btn: 9999px;
+    --radius-card: 8px;
+    --radius-chip: 9999px;
+    --shadow-card: rgba(0, 0, 0, 0.5) 0px 8px 24px;
+    --btn-transform: uppercase;
+    --btn-tracking: 1.4px;
+    --font-ui:
+        'Helvetica Neue', helvetica, arial, 'Hiragino Sans', 'Pretendard Variable', Pretendard,
+        'Noto Sans KR', system-ui, sans-serif;
 }
 
 /* App container */
@@ -84,6 +117,7 @@ body {
         border-color 0.15s ease,
         background-color 0.15s ease,
         color 0.15s ease;
+    border-radius: var(--radius-chip);
 }
 .month-chip:hover {
     border-color: var(--color-border-hover);
@@ -120,6 +154,9 @@ body {
         border-color 0.15s ease,
         background-color 0.15s ease,
         color 0.15s ease;
+    border-radius: var(--radius-btn);
+    text-transform: var(--btn-transform);
+    letter-spacing: var(--btn-tracking);
 }
 .header-action-btn:hover {
     border-color: var(--color-border-hover);
@@ -138,6 +175,7 @@ body {
         border-color 0.15s ease,
         background-color 0.15s ease,
         color 0.15s ease;
+    border-radius: var(--radius-chip);
 }
 .staff-filter-chip:hover {
     border-color: var(--color-border-hover);
@@ -214,7 +252,7 @@ body {
 .schedule-setting-card {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);
-    border-radius: 16px;
+    border-radius: var(--radius-card);
     overflow: hidden;
 }
 .schedule-setting-head {
