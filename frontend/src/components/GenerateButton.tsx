@@ -17,7 +17,7 @@ export function GenerateButton({ month, isReady, isLoading, onClick }: Props) {
                     : 'var(--color-border)',
                 color: isReady ? 'white' : 'var(--color-text-sub)',
                 border: 'none',
-                borderRadius: 10,
+                borderRadius: 'var(--radius-btn)',
                 padding: 14,
                 fontSize: 15,
                 fontWeight: 600,
