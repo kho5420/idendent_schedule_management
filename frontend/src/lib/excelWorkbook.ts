@@ -1,14 +1,19 @@
 import ExcelJS from 'exceljs';
 import type { DayAssignment, ScheduleMonth } from '../types';
 import { buildScheduleGrid } from './scheduleGrid';
-import { CLOSURE_LABEL, CLOSURE_BG_HEX } from './scheduleFormatter';
+import { CLOSURE_LABEL, CLOSURE_BG_HEX, CLOSURE_TEXT_HEX } from './scheduleFormatter';
+
+const hexToArgb = (hex: string): string => `FF${hex.slice(1).toUpperCase()}`;
 
 /** 전체휴진 칸 배경색 (공유 상수에서 파생, ARGB) */
 const CLOSURE_FILL: ExcelJS.Fill = {
     type: 'pattern',
     pattern: 'solid',
-    fgColor: { argb: `FF${CLOSURE_BG_HEX.slice(1).toUpperCase()}` },
+    fgColor: { argb: hexToArgb(CLOSURE_BG_HEX) },
 };
+
+/** 전체휴진 '전체 휴진' 글자색 (빨강) */
+const CLOSURE_FONT_COLOR = { argb: hexToArgb(CLOSURE_TEXT_HEX) };
 
 /** 한 주 블록의 행 수: 날짜행 + 데스크·실장·위생사 3행 + 진료실행 */
 const WEEK_BLOCK_ROWS = 5;
@@ -117,6 +122,7 @@ export function buildScheduleWorkbook(
             const label = dest.getCell(clinicRow, ci + 1).master;
             label.value = CLOSURE_LABEL;
             label.alignment = { horizontal: 'center', vertical: 'middle' };
+            label.font = { ...label.font, bold: true, color: CLOSURE_FONT_COLOR };
         });
     });
 

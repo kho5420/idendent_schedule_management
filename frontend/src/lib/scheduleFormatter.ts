@@ -8,6 +8,9 @@ export const CLOSURE_LABEL = '전체 휴진';
 /** 전체휴진 칸 배경색 — 미리보기·엑셀·구글 시트가 모두 이 한 색을 쓴다 */
 export const CLOSURE_BG_HEX = '#fde7ea';
 
+/** 전체휴진 '전체 휴진' 글자색 (빨강) — 세 출력 공통 */
+export const CLOSURE_TEXT_HEX = '#dc2626';
+
 function chunk<T>(items: T[], size: number): T[][] {
     const chunks: T[][] = [];
     for (let i = 0; i < items.length; i += size) {

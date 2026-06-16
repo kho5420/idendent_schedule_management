@@ -134,6 +134,8 @@ describe('buildScheduleWorkbook', () => {
         const cell = dest.getRow(9).getCell(6);
         expect(cell.text).toBe('전체 휴진');
         expect(cell.fill).toMatchObject({ pattern: 'solid' });
+        // '전체 휴진' 글자는 빨간 굵은 글씨
+        expect(cell.font).toMatchObject({ bold: true, color: { argb: 'FFDC2626' } });
         // 열 블록 전체가 같은 색 — 날짜 행(시트 5행)도 동일하게 칠해짐 (두 톤 방지)
         expect(dest.getRow(5).getCell(6).fill).toEqual(cell.fill);
     });

@@ -1,6 +1,6 @@
 import type { DayAssignment, ScheduleMonth } from '../types';
 import { buildScheduleGrid, pickTabName } from './scheduleGrid';
-import { CLOSURE_LABEL, CLOSURE_BG_HEX } from './scheduleFormatter';
+import { CLOSURE_LABEL, CLOSURE_BG_HEX, CLOSURE_TEXT_HEX } from './scheduleFormatter';
 
 const API = 'https://sheets.googleapis.com/v4/spreadsheets';
 
@@ -121,20 +121,22 @@ export async function writeGrid(
 }
 
 /**
- * 그리드에서 '전체 휴진' 칸을 찾아 그 날 열 블록(날짜~진료실 5행)에 배경색을 칠한다.
- * 전체휴진이 없으면 아무 요청도 보내지 않는다.
+ * 그리드에서 '전체 휴진' 칸을 찾아 그 날 열 블록(날짜~진료실 5행)에 배경색을 칠하고,
+ * '전체 휴진' 글자 칸은 빨간 굵은 글씨로 표시한다. 전체휴진이 없으면 요청을 보내지 않는다.
  */
-export async function applyClosureBackgrounds(
+export async function applyClosureStyles(
     sheetId: string,
     token: string,
     tabSheetId: number,
     grid: string[][]
 ): Promise<void> {
-    const color = hexToSheetColor(CLOSURE_BG_HEX);
+    const bgColor = hexToSheetColor(CLOSURE_BG_HEX);
+    const textColor = hexToSheetColor(CLOSURE_TEXT_HEX);
     const requests: unknown[] = [];
     grid.forEach((rowVals, ri) => {
         rowVals.forEach((val, ci) => {
             if (val !== CLOSURE_LABEL) return;
+            // 열 블록 전체 배경색
             requests.push({
                 repeatCell: {
                     range: {
@@ -144,8 +146,26 @@ export async function applyClosureBackgrounds(
                         startColumnIndex: ci,
                         endColumnIndex: ci + 1,
                     },
-                    cell: { userEnteredFormat: { backgroundColor: color } },
+                    cell: { userEnteredFormat: { backgroundColor: bgColor } },
                     fields: 'userEnteredFormat.backgroundColor',
+                },
+            });
+            // '전체 휴진' 글자 칸: 빨간 굵은 글씨
+            requests.push({
+                repeatCell: {
+                    range: {
+                        sheetId: tabSheetId,
+                        startRowIndex: ri,
+                        endRowIndex: ri + 1,
+                        startColumnIndex: ci,
+                        endColumnIndex: ci + 1,
+                    },
+                    cell: {
+                        userEnteredFormat: {
+                            textFormat: { bold: true, foregroundColor: textColor },
+                        },
+                    },
+                    fields: 'userEnteredFormat.textFormat.bold,userEnteredFormat.textFormat.foregroundColor',
                 },
             });
         });
@@ -191,6 +211,6 @@ export async function writeScheduleToNewTab(
     await clearRange(sheetId, token, tabName, 'A1:H60');
     await writeGrid(sheetId, token, tabName, grid);
     await setWrap(sheetId, token, newSheetId);
-    await applyClosureBackgrounds(sheetId, token, newSheetId, grid);
+    await applyClosureStyles(sheetId, token, newSheetId, grid);
     return tabName;
 }

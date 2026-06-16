@@ -1,5 +1,10 @@
 import type { DayAssignment } from '../types';
-import { formatDayCell, isClosureDay, CLOSURE_BG_HEX } from '../lib/scheduleFormatter';
+import {
+    formatDayCell,
+    isClosureDay,
+    CLOSURE_BG_HEX,
+    CLOSURE_TEXT_HEX,
+} from '../lib/scheduleFormatter';
 import { groupAssignmentsByWeek } from '../lib/weekGrouping';
 
 interface Props {
@@ -69,7 +74,8 @@ function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; c
                     fontFamily: 'inherit',
                     fontSize: 11,
                     lineHeight: 1.5,
-                    color: 'var(--color-text)',
+                    color: closure ? CLOSURE_TEXT_HEX : 'var(--color-text)',
+                    fontWeight: closure ? 700 : 400,
                     whiteSpace: 'pre-wrap',
                     wordBreak: 'break-all',
                 }}

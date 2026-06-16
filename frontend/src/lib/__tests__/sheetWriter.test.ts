@@ -1,18 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-    duplicateSheet,
-    clearRange,
-    writeGrid,
-    setWrap,
-    applyClosureBackgrounds,
-} from '../sheetWriter';
+import { duplicateSheet, clearRange, writeGrid, setWrap, applyClosureStyles } from '../sheetWriter';
 
 beforeEach(() => {
     vi.restoreAllMocks();
 });
 
-describe('applyClosureBackgrounds', () => {
-    it("'전체 휴진' 칸이 있으면 그 열 블록(날짜~진료실 5행)에 배경색 repeatCell을 보낸다", async () => {
+describe('applyClosureStyles', () => {
+    it("'전체 휴진' 칸이 있으면 열 블록 배경색 + 글자칸 빨간 굵은 글씨 repeatCell을 보낸다", async () => {
         const spy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
             ok: true,
             json: async () => ({}),
@@ -21,20 +15,33 @@ describe('applyClosureBackgrounds', () => {
         const grid: string[][] = Array.from({ length: 9 }, () => []);
         grid[8] = ['', '', '', '', '', '전체 휴진', '', ''];
 
-        await applyClosureBackgrounds('SID', 'TOK', 77, grid);
+        await applyClosureStyles('SID', 'TOK', 77, grid);
 
         const body = JSON.parse((spy.mock.calls[0] as [string, RequestInit])[1].body as string);
-        expect(body.requests).toHaveLength(1);
-        const r = body.requests[0].repeatCell;
-        expect(r.range).toMatchObject({
+        expect(body.requests).toHaveLength(2);
+
+        // 1) 열 블록(날짜~진료실 5행) 배경색
+        const bg = body.requests[0].repeatCell;
+        expect(bg.range).toMatchObject({
             sheetId: 77,
             startRowIndex: 4,
             endRowIndex: 9,
             startColumnIndex: 5,
             endColumnIndex: 6,
         });
-        expect(r.fields).toBe('userEnteredFormat.backgroundColor');
-        expect(r.cell.userEnteredFormat.backgroundColor).toHaveProperty('red');
+        expect(bg.fields).toBe('userEnteredFormat.backgroundColor');
+        expect(bg.cell.userEnteredFormat.backgroundColor).toHaveProperty('red');
+
+        // 2) '전체 휴진' 글자 칸만 빨간 굵은 글씨
+        const text = body.requests[1].repeatCell;
+        expect(text.range).toMatchObject({
+            startRowIndex: 8,
+            endRowIndex: 9,
+            startColumnIndex: 5,
+            endColumnIndex: 6,
+        });
+        expect(text.cell.userEnteredFormat.textFormat.bold).toBe(true);
+        expect(text.cell.userEnteredFormat.textFormat.foregroundColor).toHaveProperty('red');
     });
 
     it('전체 휴진이 없으면 요청을 보내지 않는다', async () => {
@@ -42,7 +49,7 @@ describe('applyClosureBackgrounds', () => {
             ok: true,
             json: async () => ({}),
         } as Response);
-        await applyClosureBackgrounds('SID', 'TOK', 77, [['', '성민'], []]);
+        await applyClosureStyles('SID', 'TOK', 77, [['', '성민'], []]);
         expect(spy).not.toHaveBeenCalled();
     });
 });
