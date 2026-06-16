@@ -50,7 +50,7 @@ export function ExcelUploader({ file, onFileChange }: Props) {
                 style={{
                     border: `1.5px dashed ${isDragging ? 'var(--color-accent-from)' : 'var(--color-border-hover)'}`,
                     borderRadius: 8,
-                    padding: 16,
+                    padding: '6px 12px',
                     textAlign: 'center',
                     cursor: clickable ? 'pointer' : 'default',
                     background: isDragging ? '#dcfce7' : 'transparent',

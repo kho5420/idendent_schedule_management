@@ -111,6 +111,7 @@ export function ExcelFileField({ label, storageKey, tabPlaceholder, onConnection
             </div>
             <div
                 style={{
+                    minHeight: 32,
                     fontSize: 12,
                     color:
                         status === 'connected'

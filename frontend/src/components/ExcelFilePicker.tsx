@@ -11,17 +11,20 @@ export function ExcelFilePicker({ onScheduleChange, onLeaveChange }: Props) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div
                 style={{
+                    minHeight: 34,
+                    boxSizing: 'border-box',
+                    display: 'flex',
+                    alignItems: 'center',
                     fontSize: 11,
                     color: '#1e40af',
                     background: '#eff6ff',
                     border: '1px solid #bfdbfe',
                     borderRadius: 6,
-                    padding: '6px 8px',
-                    lineHeight: 1.5,
+                    padding: '4px 8px',
+                    lineHeight: 1.4,
                 }}
             >
-                📄 다운로드하면 입력한 스케줄 탭의 서식을 그대로 복제한, 생성 스케줄만 담긴 새 엑셀
-                파일을 받아요. (원본 파일은 바뀌지 않아요)
+                📄 원본은 그대로 두고, 생성 스케줄만 담긴 새 엑셀 파일로 받아요
             </div>
             <ExcelFileField
                 label="📅 스케줄 파일"

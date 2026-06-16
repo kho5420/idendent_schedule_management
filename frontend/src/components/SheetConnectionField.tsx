@@ -156,6 +156,7 @@ export function SheetConnectionField({
             />
             <div
                 style={{
+                    minHeight: 32,
                     fontSize: 12,
                     color:
                         status === 'connected'

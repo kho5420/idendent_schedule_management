@@ -177,7 +177,14 @@ export function GoogleSheetPicker({
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div
+                style={{
+                    minHeight: 34,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                }}
+            >
                 <div style={{ fontSize: 13, color: 'var(--color-success)' }}>✅ 로그인됨</div>
                 <button
                     onClick={logout}
