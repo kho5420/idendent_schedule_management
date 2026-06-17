@@ -57,6 +57,7 @@ GitHub Actions Secrets: 동일 키 (`VITE_` prefix 없는 이름으로 등록, w
 ## 업데이트 내역 관리
 `frontend/CHANGELOG.md`: `## vX.Y.Z — YYYY-MM-DD` 형식, 항목 `- ` 로 시작
 빌드 시 파싱 → **일반 사용자에게 노출** — 코드 용어 금지, 일상어로 작성 (병원 도메인 용어는 가능)
+- changelog 생성·갱신 시 `changelog-generator` 스킬(`.claude/skills/changelog-generator/SKILL.md`) 사용
 
 ## 작업 규칙
 - **`git commit`은 사용자가 명시적으로 요청할 때만** (관행적 커밋 금지)
