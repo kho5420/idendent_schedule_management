@@ -152,7 +152,7 @@ export function GoogleSheetPicker({
                     🔑 Google로 로그인
                 </button>
                 {loginError && (
-                    <div style={{ fontSize: 11, color: '#dc2626', textAlign: 'center' }}>
+                    <div style={{ fontSize: 11, color: 'var(--text-danger)', textAlign: 'center' }}>
                         {loginError}
                     </div>
                 )}

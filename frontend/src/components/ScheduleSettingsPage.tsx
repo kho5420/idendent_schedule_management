@@ -137,7 +137,12 @@ export function ScheduleSettingsPage() {
         return (
             <div
                 className="app-container"
-                style={{ textAlign: 'center', paddingTop: 60, color: '#dc2626', fontSize: 14 }}
+                style={{
+                    textAlign: 'center',
+                    paddingTop: 60,
+                    color: 'var(--text-danger)',
+                    fontSize: 14,
+                }}
             >
                 {error}
                 <br />
@@ -294,7 +299,7 @@ export function ScheduleSettingsPage() {
             </div>
 
             {error && settings.length > 0 && (
-                <p style={{ fontSize: 12, color: '#dc2626', marginTop: 12 }}>{error}</p>
+                <p style={{ fontSize: 12, color: 'var(--text-danger)', marginTop: 12 }}>{error}</p>
             )}
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 20 }}>

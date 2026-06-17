@@ -27,7 +27,12 @@ function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; c
 
     if (!assignment) {
         return (
-            <td style={{ ...tdStyle, background: isWeekend ? '#fef2f2' : 'var(--color-tag-bg)' }} />
+            <td
+                style={{
+                    ...tdStyle,
+                    background: isWeekend ? 'var(--surface-weekend)' : 'var(--color-tag-bg)',
+                }}
+            />
         );
     }
 
@@ -40,7 +45,11 @@ function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; c
           ? `원장 ${assignment.doctorAliases.join(',')}`
           : null;
 
-    const cellBg = closure ? CLOSURE_BG_HEX : isWeekend ? '#fef2f2' : 'var(--color-card)';
+    const cellBg = closure
+        ? CLOSURE_BG_HEX
+        : isWeekend
+          ? 'var(--surface-weekend)'
+          : 'var(--color-card)';
 
     return (
         <td style={{ ...tdStyle, background: cellBg }}>
@@ -49,7 +58,7 @@ function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; c
                     fontSize: 12,
                     fontWeight: 700,
                     marginBottom: 4,
-                    color: isWeekend ? '#dc2626' : 'var(--color-text)',
+                    color: isWeekend ? 'var(--text-danger)' : 'var(--color-text)',
                 }}
             >
                 {dayNum}
@@ -59,7 +68,7 @@ function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; c
                     style={{
                         fontSize: 10,
                         fontWeight: 600,
-                        color: '#2563eb',
+                        color: 'var(--text-info)',
                         marginBottom: 4,
                         lineHeight: 1.4,
                         wordBreak: 'break-all',
@@ -130,8 +139,12 @@ export function AssignmentPreview({ assignments }: Props) {
                                             textAlign: 'center',
                                             fontSize: 12,
                                             fontWeight: weekend ? 700 : 600,
-                                            color: weekend ? '#dc2626' : 'var(--color-text-sub)',
-                                            background: weekend ? '#fef2f2' : 'var(--color-tag-bg)',
+                                            color: weekend
+                                                ? 'var(--text-danger)'
+                                                : 'var(--color-text-sub)',
+                                            background: weekend
+                                                ? 'var(--surface-weekend)'
+                                                : 'var(--color-tag-bg)',
                                             borderRight: '1px solid var(--color-border)',
                                             borderBottom: '1px solid var(--color-border)',
                                         }}

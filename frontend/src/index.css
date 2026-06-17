@@ -52,6 +52,7 @@
     /* 의미 기반 텍스트 */
     --text-danger: #dc2626;
     --text-danger-strong: #ef4444;
+    --text-success: #166534;
     --text-info: #2563eb;
     --text-info-strong: #1e40af;
     --text-warning: #92400e;
@@ -127,6 +128,7 @@ body {
     /* 의미 기반 텍스트 — 어두운 톤 */
     --text-danger: #f3727f;
     --text-danger-strong: #f3727f;
+    --text-success: #1ed760;
     --text-info: #539df5;
     --text-info-strong: #7cb3f7;
     --text-warning: #ffa42b;

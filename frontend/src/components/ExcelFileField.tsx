@@ -117,7 +117,7 @@ export function ExcelFileField({ label, storageKey, tabPlaceholder, onConnection
                         status === 'connected'
                             ? 'var(--color-success)'
                             : status === 'error'
-                              ? '#dc2626'
+                              ? 'var(--text-danger)'
                               : 'var(--color-text-sub)',
                 }}
             >

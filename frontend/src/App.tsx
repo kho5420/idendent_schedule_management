@@ -354,14 +354,14 @@ function MainPage() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    background: '#fefce8',
-                    border: '1px solid #fde68a',
+                    background: 'var(--surface-warning)',
+                    border: '1px solid var(--border-warning)',
                     borderRadius: 8,
                     padding: '8px 12px',
                     marginBottom: 12,
                 }}
             >
-                <span style={{ fontSize: 12, color: '#92400e' }}>
+                <span style={{ fontSize: 12, color: 'var(--text-warning)' }}>
                     구글 시트 연동이 처음이신가요?
                 </span>
                 <button
@@ -371,7 +371,7 @@ function MainPage() {
                         border: 'none',
                         fontSize: 12,
                         fontWeight: 600,
-                        color: '#2563eb',
+                        color: 'var(--text-info)',
                         textDecoration: 'underline',
                         cursor: 'pointer',
                         padding: 0,
@@ -391,12 +391,12 @@ function MainPage() {
             {error && (
                 <div
                     style={{
-                        background: '#fef2f2',
-                        border: '1px solid #fca5a5',
+                        background: 'var(--surface-danger)',
+                        border: '1px solid var(--border-danger)',
                         borderRadius: 8,
                         padding: '10px 14px',
                         fontSize: 13,
-                        color: '#dc2626',
+                        color: 'var(--text-danger)',
                         marginBottom: 16,
                     }}
                 >
@@ -408,8 +408,8 @@ function MainPage() {
                 <>
                     <div
                         style={{
-                            background: '#f0fdf4',
-                            border: '1px solid #bbf7d0',
+                            background: 'var(--surface-success-soft)',
+                            border: '1px solid var(--border-success)',
                             borderRadius: 8,
                             padding: '10px 12px',
                             marginBottom: 12,
@@ -497,12 +497,14 @@ function MainPage() {
                     {writeMsg && (
                         <div
                             style={{
-                                background: writeMsg.ok ? '#f0fdf4' : '#fef2f2',
-                                border: `1px solid ${writeMsg.ok ? '#bbf7d0' : '#fca5a5'}`,
+                                background: writeMsg.ok
+                                    ? 'var(--surface-success-soft)'
+                                    : 'var(--surface-danger)',
+                                border: `1px solid ${writeMsg.ok ? 'var(--border-success)' : 'var(--border-danger)'}`,
                                 borderRadius: 8,
                                 padding: '10px 14px',
                                 fontSize: 13,
-                                color: writeMsg.ok ? '#166534' : '#dc2626',
+                                color: writeMsg.ok ? 'var(--text-success)' : 'var(--text-danger)',
                                 marginBottom: 12,
                             }}
                         >

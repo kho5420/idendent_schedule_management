@@ -28,12 +28,42 @@ type Filter = 'all' | 'leave' | number;
 const LIST_GRID = '20px 32px 1fr 50px 28px 1fr 16px';
 
 const BADGES = [
-    { key: 'is_team_leader' as const, label: '팀장', bg: '#fef3c7', color: '#d97706' },
-    { key: 'is_ortho' as const, label: '교정', bg: '#ede9fe', color: '#7c3aed' },
-    { key: 'is_night_fixed' as const, label: '야간', bg: '#fff7ed', color: '#ea580c' },
-    { key: 'is_weekday_fixed' as const, label: '평일', bg: '#f0fdf4', color: '#16a34a' },
-    { key: 'is_head_dentist_pick' as const, label: '윤팀', bg: '#f0f0ff', color: '#6366f1' },
-    { key: 'is_on_leave' as const, label: '휴직', bg: '#fee2e2', color: '#dc2626' },
+    {
+        key: 'is_team_leader' as const,
+        label: '팀장',
+        bg: 'var(--surface-warning-strong)',
+        color: 'var(--text-warning-badge)',
+    },
+    {
+        key: 'is_ortho' as const,
+        label: '교정',
+        bg: 'var(--surface-purple)',
+        color: 'var(--text-purple)',
+    },
+    {
+        key: 'is_night_fixed' as const,
+        label: '야간',
+        bg: 'var(--surface-weekend-row)',
+        color: 'var(--text-orange)',
+    },
+    {
+        key: 'is_weekday_fixed' as const,
+        label: '평일',
+        bg: 'var(--surface-success-soft)',
+        color: 'var(--color-success)',
+    },
+    {
+        key: 'is_head_dentist_pick' as const,
+        label: '윤팀',
+        bg: 'var(--surface-indigo-soft)',
+        color: 'var(--text-indigo)',
+    },
+    {
+        key: 'is_on_leave' as const,
+        label: '휴직',
+        bg: 'var(--surface-danger-strong)',
+        color: 'var(--text-danger)',
+    },
 ];
 
 type SortableRowProps = {
@@ -75,8 +105,8 @@ function SortableStaffRow({
         zIndex: isDragging ? 1 : undefined,
         position: 'relative',
         ...(selected && {
-            background: '#eef2ff',
-            border: '1px solid #c7d2fe',
+            background: 'var(--surface-indigo)',
+            border: '1px solid var(--border-indigo)',
         }),
     };
 
@@ -87,7 +117,7 @@ function SortableStaffRow({
                 checked={selected}
                 onChange={() => onToggleSelect(s.id)}
                 onClick={(e) => e.stopPropagation()}
-                style={{ accentColor: '#6366f1', cursor: 'pointer' }}
+                style={{ accentColor: 'var(--text-indigo)', cursor: 'pointer' }}
             />
             <div
                 style={{
@@ -110,7 +140,14 @@ function SortableStaffRow({
                 </div>
                 <div style={{ fontSize: 10, color: 'var(--color-text-sub)' }}>{role}</div>
             </div>
-            <div style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, color: '#6366f1' }}>
+            <div
+                style={{
+                    textAlign: 'center',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: 'var(--text-indigo)',
+                }}
+            >
                 {s.career ?? '—'}
             </div>
             <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--color-text-sub)' }}>
@@ -266,7 +303,12 @@ export function StaffSettingsPage() {
         return (
             <div
                 className="app-container"
-                style={{ textAlign: 'center', paddingTop: 60, color: '#dc2626', fontSize: 14 }}
+                style={{
+                    textAlign: 'center',
+                    paddingTop: 60,
+                    color: 'var(--text-danger)',
+                    fontSize: 14,
+                }}
             >
                 {error}
                 <br />
@@ -362,8 +404,8 @@ export function StaffSettingsPage() {
             {selectedIds.size >= 2 && (
                 <div
                     style={{
-                        background: '#eef2ff',
-                        border: '1px solid #c7d2fe',
+                        background: 'var(--surface-indigo)',
+                        border: '1px solid var(--border-indigo)',
                         borderRadius: 10,
                         padding: '8px 14px',
                         marginBottom: 12,
@@ -372,7 +414,13 @@ export function StaffSettingsPage() {
                         gap: 10,
                     }}
                 >
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#4338ca' }}>
+                    <span
+                        style={{
+                            fontSize: 13,
+                            fontWeight: 700,
+                            color: 'var(--text-indigo-strong)',
+                        }}
+                    >
                         {selectedIds.size}명 선택됨
                     </span>
                     <button
@@ -381,7 +429,7 @@ export function StaffSettingsPage() {
                             fontSize: 12,
                             fontWeight: 600,
                             color: 'white',
-                            background: '#6366f1',
+                            background: 'var(--text-indigo)',
                             border: 'none',
                             borderRadius: 6,
                             padding: '4px 12px',
@@ -449,7 +497,7 @@ export function StaffSettingsPage() {
                     type="checkbox"
                     checked={filtered.length > 0 && selectedIds.size === filtered.length}
                     onChange={toggleAll}
-                    style={{ accentColor: '#6366f1', cursor: 'pointer' }}
+                    style={{ accentColor: 'var(--text-indigo)', cursor: 'pointer' }}
                 />
                 <div />
                 <div

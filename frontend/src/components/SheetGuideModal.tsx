@@ -14,7 +14,11 @@ function linkify(text: string): ReactNode[] {
                 href={part}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: '#2563eb', textDecoration: 'underline', wordBreak: 'break-all' }}
+                style={{
+                    color: 'var(--text-info)',
+                    textDecoration: 'underline',
+                    wordBreak: 'break-all',
+                }}
             >
                 {part}
             </a>

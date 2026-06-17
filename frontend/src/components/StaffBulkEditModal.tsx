@@ -187,7 +187,7 @@ export function StaffBulkEditModal({ selectedStaff, onSave, onClose }: Props) {
                     style={{
                         fontSize: 10,
                         fontWeight: 700,
-                        color: '#6366f1',
+                        color: 'var(--text-indigo)',
                         letterSpacing: 1,
                         textTransform: 'uppercase',
                         marginBottom: 10,
@@ -203,7 +203,7 @@ export function StaffBulkEditModal({ selectedStaff, onSave, onClose }: Props) {
                             type="checkbox"
                             checked={enabled.has('career')}
                             onChange={() => toggleField('career')}
-                            style={{ accentColor: '#6366f1', cursor: 'pointer' }}
+                            style={{ accentColor: 'var(--text-indigo)', cursor: 'pointer' }}
                         />
                         <span style={{ flex: 1, fontSize: 13, color: 'var(--color-text)' }}>
                             경력 수준
@@ -230,7 +230,7 @@ export function StaffBulkEditModal({ selectedStaff, onSave, onClose }: Props) {
                             type="checkbox"
                             checked={enabled.has('team_no')}
                             onChange={() => toggleField('team_no')}
-                            style={{ accentColor: '#6366f1', cursor: 'pointer' }}
+                            style={{ accentColor: 'var(--text-indigo)', cursor: 'pointer' }}
                         />
                         <span style={{ flex: 1, fontSize: 13, color: 'var(--color-text)' }}>
                             팀
@@ -254,7 +254,7 @@ export function StaffBulkEditModal({ selectedStaff, onSave, onClose }: Props) {
                                 type="checkbox"
                                 checked={enabled.has(f.key)}
                                 onChange={() => toggleField(f.key)}
-                                style={{ accentColor: '#6366f1', cursor: 'pointer' }}
+                                style={{ accentColor: 'var(--text-indigo)', cursor: 'pointer' }}
                             />
                             <span style={{ flex: 1, fontSize: 13, color: 'var(--color-text)' }}>
                                 {f.label}

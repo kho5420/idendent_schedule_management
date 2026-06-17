@@ -41,13 +41,13 @@ const ATTRS: [keyof FormData, string, boolean][] = [
 
 const selectStyle: React.CSSProperties = {
     width: '100%',
-    background: '#f8fafc',
-    border: '1.5px solid #e2e8f0',
+    background: 'var(--surface-neutral)',
+    border: '1.5px solid var(--border-neutral)',
     borderRadius: 10,
     padding: '9px 8px',
     fontSize: 12,
     fontWeight: 600,
-    color: '#1e293b',
+    color: 'var(--text-strong)',
     cursor: 'pointer',
     fontFamily: 'inherit',
     outline: 'none',
@@ -56,12 +56,19 @@ const selectStyle: React.CSSProperties = {
 function SectionLabel({ children }: { children: React.ReactNode }) {
     return (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <div style={{ width: 3, height: 14, background: '#16a34a', borderRadius: 2 }} />
+            <div
+                style={{
+                    width: 3,
+                    height: 14,
+                    background: 'var(--color-success)',
+                    borderRadius: 2,
+                }}
+            />
             <span
                 style={{
                     fontSize: 10,
                     fontWeight: 800,
-                    color: '#16a34a',
+                    color: 'var(--color-success)',
                     letterSpacing: 1.4,
                     textTransform: 'uppercase',
                 }}
@@ -140,7 +147,7 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                     <div
                         className="staff-modal-card"
                         style={{
-                            background: 'white',
+                            background: 'var(--color-card)',
                             borderRadius: 20,
                             overflow: 'hidden',
                             width: '100%',
@@ -150,7 +157,7 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                     >
                         <div
                             style={{
-                                background: '#fef2f2',
+                                background: 'var(--surface-danger)',
                                 padding: '28px 24px 20px',
                                 textAlign: 'center',
                             }}
@@ -159,7 +166,7 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                 style={{
                                     width: 52,
                                     height: 52,
-                                    background: '#fee2e2',
+                                    background: 'var(--surface-danger-strong)',
                                     borderRadius: '50%',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -174,14 +181,20 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                 style={{
                                     fontSize: 17,
                                     fontWeight: 800,
-                                    color: '#dc2626',
+                                    color: 'var(--text-danger)',
                                     marginBottom: 8,
                                 }}
                             >
                                 직원 삭제
                             </div>
-                            <div style={{ fontSize: 13, color: '#6b7280', lineHeight: 1.5 }}>
-                                <span style={{ fontWeight: 700, color: '#111827' }}>
+                            <div
+                                style={{
+                                    fontSize: 13,
+                                    color: 'var(--text-neutral)',
+                                    lineHeight: 1.5,
+                                }}
+                            >
+                                <span style={{ fontWeight: 700, color: 'var(--text-strong)' }}>
                                     {form.name}
                                 </span>{' '}
                                 직원을 목록에서 제거하시겠습니까?
@@ -194,8 +207,8 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                     flex: 1,
                                     fontSize: 13,
                                     fontWeight: 600,
-                                    color: '#6b7280',
-                                    background: '#f3f4f6',
+                                    color: 'var(--text-neutral)',
+                                    background: 'var(--surface-neutral-soft)',
                                     border: 'none',
                                     borderRadius: 10,
                                     padding: '11px',
@@ -212,7 +225,8 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                     fontSize: 13,
                                     fontWeight: 700,
                                     color: 'white',
-                                    background: 'linear-gradient(135deg, #f87171, #dc2626)',
+                                    background:
+                                        'linear-gradient(135deg, var(--text-danger-strong), var(--text-danger))',
                                     border: 'none',
                                     borderRadius: 10,
                                     padding: '11px',
@@ -245,7 +259,7 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                     className="staff-modal-card"
                     onClick={(e) => e.stopPropagation()}
                     style={{
-                        background: 'white',
+                        background: 'var(--color-card)',
                         borderRadius: 22,
                         width: '100%',
                         maxWidth: 420,
@@ -258,7 +272,7 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                     <div
                         style={{
                             background:
-                                'linear-gradient(145deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%)',
+                                'linear-gradient(145deg, var(--surface-success-soft) 0%, var(--surface-success) 50%, var(--border-success) 100%)',
                             borderRadius: '22px 22px 0 0',
                             padding: '22px 20px 26px',
                             position: 'relative',
@@ -389,7 +403,7 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                     style={{
                                         fontSize: 10,
                                         fontWeight: 700,
-                                        color: '#94a3b8',
+                                        color: 'var(--text-neutral-sub)',
                                         letterSpacing: 0.5,
                                         marginBottom: 5,
                                     }}
@@ -419,7 +433,7 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                     style={{
                                         fontSize: 10,
                                         fontWeight: 700,
-                                        color: '#94a3b8',
+                                        color: 'var(--text-neutral-sub)',
                                         letterSpacing: 0.5,
                                         marginBottom: 5,
                                     }}
@@ -446,7 +460,7 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                     style={{
                                         fontSize: 10,
                                         fontWeight: 700,
-                                        color: '#94a3b8',
+                                        color: 'var(--text-neutral-sub)',
                                         letterSpacing: 0.5,
                                         marginBottom: 5,
                                     }}
@@ -469,7 +483,7 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                         <SectionLabel>속성</SectionLabel>
                         <div
                             style={{
-                                border: '1.5px solid #e2e8f0',
+                                border: '1.5px solid var(--border-neutral)',
                                 borderRadius: 14,
                                 overflow: 'hidden',
                                 marginBottom: 20,
@@ -477,9 +491,15 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                         >
                             {ATTRS.map(([key, label, danger], i) => {
                                 const checked = form[key] as boolean;
-                                let background = 'white';
-                                if (checked) background = danger ? '#fff5f5' : '#f0fdf4';
-                                const labelColor = danger && checked ? '#dc2626' : '#374151';
+                                let background = 'var(--color-card)';
+                                if (checked)
+                                    background = danger
+                                        ? 'var(--surface-danger-soft)'
+                                        : 'var(--surface-success-soft)';
+                                const labelColor =
+                                    danger && checked
+                                        ? 'var(--text-danger)'
+                                        : 'var(--text-neutral-strong)';
                                 return (
                                     <label
                                         key={key}
@@ -488,7 +508,9 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                             alignItems: 'center',
                                             padding: '12px 14px',
                                             borderBottom:
-                                                i < ATTRS.length - 1 ? '1px solid #f1f5f9' : 'none',
+                                                i < ATTRS.length - 1
+                                                    ? '1px solid var(--border-neutral-soft)'
+                                                    : 'none',
                                             background,
                                             cursor: 'pointer',
                                         }}
@@ -524,12 +546,12 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                             placeholder="비고 입력..."
                             style={{
                                 width: '100%',
-                                background: '#f8fafc',
-                                border: '1.5px solid #e2e8f0',
+                                background: 'var(--surface-neutral)',
+                                border: '1.5px solid var(--border-neutral)',
                                 borderRadius: 12,
                                 padding: '10px 12px',
                                 fontSize: 13,
-                                color: '#374151',
+                                color: 'var(--text-neutral-strong)',
                                 resize: 'none',
                                 height: 72,
                                 boxSizing: 'border-box',
@@ -544,8 +566,8 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                         style={{
                             position: 'sticky',
                             bottom: 0,
-                            background: 'white',
-                            borderTop: '1px solid #f1f5f9',
+                            background: 'var(--color-card)',
+                            borderTop: '1px solid var(--border-neutral-soft)',
                             padding: '14px 20px 20px',
                             display: 'flex',
                             gap: 8,
@@ -563,9 +585,9 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     fontSize: 15,
-                                    color: '#ef4444',
-                                    background: '#fff5f5',
-                                    border: '1.5px solid #fca5a5',
+                                    color: 'var(--text-danger-strong)',
+                                    background: 'var(--surface-danger-soft)',
+                                    border: '1.5px solid var(--border-danger)',
                                     borderRadius: 10,
                                     cursor: 'pointer',
                                     flexShrink: 0,
@@ -580,8 +602,8 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                             style={{
                                 fontSize: 13,
                                 fontWeight: 600,
-                                color: '#6b7280',
-                                background: '#f3f4f6',
+                                color: 'var(--text-neutral)',
+                                background: 'var(--surface-neutral-soft)',
                                 border: 'none',
                                 borderRadius: 10,
                                 padding: '10px 18px',
@@ -598,8 +620,8 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                 fontWeight: 700,
                                 color: 'white',
                                 background: form.name.trim()
-                                    ? 'linear-gradient(135deg, #22c55e, #16a34a)'
-                                    : '#d1d5db',
+                                    ? 'linear-gradient(135deg, var(--color-accent-from), var(--color-accent-to))'
+                                    : 'var(--surface-disabled)',
                                 border: 'none',
                                 borderRadius: 10,
                                 padding: '10px 24px',
