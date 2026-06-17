@@ -185,7 +185,7 @@ export function StaffConfigModal({ isOpen, config, onChange, onClose }: Props) {
                             padding: '8px 14px',
                             fontSize: 13,
                             fontWeight: 600,
-                            color: 'white',
+                            color: 'var(--color-on-accent)',
                             cursor: 'pointer',
                             whiteSpace: 'nowrap',
                         }}

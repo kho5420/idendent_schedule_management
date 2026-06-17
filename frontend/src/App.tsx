@@ -286,7 +286,7 @@ function MainPage() {
                             display: 'inline-block',
                             background:
                                 'linear-gradient(135deg, var(--color-accent-from), var(--color-accent-to))',
-                            color: 'white',
+                            color: 'var(--color-on-accent)',
                             fontSize: 12,
                             fontWeight: 600,
                             letterSpacing: 1,

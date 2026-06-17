@@ -88,7 +88,7 @@ export function ChangelogModal({ isOpen, onClose }: Props) {
                                             fontWeight: 700,
                                             background:
                                                 'linear-gradient(135deg, var(--color-accent-from), var(--color-accent-to))',
-                                            color: 'white',
+                                            color: 'var(--color-on-accent)',
                                             borderRadius: 10,
                                             padding: '2px 7px',
                                         }}

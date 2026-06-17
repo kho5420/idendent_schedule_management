@@ -391,7 +391,7 @@ export function StaffSettingsPage() {
                             padding: '6px 12px',
                             fontSize: 12,
                             fontWeight: 600,
-                            color: 'white',
+                            color: 'var(--color-on-accent)',
                             cursor: 'pointer',
                         }}
                     >
@@ -472,7 +472,7 @@ export function StaffSettingsPage() {
                             fontWeight: filter === chip.value ? 700 : 400,
                             ...(filter === chip.value && {
                                 background: 'var(--color-accent-to)',
-                                color: 'white',
+                                color: 'var(--color-on-accent)',
                                 border: '1px solid transparent',
                             }),
                         }}

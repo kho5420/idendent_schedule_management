@@ -7,6 +7,7 @@
     --color-border-hover: #4ade80;
     --color-accent-from: #4ade80;
     --color-accent-to: #16a34a;
+    --color-on-accent: #ffffff;
     --color-text: #14532d;
     --color-text-sub: #166534;
     --color-success: #16a34a;
@@ -221,6 +222,79 @@ body {
     --text-neutral: #5b6b7b;
     --text-neutral-sub: #8a98a6;
     --text-neutral-strong: #1a2b3c;
+}
+
+[data-theme='posthog'] {
+    --color-bg: #eeefe9;
+    --color-card: #ffffff;
+    --color-border: #bfc1b7;
+    --color-border-hover: #9b9c92;
+    --color-accent-from: #f7a501;
+    --color-accent-to: #dd9001;
+    --color-on-accent: #23251d;
+    --color-text: #23251d;
+    --color-text-sub: #6c6e63;
+    --color-success: #2c8c66;
+    --color-tag-bg: #e5e7e0;
+    --color-tag-text: #4d4f46;
+
+    --radius-btn: 6px;
+    --radius-card: 8px;
+    --radius-chip: 9999px;
+    --shadow-card: none;
+    --font-ui:
+        'IBM Plex Sans', Inter, -apple-system, BlinkMacSystemFont, 'Pretendard Variable',
+        Pretendard, 'Noto Sans KR', system-ui, sans-serif;
+
+    /* 의미 기반 표면 — 크림/올리브 톤 */
+    --surface-danger: #f7d6d3;
+    --surface-danger-strong: #efc3bf;
+    --surface-danger-soft: #fbe8e6;
+    --surface-success: #d9eddf;
+    --surface-success-soft: #e8f3ec;
+    --surface-info: #dceaf6;
+    --surface-warning: #fbeacb;
+    --surface-warning-strong: #f6dca8;
+    --surface-weekend: #f7d6d3;
+    --surface-weekend-row: #f3ead9;
+    --surface-indigo: #dceaf6;
+    --surface-indigo-soft: #e8f1f9;
+    --surface-purple: #e7d8ee;
+    --surface-neutral: #e5e7e0;
+    --surface-neutral-soft: #eceee7;
+    --surface-disabled: #e5e7e0;
+    --surface-frost: rgba(255, 255, 255, 0.55);
+
+    /* 모달 헤더 그라데이션 — 크림/골드 톤 */
+    --surface-header-from: #f3ecdd;
+    --surface-header-mid: #f1e6cd;
+    --surface-header-to: #ecd9ad;
+
+    /* 의미 기반 테두리 — 올리브 톤 */
+    --border-danger: #e8a8a2;
+    --border-success: #b3d8c2;
+    --border-info: #b8d4ec;
+    --border-warning: #e6c48f;
+    --border-indigo: #b8d4ec;
+    --border-neutral: #bfc1b7;
+    --border-neutral-soft: #dcdfd2;
+
+    /* 의미 기반 텍스트 — 올리브/세만틱 */
+    --text-danger: #cd4239;
+    --text-danger-strong: #cd4239;
+    --text-success: #2c8c66;
+    --text-info: #1078a3;
+    --text-info-strong: #1d4ed8;
+    --text-warning: #b17816;
+    --text-warning-badge: #b17816;
+    --text-orange: #b17816;
+    --text-purple: #7c44a6;
+    --text-indigo: #1d4ed8;
+    --text-indigo-strong: #1d4ed8;
+    --text-strong: #23251d;
+    --text-neutral: #6c6e63;
+    --text-neutral-sub: #9b9c92;
+    --text-neutral-strong: #33342d;
 }
 
 /* App container */

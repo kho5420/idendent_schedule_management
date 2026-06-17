@@ -61,7 +61,7 @@ export function MonthSelector({ selected, onChange }: Props) {
                                     border: 'none',
                                     background:
                                         'linear-gradient(135deg, var(--color-accent-from), var(--color-accent-to))',
-                                    color: 'white',
+                                    color: 'var(--color-on-accent)',
                                 }),
                             }}
                         >

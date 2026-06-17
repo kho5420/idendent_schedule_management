@@ -301,7 +301,7 @@ export function StaffBulkEditModal({ selectedStaff, onSave, onClose }: Props) {
                             flex: 2,
                             fontSize: 13,
                             fontWeight: 600,
-                            color: 'white',
+                            color: 'var(--color-on-accent)',
                             background:
                                 'linear-gradient(135deg, var(--color-accent-from), var(--color-accent-to))',
                             border: 'none',

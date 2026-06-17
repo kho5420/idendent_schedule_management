@@ -311,7 +311,7 @@ export function ScheduleSettingsPage() {
                             isDirty && !saving
                                 ? 'linear-gradient(135deg, var(--color-accent-from), var(--color-accent-to))'
                                 : 'var(--color-border)',
-                        color: 'white',
+                        color: 'var(--color-on-accent)',
                         border: 'none',
                         borderRadius: 8,
                         padding: '9px 20px',

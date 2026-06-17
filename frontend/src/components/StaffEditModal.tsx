@@ -618,7 +618,7 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                             style={{
                                 fontSize: 13,
                                 fontWeight: 700,
-                                color: 'white',
+                                color: 'var(--color-on-accent)',
                                 background: form.name.trim()
                                     ? 'linear-gradient(135deg, var(--color-accent-from), var(--color-accent-to))'
                                     : 'var(--surface-disabled)',

@@ -119,7 +119,7 @@ export function GoogleSheetPicker({
                         padding: '7px 12px',
                         fontSize: 12,
                         fontWeight: 600,
-                        color: 'white',
+                        color: 'var(--color-on-accent)',
                         cursor: inputValue.trim() ? 'pointer' : 'not-allowed',
                     }}
                 >

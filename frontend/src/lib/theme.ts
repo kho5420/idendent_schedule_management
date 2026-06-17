@@ -9,6 +9,7 @@ export const THEMES = [
     { id: 'default', label: '기본', swatch: ['#f0fdf4', '#ffffff', '#16a34a'] },
     { id: 'spotify', label: 'Spotify', swatch: ['#121212', '#181818', '#1ed760'] },
     { id: 'snowflake', label: 'Snowflake', swatch: ['#f5f8fa', '#ffffff', '#29b5e8'] },
+    { id: 'posthog', label: 'PostHog', swatch: ['#eeefe9', '#ffffff', '#f7a501'] },
 ] as const satisfies readonly ThemeMeta[];
 
 export type ThemeId = (typeof THEMES)[number]['id'];

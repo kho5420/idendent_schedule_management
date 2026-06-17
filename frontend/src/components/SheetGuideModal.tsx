@@ -293,7 +293,7 @@ export function SheetGuideModal({ isOpen, onClose }: Props) {
                             fontSize: 13,
                             fontWeight: 600,
                             cursor: 'pointer',
-                            color: 'white',
+                            color: 'var(--color-on-accent)',
                         }}
                     >
                         {isLast ? '완료 ✓' : '다음 →'}
