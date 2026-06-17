@@ -60,7 +60,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
                 style={{
                     width: 3,
                     height: 14,
-                    background: 'var(--color-success)',
+                    background: 'var(--color-accent-to)',
                     borderRadius: 2,
                 }}
             />
@@ -68,7 +68,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
                 style={{
                     fontSize: 10,
                     fontWeight: 800,
-                    color: 'var(--color-success)',
+                    color: 'var(--color-accent-to)',
                     letterSpacing: 1.4,
                     textTransform: 'uppercase',
                 }}
@@ -495,7 +495,7 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                                 if (checked)
                                     background = danger
                                         ? 'var(--surface-danger-soft)'
-                                        : 'var(--surface-success-soft)';
+                                        : 'var(--color-tag-bg)';
                                 const labelColor =
                                     danger && checked
                                         ? 'var(--text-danger)'
