@@ -39,6 +39,7 @@
     --surface-neutral: #f8fafc;
     --surface-neutral-soft: #f3f4f6;
     --surface-disabled: #d1d5db;
+    --surface-frost: rgba(255, 255, 255, 0.6);
 
     /* 의미 기반 테두리 */
     --border-danger: #fca5a5;
@@ -115,6 +116,7 @@ body {
     --surface-neutral: #1f1f1f;
     --surface-neutral-soft: #262626;
     --surface-disabled: #3a3a3a;
+    --surface-frost: rgba(255, 255, 255, 0.1);
 
     /* 의미 기반 테두리 — 어두운 톤 */
     --border-danger: #5a2e31;
