@@ -41,6 +41,11 @@
     --surface-disabled: #d1d5db;
     --surface-frost: rgba(255, 255, 255, 0.6);
 
+    /* 모달 헤더 그라데이션 (테마 브랜드색) */
+    --surface-header-from: #f0fdf4;
+    --surface-header-mid: #dcfce7;
+    --surface-header-to: #bbf7d0;
+
     /* 의미 기반 테두리 */
     --border-danger: #fca5a5;
     --border-success: #bbf7d0;
@@ -118,6 +123,11 @@ body {
     --surface-disabled: #3a3a3a;
     --surface-frost: rgba(255, 255, 255, 0.1);
 
+    /* 모달 헤더 그라데이션 — 어두운 톤 */
+    --surface-header-from: #14211a;
+    --surface-header-mid: #16281d;
+    --surface-header-to: #2c4a37;
+
     /* 의미 기반 테두리 — 어두운 톤 */
     --border-danger: #5a2e31;
     --border-success: #2c4a37;
@@ -143,6 +153,80 @@ body {
     --text-neutral: #b3b3b3;
     --text-neutral-sub: #8a8a8a;
     --text-neutral-strong: #e0e0e0;
+}
+
+[data-theme='snowflake'] {
+    --color-bg: #f5f8fa;
+    --color-card: #ffffff;
+    --color-border: #d5dee5;
+    --color-border-hover: #29b5e8;
+    --color-accent-from: #29b5e8;
+    --color-accent-to: #11567f;
+    --color-text: #1a2b3c;
+    --color-text-sub: #5b6b7b;
+    --color-success: #1e8e5a;
+    --color-tag-bg: #e5f6fc;
+    --color-tag-text: #11567f;
+
+    --radius-btn: 6px;
+    --radius-card: 10px;
+    --radius-chip: 9999px;
+    --shadow-card: rgba(26, 43, 60, 0.08) 0px 1px 3px;
+    --btn-transform: none;
+    --btn-tracking: normal;
+    --font-ui:
+        Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Pretendard Variable',
+        Pretendard, 'Noto Sans KR', system-ui, sans-serif;
+
+    /* 의미 기반 표면 — 밝은 블루 톤 */
+    --surface-danger: #fbeae7;
+    --surface-danger-strong: #f7d8d2;
+    --surface-danger-soft: #fef4f2;
+    --surface-success: #e3f2eb;
+    --surface-success-soft: #eff7f3;
+    --surface-info: #e5f6fc;
+    --surface-warning: #fbf1e0;
+    --surface-warning-strong: #f6e4c6;
+    --surface-weekend: #fbeae7;
+    --surface-weekend-row: #fbf1e0;
+    --surface-indigo: #e5f6fc;
+    --surface-indigo-soft: #eef7fb;
+    --surface-purple: #efeaf7;
+    --surface-neutral: #f5f8fa;
+    --surface-neutral-soft: #e8eef2;
+    --surface-disabled: #e8eef2;
+    --surface-frost: rgba(255, 255, 255, 0.55);
+
+    /* 모달 헤더 그라데이션 — 밝은 블루 톤 */
+    --surface-header-from: #e5f6fc;
+    --surface-header-mid: #eaf7fc;
+    --surface-header-to: #d5e8f2;
+
+    /* 의미 기반 테두리 — 밝은 톤 */
+    --border-danger: #f2bab2;
+    --border-success: #bfe3d1;
+    --border-info: #b5e2f2;
+    --border-warning: #ebd2a3;
+    --border-indigo: #b5e2f2;
+    --border-neutral: #d5dee5;
+    --border-neutral-soft: #e8eef2;
+
+    /* 의미 기반 텍스트 — 밝은 톤 */
+    --text-danger: #d6402c;
+    --text-danger-strong: #d6402c;
+    --text-success: #1e8e5a;
+    --text-info: #11567f;
+    --text-info-strong: #11567f;
+    --text-warning: #c77700;
+    --text-warning-badge: #c77700;
+    --text-orange: #c77700;
+    --text-purple: #7c3aed;
+    --text-indigo: #11567f;
+    --text-indigo-strong: #11567f;
+    --text-strong: #1a2b3c;
+    --text-neutral: #5b6b7b;
+    --text-neutral-sub: #8a98a6;
+    --text-neutral-strong: #1a2b3c;
 }
 
 /* App container */

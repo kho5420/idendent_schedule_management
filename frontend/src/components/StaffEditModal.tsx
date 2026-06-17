@@ -268,11 +268,11 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                         boxShadow: '0 24px 64px rgba(0,0,0,0.2)',
                     }}
                 >
-                    {/* ── 헤더 (멜론 우유 톤 그라디언트, 앱 테마와 통일) ── */}
+                    {/* ── 헤더 (테마 브랜드색 그라디언트) ── */}
                     <div
                         style={{
                             background:
-                                'linear-gradient(145deg, var(--surface-success-soft) 0%, var(--surface-success) 50%, var(--border-success) 100%)',
+                                'linear-gradient(145deg, var(--surface-header-from) 0%, var(--surface-header-mid) 50%, var(--surface-header-to) 100%)',
                             borderRadius: '22px 22px 0 0',
                             padding: '22px 20px 26px',
                             position: 'relative',

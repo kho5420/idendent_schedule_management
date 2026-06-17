@@ -16,7 +16,7 @@
       (function () {
         try {
           var t = localStorage.getItem('app-theme');
-          if (t === 'spotify') {
+          if (t && t !== 'default') {
             document.documentElement.setAttribute('data-theme', t);
           }
         } catch (e) {}
