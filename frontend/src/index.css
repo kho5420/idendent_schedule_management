@@ -331,6 +331,7 @@ body {
     border-radius: var(--radius-btn);
     text-transform: var(--btn-transform);
     letter-spacing: var(--btn-tracking);
+    white-space: nowrap;
 }
 .header-action-btn:hover {
     border-color: var(--color-border-hover);

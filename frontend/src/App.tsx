@@ -206,6 +206,7 @@ function MainPage() {
                 <div
                     style={{
                         display: 'flex',
+                        flexWrap: 'wrap',
                         justifyContent: 'flex-end',
                         gap: 6,
                         marginBottom: 16,
