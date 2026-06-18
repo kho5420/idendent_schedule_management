@@ -61,6 +61,14 @@ function hasJucha(staff: StaffRow, date: string, leaveRequests: LeaveRequest[]):
     return leaveRequests.some((r) => r.date === date && r.name === key && r.type === '주차');
 }
 
+/** 해당 직원이 그 날짜에 휴무시트로 종일 휴무(연차/주차)를 신청했는지 */
+function hasFullDayLeave(staff: StaffRow, date: string, leaveRequests: LeaveRequest[]): boolean {
+    const key = staff.alias ?? staff.name;
+    return leaveRequests.some(
+        (r) => r.date === date && r.name === key && FULL_DAY_OFF_TYPES.includes(r.type)
+    );
+}
+
 function settingByDow(
     scheduleSettings: ScheduleSetting[],
     dayOfWeek: number
@@ -142,7 +150,8 @@ export function planWeeklyOffDays(
     doctorSchedule: DoctorDayInfo[],
     leaveRequests: LeaveRequest[],
     scheduleSettings: ScheduleSetting[] = [],
-    seed = 0
+    seed = 0,
+    doctors: StaffRow[] = []
 ): Map<number, Set<string>> {
     const offDays = new Map<number, Set<string>>();
     for (const s of clinicStaff) offDays.set(s.id, new Set());
@@ -168,6 +177,20 @@ export function planWeeklyOffDays(
         return dow != null
             ? (settingByDow(scheduleSettings, dow)?.min_staff_without_ortho ?? 0)
             : 0;
+    };
+    // 교정 진료일 여부 — 교정 원장(is_ortho) 출근일은 인원 보강이 더 필요하므로 공여 후순위로 둔다.
+    const orthoDoctorAliases = new Set(doctors.filter((d) => d.is_ortho).map((d) => d.alias));
+    const hasOrthoDoctor = doctors.some((d) => d.is_ortho);
+    const isOrthoDate = (date: string): boolean => {
+        const info = fullSchedule.find((i) => i.date === date);
+        if (!info) return false;
+        if (info.isFullAttendance) return hasOrthoDoctor;
+        return info.doctorAliases.some((alias) => orthoDoctorAliases.has(alias));
+    };
+    // 휴무를 쓰더라도 반드시 지켜야 하는 평일 하드 하한 (재배치 보정의 기준)
+    const onLeaveFloorByDate = (date: string): number => {
+        const dow = dowByDate.get(date);
+        return dow != null ? (settingByDow(scheduleSettings, dow)?.min_staff_on_leave ?? 0) : 0;
     };
     const fullDayLeavesByDate = countFullDayLeavesByDate(available, leaveRequests);
     const weekdayWorkerBase = available.length; // 평일에는 휴직 외 전원이 출근 후보
@@ -258,6 +281,52 @@ export function planWeeklyOffDays(
                 }
                 offDays.get(s.id)?.add(offDate);
                 offCount.set(offDate, (offCount.get(offDate) ?? 0) + 1);
+            }
+        }
+
+        // 평일 출근 하한(min_staff_on_leave) 보정: 자동 평일 off가 특정 요일(예: 대표원장 휴무일)에
+        // 몰려 출근이 하한 미만이 되면, 여유(출근−하한)가 가장 큰 평일로 자동 off를 옮겨 채운다.
+        // 휴무시트 신청분(연차/주차)은 옮기지 않고, 공여 요일을 그 요일 하한 아래로 내리지 않는다.
+        if (!hasClosureWeekday && candidateWeekdays.length > 0) {
+            const presentOn = (date: string): number =>
+                available.filter(
+                    (s) => !offDays.get(s.id)?.has(date) && !hasFullDayLeave(s, date, leaveRequests)
+                ).length;
+
+            for (const shortDay of candidateWeekdays) {
+                while (presentOn(shortDay) < onLeaveFloorByDate(shortDay)) {
+                    // 공여 우선순위: ① 비교정일 먼저(교정일은 후순위) ② 그다음 여유 큰 순
+                    const donors = candidateWeekdays
+                        .filter((d) => d !== shortDay && presentOn(d) - onLeaveFloorByDate(d) > 0)
+                        .sort((a, b) => {
+                            const orthoA = isOrthoDate(a) ? 1 : 0;
+                            const orthoB = isOrthoDate(b) ? 1 : 0;
+                            if (orthoA !== orthoB) return orthoA - orthoB;
+                            return (
+                                presentOn(b) -
+                                onLeaveFloorByDate(b) -
+                                (presentOn(a) - onLeaveFloorByDate(a))
+                            );
+                        });
+
+                    let moved = false;
+                    for (const donor of donors) {
+                        // shortDay에 자동 off(주차 신청 아님)이면서 donor에는 근무하는 직원을 옮긴다
+                        const mover = order.find(
+                            (s) =>
+                                offDays.get(s.id)?.has(shortDay) &&
+                                !offDays.get(s.id)?.has(donor) &&
+                                !hasFullDayLeave(s, donor, leaveRequests)
+                        );
+                        if (mover) {
+                            offDays.get(mover.id)!.delete(shortDay);
+                            offDays.get(mover.id)!.add(donor);
+                            moved = true;
+                            break;
+                        }
+                    }
+                    if (!moved) break; // 옮길 사람/여유 요일이 없으면 최선 노력에서 멈춤
+                }
             }
         }
 

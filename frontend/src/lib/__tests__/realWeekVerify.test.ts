@@ -3,6 +3,8 @@ import { planWeeklyOffDays } from '../weeklyOffPlanner';
 import { assignDailySchedule } from '../scheduleAssigner';
 import type { StaffRow, DoctorDayInfo, LeaveRequest, ScheduleSetting } from '../../types';
 
+const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
+
 // 실제 DB 직원 (employee_type_id=6, 활성 11명; 민주는 휴직 제외)
 function S(o: Partial<StaffRow> & { id: number; name: string; alias: string }): StaffRow {
     return {
@@ -166,6 +168,60 @@ describe('실제 7월 6~12 주간 검증', () => {
             if (off) return `${d.date.slice(8)}:${off.type}`;
             return `${d.date.slice(8)}:???`;
         });
+
+    it('실제 min_staff_on_leave 설정 시 모든 평일이 하한을 충족한다(목 5→6 보정)', () => {
+        // 실제 DB schedule_setting 값 (without_ortho / on_leave 분리)
+        const real: ScheduleSetting[] = [
+            ['일', false, 7, 7],
+            ['월', false, 9, 9],
+            ['화', false, 10, 9],
+            ['수', true, 12, 11],
+            ['목', false, 7, 6],
+            ['금', false, 9, 8],
+            ['토', false, 7, 7],
+        ].map(([d, n, wo, ol], i) => ({
+            id: i + 1,
+            day_name: d as string,
+            sort_order: i,
+            min_staff_with_ortho: wo as number,
+            min_staff_without_ortho: wo as number,
+            min_staff_on_leave: ol as number,
+            has_night_shift: n as boolean,
+        }));
+        const plannedReal = planWeeklyOffDays(
+            clinicStaff,
+            doctorSchedule,
+            leaveRequests,
+            real,
+            0,
+            doctors
+        );
+        const daysReal = assignDailySchedule(
+            clinicStaff,
+            doctors,
+            leaveRequests,
+            doctorSchedule,
+            real,
+            { year: 2026, month: 7 },
+            plannedReal
+        );
+
+        // 평일(월~금)은 모두 on_leave 하한 이상이어야 한다. 특히 목요일은 보정 전 5명 → 6명.
+        const onLeaveFloor = Object.fromEntries(
+            real.map((s) => [s.day_name, s.min_staff_on_leave])
+        );
+        for (const d of daysReal) {
+            if (d.dayOfWeek >= 1 && d.dayOfWeek <= 5) {
+                expect(d.working.length).toBeGreaterThanOrEqual(
+                    onLeaveFloor[DAY_NAMES[d.dayOfWeek]]
+                );
+            }
+        }
+        const byDate = Object.fromEntries(daysReal.map((d) => [d.date.slice(8), d.working.length]));
+        expect(byDate['09']).toBe(6); // 목요일: 5 → 6 보정
+        expect(byDate['07']).toBe(9); // 화요일(비교정)에서 1명 공여 → 10 → 9
+        expect(byDate['10']).toBe(10); // 금요일(교정일)은 후순위라 그대로 10 유지
+    });
 
     it('지수: 10일(금)에 사라지지 않고 근무한다', () => {
         console.log('지수:', dump('지수').join('  '));

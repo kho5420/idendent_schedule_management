@@ -309,6 +309,195 @@ describe('planWeeklyOffDays', () => {
         }
     });
 
+    it('평일 출근이 min_staff_on_leave 미달이면 여유 있는 평일로 자동 휴무를 옮겨 하한을 충족한다', () => {
+        // 4명 모두 대표원장핏 → 목요일(Y 휴무일)에 평일 off가 전원 몰려 목요일 출근 0명.
+        // min_staff_on_leave(목)=2 → 2명은 여유 있는 다른 평일로 옮겨 목요일 출근 ≥ 2 가 되어야 한다.
+        const picks = ['P1', 'P2', 'P3', 'P4'].map((name) =>
+            makeStaff({ name, is_head_dentist_pick: true })
+        );
+        const schedule: DoctorDayInfo[] = [
+            {
+                date: '2026-07-06',
+                dayOfWeek: 1,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+            {
+                date: '2026-07-07',
+                dayOfWeek: 2,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+            {
+                date: '2026-07-08',
+                dayOfWeek: 3,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+            { date: '2026-07-09', dayOfWeek: 4, doctorAliases: ['오'], isFullAttendance: false }, // Y 휴무
+            {
+                date: '2026-07-10',
+                dayOfWeek: 5,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+            {
+                date: '2026-07-11',
+                dayOfWeek: 6,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+            {
+                date: '2026-07-12',
+                dayOfWeek: 0,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+        ];
+        const settings = makeSettings((d) => (d === '목' ? { min_staff_on_leave: 2 } : {}));
+        const result = planWeeklyOffDays(picks, schedule, [], settings);
+
+        const weekdays = ['2026-07-06', '2026-07-07', '2026-07-08', '2026-07-09', '2026-07-10'];
+        const thu = '2026-07-09';
+        const presentThu = picks.filter((s) => !result.get(s.id)!.has(thu)).length;
+        expect(presentThu).toBeGreaterThanOrEqual(2); // 목요일 하한 충족
+
+        // 각 직원은 여전히 평일 off 정확히 1일 유지 (옮긴 것이지 늘리거나 줄인 게 아님)
+        for (const s of picks) {
+            expect(weekdays.filter((d) => result.get(s.id)!.has(d))).toHaveLength(1);
+        }
+    });
+
+    it('하한 보정 시 교정 진료일은 공여 후순위 — 여유가 더 커도 비교정일을 먼저 쓴다', () => {
+        // 5명 모두 대표원장핏 → 목요일(Y 휴무)에 평일 off 전원 몰림(출근 0).
+        // 화(비교정) 여유 1, 금(교정) 여유 5 → 여유는 금이 크지만, 교정일이라 화를 먼저 채워야 한다.
+        const picks = ['P1', 'P2', 'P3', 'P4', 'P5'].map((name) =>
+            makeStaff({ name, is_head_dentist_pick: true })
+        );
+        const Y = makeStaff({ name: 'Y', alias: 'Y', employee_type_id: 1 });
+        const 오 = makeStaff({ name: '오', alias: '오', employee_type_id: 2 });
+        const 정 = makeStaff({ name: '정', alias: '정', employee_type_id: 2, is_ortho: true });
+        const schedule: DoctorDayInfo[] = [
+            {
+                date: '2026-07-06',
+                dayOfWeek: 1,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+            {
+                date: '2026-07-07',
+                dayOfWeek: 2,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            }, // 화 비교정
+            {
+                date: '2026-07-08',
+                dayOfWeek: 3,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+            { date: '2026-07-09', dayOfWeek: 4, doctorAliases: ['오'], isFullAttendance: false }, // 목 Y휴무
+            {
+                date: '2026-07-10',
+                dayOfWeek: 5,
+                doctorAliases: ['Y', '정'],
+                isFullAttendance: false,
+            }, // 금 교정일
+            {
+                date: '2026-07-11',
+                dayOfWeek: 6,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+            {
+                date: '2026-07-12',
+                dayOfWeek: 0,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+        ];
+        const settings = makeSettings(
+            (d) =>
+                d === '월' || d === '수'
+                    ? { min_staff_on_leave: 5 } // 여유 0 → 공여 불가
+                    : d === '화'
+                      ? { min_staff_on_leave: 4 } // 여유 1 (비교정)
+                      : d === '목'
+                        ? { min_staff_on_leave: 2 }
+                        : {} // 금: 여유 5 (교정)
+        );
+        const result = planWeeklyOffDays(picks, schedule, [], settings, 0, [Y, 오, 정]);
+
+        const tue = '2026-07-07';
+        const fri = '2026-07-10';
+        const offsTue = picks.filter((s) => result.get(s.id)!.has(tue)).length;
+        const offsFri = picks.filter((s) => result.get(s.id)!.has(fri)).length;
+        expect(offsTue).toBe(1); // 비교정일(화)을 먼저 채운다
+        expect(offsFri).toBe(1); // 화 여유 소진 후에야 교정일(금)을 사용
+    });
+
+    it('자동 휴무 재배치는 휴무시트 신청분(주차)을 옮기지 않고 자동배정 휴무만 옮긴다', () => {
+        // 목요일에 자동배정(핏) 2명 + 신청 주차 2명 = 4명 off → 출근 0명.
+        // min_staff_on_leave(목)=2 → 자동 2명만 옮길 수 있고 신청 주차는 유지되어 목 출근 2명.
+        const picks = ['P1', 'P2'].map((name) => makeStaff({ name, is_head_dentist_pick: true }));
+        const requested = ['R1', 'R2'].map((name) => makeStaff({ name }));
+        const staff = [...picks, ...requested];
+        const schedule: DoctorDayInfo[] = [
+            {
+                date: '2026-07-06',
+                dayOfWeek: 1,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+            {
+                date: '2026-07-07',
+                dayOfWeek: 2,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+            {
+                date: '2026-07-08',
+                dayOfWeek: 3,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+            { date: '2026-07-09', dayOfWeek: 4, doctorAliases: ['오'], isFullAttendance: false }, // Y 휴무
+            {
+                date: '2026-07-10',
+                dayOfWeek: 5,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+            {
+                date: '2026-07-11',
+                dayOfWeek: 6,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+            {
+                date: '2026-07-12',
+                dayOfWeek: 0,
+                doctorAliases: ['Y', '오'],
+                isFullAttendance: false,
+            },
+        ];
+        const thu = '2026-07-09';
+        const leaves = [
+            { date: thu, name: 'R1', type: '주차' as const },
+            { date: thu, name: 'R2', type: '주차' as const },
+        ];
+        const settings = makeSettings((d) => (d === '목' ? { min_staff_on_leave: 2 } : {}));
+        const result = planWeeklyOffDays(staff, schedule, leaves, settings);
+
+        // 신청 주차자(R1·R2)는 목요일 off 유지 (플래너가 평일 off를 추가 배정하지 않음)
+        for (const s of requested) {
+            expect(result.get(s.id)!.has(thu)).toBe(false); // 플래너가 추가로 옮기거나 만들지 않음
+        }
+        // 자동배정 핏(P1·P2)은 목요일에서 빠져 출근(목 자동 off 0명) → 목 출근 = 2명(핏) 확보
+        const autoOffThu = picks.filter((s) => result.get(s.id)!.has(thu)).length;
+        expect(autoOffThu).toBe(0);
+    });
+
     it('월초 부분주(수요일 시작)는 전월 평일까지 한 주로 채워 목·금 하한을 지킨다', () => {
         // 7월이 수요일(1일)에 시작 → 전월(6/29 월, 6/30 화)까지 한 주로 보충되어야 함.
         // 보충이 없으면 목·금에만 off가 몰려 하한(4) 미달.

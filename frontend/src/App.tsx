@@ -128,7 +128,8 @@ function MainPage() {
                 doctorSchedule,
                 leaveRequests,
                 scheduleSettings,
-                genSeed
+                genSeed,
+                doctors
             );
             setDayAssignments(
                 assignDailySchedule(
