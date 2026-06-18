@@ -78,6 +78,43 @@ describe('formatDayCell', () => {
         expect(cell).toBe('박민,혜수,지수,이은\n윤정,은경,언경,서이\n예진,미연\n\n(7+3)');
     });
 
+    it('교정 인원이 정원(3명)을 초과하면 교정은 3으로 고정하고 초과분은 일반에 합산한다', () => {
+        // 실제 교정 6명(총 10명) → 4+6 이 아니라 7+3 으로 표기
+        const cell = formatDayCell(
+            makeAssignment({
+                working: [
+                    '박민',
+                    '혜수',
+                    '지수',
+                    '이은',
+                    '윤정',
+                    '은경',
+                    '언경',
+                    '서이',
+                    '예진',
+                    '미연',
+                ],
+                isOrthoDay: true,
+                orthoStaffCount: 6,
+            })
+        );
+
+        expect(cell).toBe('박민,혜수,지수,이은\n윤정,은경,언경,서이\n예진,미연\n\n(7+3)');
+    });
+
+    it('교정 인원이 정원(3명) 초과 시 총 6명이면 3+3 으로 표기한다', () => {
+        // 교정 4명(총 6명) → 2+4 가 아니라 3+3
+        const cell = formatDayCell(
+            makeAssignment({
+                working: ['지수', '윤정', '은경', '언경', '혜수', '미연'],
+                isOrthoDay: true,
+                orthoStaffCount: 4,
+            })
+        );
+
+        expect(cell).toBe('지수,윤정,은경,언경\n혜수,미연\n\n(3+3)');
+    });
+
     it('교정과 진료일이어도 교정 인원이 0명이면 일반 형식으로 표기한다', () => {
         const cell = formatDayCell(
             makeAssignment({

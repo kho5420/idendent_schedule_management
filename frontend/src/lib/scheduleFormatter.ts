@@ -1,4 +1,5 @@
 import type { DayAssignment, LeaveRequest } from '../types';
+import { ORTHO_FIXED_COUNT } from './scheduleAssigner';
 
 const NAMES_PER_LINE = 4;
 
@@ -27,7 +28,9 @@ function formatNameLines(names: string[]): string {
 
 function formatCount(workingCount: number, isOrthoDay: boolean, orthoStaffCount: number): string {
     if (isOrthoDay && orthoStaffCount > 0) {
-        return `(${workingCount - orthoStaffCount}+${orthoStaffCount})`;
+        // 교정일은 교정 인원을 정원(ORTHO_FIXED_COUNT)으로 고정 표기하고, 초과 교정 인원은 일반에 합산한다.
+        const orthoShown = Math.min(orthoStaffCount, ORTHO_FIXED_COUNT);
+        return `(${workingCount - orthoShown}+${orthoShown})`;
     }
     return `(${workingCount})`;
 }

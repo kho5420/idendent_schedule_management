@@ -72,7 +72,7 @@ function isOrthoDoctorPresent(doctorInfo: DoctorDayInfo, doctors: StaffRow[]): b
     );
 }
 
-const ORTHO_FIXED_COUNT = 3;
+export const ORTHO_FIXED_COUNT = 3;
 
 const EMPTY_DAY = (doctorInfo: DoctorDayInfo): DayAssignment => ({
     date: doctorInfo.date,
