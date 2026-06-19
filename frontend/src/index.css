@@ -89,6 +89,7 @@ body {
     --color-border-hover: #7c7c7c;
     --color-accent-from: #1ed760;
     --color-accent-to: #1ed760;
+    --color-on-accent: #000000;
     --color-text: #ffffff;
     --color-text-sub: #b3b3b3;
     --color-success: #1ed760;
@@ -160,7 +161,8 @@ body {
     --color-border: #d5dee5;
     --color-border-hover: #29b5e8;
     --color-accent-from: #29b5e8;
-    --color-accent-to: #11567f;
+    --color-accent-to: #1e9bcb;
+    --color-on-accent: #0a2b40;
     --color-text: #1a2b3c;
     --color-text-sub: #5b6b7b;
     --color-success: #1e8e5a;
