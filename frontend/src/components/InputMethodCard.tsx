@@ -30,7 +30,7 @@ function Card({ isSelected, onClick, icon, title, description, children }: CardP
             onClick={onClick}
             style={{
                 flex: 1,
-                background: isSelected ? 'var(--surface-success)' : 'var(--color-card)',
+                background: isSelected ? 'var(--color-tag-bg)' : 'var(--color-card)',
                 border: `1.5px solid ${isSelected ? 'var(--color-accent-from)' : 'var(--color-border)'}`,
                 borderRadius: 12,
                 padding: 20,

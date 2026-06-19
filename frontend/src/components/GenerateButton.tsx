@@ -10,12 +10,13 @@ export function GenerateButton({ month, isReady, isLoading, onClick }: Props) {
         <button
             onClick={onClick}
             disabled={!isReady || isLoading}
+            className="generate-btn"
             style={{
                 width: '100%',
                 background: isReady
                     ? 'linear-gradient(135deg, var(--color-accent-from), var(--color-accent-to))'
                     : 'var(--color-border)',
-                color: isReady ? 'white' : 'var(--color-text-sub)',
+                color: isReady ? 'var(--color-on-accent)' : 'var(--color-text-sub)',
                 border: 'none',
                 borderRadius: 'var(--radius-btn)',
                 padding: 14,

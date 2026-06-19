@@ -19,6 +19,8 @@
     --radius-card: 16px;
     --radius-chip: 20px;
     --shadow-card: none;
+    --btn-transform: none;
+    --btn-tracking: normal;
     --font-ui: 'Pretendard Variable', Pretendard, 'Noto Sans KR', system-ui, sans-serif;
 
     /* 의미 기반 표면 (테마별로 덮어씀) */
@@ -297,6 +299,81 @@ body {
     --text-neutral-strong: #33342d;
 }
 
+[data-theme='bmw'] {
+    --color-bg: #000000;
+    --color-card: #1a1a1a;
+    --color-border: #3c3c3c;
+    --color-border-hover: #ffffff;
+    --color-accent-from: #ffffff;
+    --color-accent-to: #ffffff;
+    --color-on-accent: #000000;
+    --color-text: #ffffff;
+    --color-text-sub: #bbbbbb;
+    --color-success: #0fa336;
+    --color-tag-bg: #262626;
+    --color-tag-text: #bbbbbb;
+
+    --radius-btn: 0px;
+    --radius-card: 0px;
+    --radius-chip: 0px;
+    --shadow-card: none;
+    --btn-transform: uppercase;
+    --btn-tracking: 1.5px;
+    --font-ui:
+        'BMW Type Next Latin', Inter, -apple-system, BlinkMacSystemFont, 'Pretendard Variable',
+        Pretendard, 'Noto Sans KR', system-ui, sans-serif;
+
+    /* 의미 기반 표면 — 모터스포츠 다크 */
+    --surface-danger: #2a1413;
+    --surface-danger-strong: #3a1817;
+    --surface-danger-soft: #241010;
+    --surface-success: #11261a;
+    --surface-success-soft: #0f2016;
+    --surface-info: #0d1f33;
+    --surface-warning: #2a2410;
+    --surface-warning-strong: #332c12;
+    --surface-weekend: #241413;
+    --surface-weekend-row: #1c1c1c;
+    --surface-indigo: #131a30;
+    --surface-indigo-soft: #161d33;
+    --surface-purple: #1f1630;
+    --surface-neutral: #1a1a1a;
+    --surface-neutral-soft: #262626;
+    --surface-disabled: #2b2b2b;
+    --surface-frost: rgba(255, 255, 255, 0.08);
+
+    /* 모달 헤더 그라데이션 — 카본 다크 */
+    --surface-header-from: #1a1a1a;
+    --surface-header-mid: #202020;
+    --surface-header-to: #2b2b2b;
+
+    /* 의미 기반 테두리 — 다크 */
+    --border-danger: #5a2a28;
+    --border-success: #1e4d33;
+    --border-info: #1c3a5a;
+    --border-warning: #5a4d20;
+    --border-indigo: #1c3a6a;
+    --border-neutral: #3c3c3c;
+    --border-neutral-soft: #262626;
+
+    /* 의미 기반 텍스트 — M 컬러 세만틱 */
+    --text-danger: #e22718;
+    --text-danger-strong: #e22718;
+    --text-success: #0fa336;
+    --text-info: #1c69d4;
+    --text-info-strong: #4a90e2;
+    --text-warning: #f4b400;
+    --text-warning-badge: #f4b400;
+    --text-orange: #f4b400;
+    --text-purple: #b794f6;
+    --text-indigo: #1c69d4;
+    --text-indigo-strong: #4a90e2;
+    --text-strong: #ffffff;
+    --text-neutral: #bbbbbb;
+    --text-neutral-sub: #7e7e7e;
+    --text-neutral-strong: #e6e6e6;
+}
+
 /* App container */
 .app-container {
     padding: 32px 24px;
@@ -397,7 +474,13 @@ body {
         background-color 0.15s ease,
         color 0.15s ease;
     border-radius: var(--radius-btn);
+    text-transform: var(--btn-transform);
+    letter-spacing: var(--btn-tracking);
     white-space: nowrap;
+}
+.generate-btn {
+    text-transform: var(--btn-transform);
+    letter-spacing: var(--btn-tracking);
 }
 .header-action-btn:hover {
     border-color: var(--color-border-hover);

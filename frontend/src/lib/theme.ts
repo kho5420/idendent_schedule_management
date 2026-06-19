@@ -10,6 +10,7 @@ export const THEMES = [
     { id: 'spotify', label: 'Spotify', swatch: ['#121212', '#181818', '#1ed760'] },
     { id: 'snowflake', label: 'Snowflake', swatch: ['#f5f8fa', '#ffffff', '#29b5e8'] },
     { id: 'posthog', label: 'PostHog', swatch: ['#eeefe9', '#ffffff', '#f7a501'] },
+    { id: 'bmw', label: 'BMW M', swatch: ['#000000', '#1a1a1a', '#1c69d4'] },
 ] as const satisfies readonly ThemeMeta[];
 
 export type ThemeId = (typeof THEMES)[number]['id'];

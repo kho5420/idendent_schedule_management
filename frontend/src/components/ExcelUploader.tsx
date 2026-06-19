@@ -53,7 +53,7 @@ export function ExcelUploader({ file, onFileChange }: Props) {
                     padding: '6px 12px',
                     textAlign: 'center',
                     cursor: clickable ? 'pointer' : 'default',
-                    background: isDragging ? 'var(--surface-success)' : 'transparent',
+                    background: isDragging ? 'var(--color-tag-bg)' : 'transparent',
                     transition: 'all 0.2s',
                 }}
             >
