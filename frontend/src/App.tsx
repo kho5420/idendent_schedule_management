@@ -23,6 +23,7 @@ import { fetchSheetRows } from './lib/sheetsApi';
 import { parseLeaveRequests } from './lib/leaveRequestParser';
 import { parseDoctorSchedule } from './lib/doctorScheduleParser';
 import { assignDailySchedule } from './lib/scheduleAssigner';
+import { validateSchedule, type WeekValidation } from './lib/scheduleValidator';
 import { planWeeklyOffDays } from './lib/weeklyOffPlanner';
 import { writeScheduleToNewTab } from './lib/sheetWriter';
 import {
@@ -52,6 +53,7 @@ function MainPage() {
     const [scheduleSheet, setScheduleSheet] = useState<SheetConnection>(null);
     const [leaveRequestSheet, setLeaveRequestSheet] = useState<SheetConnection>(null);
     const [dayAssignments, setDayAssignments] = useState<DayAssignment[] | null>(null);
+    const [weekValidations, setWeekValidations] = useState<WeekValidation[] | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [seed, setSeed] = useState(0);
     const [isWriting, setIsWriting] = useState(false);
@@ -74,6 +76,7 @@ function MainPage() {
 
         setError(null);
         setDayAssignments(null);
+        setWeekValidations(null);
         setIsGenerating(true);
         try {
             const [staff, scheduleSettings] = await Promise.all([
@@ -131,17 +134,17 @@ function MainPage() {
                 genSeed,
                 doctors
             );
-            setDayAssignments(
-                assignDailySchedule(
-                    clinicStaff,
-                    doctors,
-                    leaveRequests,
-                    doctorSchedule,
-                    scheduleSettings,
-                    selectedMonth,
-                    plannedOffDays
-                )
+            const assignments = assignDailySchedule(
+                clinicStaff,
+                doctors,
+                leaveRequests,
+                doctorSchedule,
+                scheduleSettings,
+                selectedMonth,
+                plannedOffDays
             );
+            setDayAssignments(assignments);
+            setWeekValidations(validateSchedule(assignments, clinicStaff, scheduleSettings));
         } catch (e) {
             setError(e instanceof Error ? e.message : '스케줄 생성 중 오류가 발생했습니다');
         } finally {
@@ -517,7 +520,12 @@ function MainPage() {
                 </>
             )}
 
-            {dayAssignments && <AssignmentPreview assignments={dayAssignments} />}
+            {dayAssignments && (
+                <AssignmentPreview
+                    assignments={dayAssignments}
+                    validations={weekValidations ?? undefined}
+                />
+            )}
 
             <ChangelogModal isOpen={isChangelogOpen} onClose={() => setIsChangelogOpen(false)} />
             <SheetGuideModal isOpen={isSheetGuideOpen} onClose={() => setIsSheetGuideOpen(false)} />

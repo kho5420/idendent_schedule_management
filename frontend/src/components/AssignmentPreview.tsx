@@ -1,4 +1,6 @@
+import { Fragment } from 'react';
 import type { DayAssignment } from '../types';
+import type { WeekValidation } from '../lib/scheduleValidator';
 import {
     formatDayCell,
     isClosureDay,
@@ -9,6 +11,7 @@ import { groupAssignmentsByWeek } from '../lib/weekGrouping';
 
 interface Props {
     assignments: DayAssignment[];
+    validations?: WeekValidation[];
 }
 
 const DAY_HEADERS = ['월', '화', '수', '목', '금', '토', '일'];
@@ -95,7 +98,39 @@ function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; c
     );
 }
 
-export function AssignmentPreview({ assignments }: Props) {
+function ValidationRow({ validation }: { validation: WeekValidation }) {
+    const warns = validation.issues.filter((i) => i.severity === 'warn');
+    const infos = validation.issues.filter((i) => i.severity === 'info');
+    const ok = warns.length === 0;
+
+    return (
+        <td
+            colSpan={7}
+            style={{
+                padding: '6px 10px',
+                fontSize: 11,
+                lineHeight: 1.6,
+                borderBottom: '2px solid var(--color-border)',
+                background: ok ? '#f0fdf4' : '#fef2f2',
+                color: ok ? '#166534' : '#dc2626',
+            }}
+        >
+            <b>
+                {ok ? '✅' : '⚠️'} {validation.weekLabel}
+                {ok ? ' 이상 없음' : ''}
+            </b>
+            {warns.length > 0 && <span> · {warns.map((i) => i.message).join(' · ')}</span>}
+            {infos.length > 0 && (
+                <span style={{ color: 'var(--color-text-sub)' }}>
+                    {' '}
+                    · {infos.map((i) => i.message).join(' · ')}
+                </span>
+            )}
+        </td>
+    );
+}
+
+export function AssignmentPreview({ assignments, validations }: Props) {
     const weeks = groupAssignmentsByWeek(assignments);
 
     return (
@@ -157,11 +192,18 @@ export function AssignmentPreview({ assignments }: Props) {
                     </thead>
                     <tbody>
                         {weeks.map((week, i) => (
-                            <tr key={i}>
-                                {week.map((a, col) => (
-                                    <CalendarCell key={col} assignment={a} col={col} />
-                                ))}
-                            </tr>
+                            <Fragment key={i}>
+                                <tr>
+                                    {week.map((a, col) => (
+                                        <CalendarCell key={col} assignment={a} col={col} />
+                                    ))}
+                                </tr>
+                                {validations?.[i] && (
+                                    <tr>
+                                        <ValidationRow validation={validations[i]} />
+                                    </tr>
+                                )}
+                            </Fragment>
                         ))}
                     </tbody>
                 </table>
