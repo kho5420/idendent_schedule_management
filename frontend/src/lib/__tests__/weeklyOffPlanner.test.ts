@@ -630,4 +630,35 @@ describe('planWeeklyOffDays', () => {
         expect(normal.get(언경.id)!.has('2026-07-18')).toBe(true);
         expect(normal.get(언경.id)!.has('2026-07-19')).toBe(true);
     });
+
+    it('weekday_fixed가 평일 명시 주차 + 평일 전체휴진으로 평일 휴무를 2회 소진하면 토·일 모두 근무한다', () => {
+        const 언경 = makeStaff({ name: '언경', is_weekday_fixed: true });
+        // 수(15) 명시 주차, 금(17) 전체휴진 → 평일 휴무 2회 소진 → 주말 둘 다 근무
+        const week3Closure: DoctorDayInfo[] = [
+            makeDay('2026-07-13', 1),
+            makeDay('2026-07-14', 2),
+            makeDay('2026-07-15', 3),
+            makeDay('2026-07-16', 4),
+            { date: '2026-07-17', dayOfWeek: 5, doctorAliases: [], isFullAttendance: false },
+            makeDay('2026-07-18', 6),
+            makeDay('2026-07-19', 0),
+        ];
+        const leaves = [{ date: '2026-07-15', name: '언경', type: '주차' as const }];
+        const result = planWeeklyOffDays([언경], week3Closure, leaves, makeSettings());
+
+        const offs = result.get(언경.id)!;
+        expect(offs.has('2026-07-18')).toBe(false); // 토 근무
+        expect(offs.has('2026-07-19')).toBe(false); // 일 근무 (기존엔 일요일을 빼버리던 버그)
+    });
+
+    it('weekday_fixed가 평일 명시 주차 1회만 쓰면 토요일만 근무하고 일요일은 휴무', () => {
+        const 언경 = makeStaff({ name: '언경', is_weekday_fixed: true });
+        // 수(15) 명시 주차 1회 → 평일 휴무 1회 소진 → 토 대체근무, 일 휴무
+        const leaves = [{ date: '2026-07-15', name: '언경', type: '주차' as const }];
+        const result = planWeeklyOffDays([언경], WEEK3, leaves, makeSettings());
+
+        const offs = result.get(언경.id)!;
+        expect(offs.has('2026-07-18')).toBe(false); // 토 근무
+        expect(offs.has('2026-07-19')).toBe(true); // 일 휴무
+    });
 });

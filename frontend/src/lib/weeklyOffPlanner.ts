@@ -208,21 +208,26 @@ export function planWeeklyOffDays(
     for (let wi = 0; wi < weeks.length; wi++) {
         const week = weeks[wi];
 
-        // 평일 전체휴진(진료 없음)일 여부 — 있으면 그날이 그 주의 평일 휴무로 흡수된다. (SCHEDULE_RULE)
-        const hasClosureWeekday = week.weekdays.some((d) => {
+        // 평일 전체휴진(진료 없음)일 목록 — 그날이 그 주의 평일 휴무로 흡수된다. (SCHEDULE_RULE)
+        const closureWeekdays = week.weekdays.filter((d) => {
             const info = fullSchedule.find((i) => i.date === d);
             return info != null && !info.isFullAttendance && info.doctorAliases.length === 0;
         });
+        const hasClosureWeekday = closureWeekdays.length > 0;
 
-        // weekday_fixed: 토·일 off. 단, 그 주에 평일 전체휴진(공휴일 등)이 있으면 평일 근무가
-        // 하루 줄어 주말 1일을 대체 근무한다 (토요일 우선 근무, SCHEDULE_RULE).
+        // weekday_fixed: 기본 휴무는 토·일(주차 2회). 단, 그 주에 평일 휴무를 이미 소진한 만큼
+        // (= 평일 전체휴진일 수 + 본인 평일 명시 주차 수) 주말을 대체 근무한다(토요일 우선 근무).
+        // 연차는 별도 휴가이므로 세지 않는다. (SCHEDULE_RULE)
         for (const s of weekdayFixed) {
-            if (hasClosureWeekday) {
-                // 토·일이 모두 있으면 토요일 근무·일요일 off, 한쪽만 있으면 그날을 대체 근무
-                if (week.saturday && week.sunday) offDays.get(s.id)?.add(week.sunday);
-            } else {
-                if (week.saturday) offDays.get(s.id)?.add(week.saturday);
-                if (week.sunday) offDays.get(s.id)?.add(week.sunday);
+            const weekdayJuchaCount = week.weekdays.filter((d) =>
+                hasJucha(s, d, leaveRequests)
+            ).length;
+            const consumed = Math.min(2, closureWeekdays.length + weekdayJuchaCount);
+            const weekendOffsToKeep = 2 - consumed;
+            // 일요일부터 휴무로 남긴다(= 토요일을 먼저 근무시킨다)
+            const weekendDays = [week.sunday, week.saturday].filter((d): d is string => d != null);
+            for (let k = 0; k < weekendOffsToKeep && k < weekendDays.length; k++) {
+                offDays.get(s.id)?.add(weekendDays[k]);
             }
         }
 
