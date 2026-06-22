@@ -13,8 +13,8 @@ export type WeekValidation = {
 
 const DAY_NAME_BY_DOW = ['일', '월', '화', '수', '목', '금', '토'];
 const ORTHO_MIN = 3;
-const EXPECTED_WORK_DAYS = 5;
-const MIN_OPEN_DAYS_FOR_BALANCE = 6; // 부분주 오탐 방지
+const EXPECTED_WORK_DAYS = 5; // 정상 주 근무일(주차 2회 = 기본 휴무, 5근무 2휴무)
+const FULL_WEEK_DAYS = 7; // 월~일 모두 있는 완전한 주만 개인 균형 검사 (부분주 오탐 방지)
 
 function staffKey(s: StaffRow): string {
     return s.alias ?? s.name;
@@ -86,30 +86,32 @@ function checkDay(
     return issues;
 }
 
-/** 한 주 개인별 5근무/2휴무 검사 (가용일 6 이상인 주만) */
+/**
+ * 한 주 개인별 5근무/2휴무 검사 (완전한 주만).
+ * 주차는 매주 2회 주어지는 기본 휴무이므로 근무일 기준(5)에 이미 반영돼 있다.
+ * 연차만 별도 휴가로 근무일을 줄인다 → 기대 근무일 = 5 - 연차.
+ */
 function checkWeeklyBalance(days: DayAssignment[], clinicStaff: StaffRow[]): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
-    if (days.length < MIN_OPEN_DAYS_FOR_BALANCE) return issues;
+    if (days.length !== FULL_WEEK_DAYS) return issues;
 
     const active = clinicStaff.filter((s) => !s.is_on_leave);
     for (const s of active) {
         const key = staffKey(s);
         let workDays = 0;
-        let leaveDays = 0;
+        let annualDays = 0; // 연차만 (주차는 제외)
         for (const d of days) {
             if (d.working.includes(key)) workDays++;
-            else if (d.fullDayOff.some((r) => r.name === key)) leaveDays++;
+            else if (d.fullDayOff.some((r) => r.name === key && r.type === '연차')) annualDays++;
         }
 
-        if (workDays > EXPECTED_WORK_DAYS) {
+        const expected = Math.max(0, EXPECTED_WORK_DAYS - annualDays);
+        if (workDays < expected) {
+            issues.push({ severity: 'warn', message: `${key} ${workDays}일 근무` });
+        } else if (workDays > expected) {
             issues.push({ severity: 'warn', message: `${key} ${workDays}일 근무 (휴무 부족)` });
-        } else if (workDays < EXPECTED_WORK_DAYS) {
-            const shortfall = EXPECTED_WORK_DAYS - workDays;
-            if (shortfall > leaveDays) {
-                issues.push({ severity: 'warn', message: `${key} ${workDays}일 근무` });
-            } else {
-                issues.push({ severity: 'info', message: `${key} 연차 ${leaveDays}일` });
-            }
+        } else if (annualDays > 0) {
+            issues.push({ severity: 'info', message: `${key} 연차 ${annualDays}일` });
         }
     }
     return issues;

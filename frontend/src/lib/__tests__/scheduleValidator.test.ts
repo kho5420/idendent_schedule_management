@@ -159,20 +159,42 @@ describe('validateSchedule', () => {
         expect(msgs(r)).toContain('혜수 4일 근무');
     });
 
-    it('근무일 부족이 연차로 설명되면 경고 대신 정보로 표시한다', () => {
-        const leave = (name: string) => ({ date: '', name, type: '연차' as const });
+    it('연차로 설명되는 근무일은 정보로 표시하고, 주차는 연차로 집계하지 않는다', () => {
+        // 예진: 월·화·수 근무(3), 목·금 연차(2), 토·일 명시 주차(2)
+        // 기대 근무일 = 5 - 연차2 = 3 → 정상. 주차는 '연차'에 합산되면 안 됨(연차 4일 ✗, 연차 2일 ✓)
+        const annual = (name: string) => ({ date: '', name, type: '연차' as const });
+        const jucha = (name: string) => ({ date: '', name, type: '주차' as const });
         const week = baseWeek({
             1: { working: ['예진'] },
             2: { working: ['예진'] },
             3: { working: ['예진'] },
-            4: { fullDayOff: [leave('예진')] },
-            5: { fullDayOff: [leave('예진')] },
-            6: { fullDayOff: [leave('예진')] },
+            4: { fullDayOff: [annual('예진')] },
+            5: { fullDayOff: [annual('예진')] },
+            6: { fullDayOff: [jucha('예진')] },
+            0: { fullDayOff: [jucha('예진')] },
         });
         const staff = [makeStaff({ name: '예진' })];
         const r = validateSchedule(week, staff, []);
-        expect(r[0].issues).toContainEqual({ severity: 'info', message: '예진 연차 3일' });
+        expect(r[0].issues).toContainEqual({ severity: 'info', message: '예진 연차 2일' });
+        expect(msgs(r)).not.toContain('예진 연차 4일');
         expect(r[0].issues.every((i) => i.severity !== 'warn')).toBe(true);
+    });
+
+    it('연차로 설명되지 않는 근무일 부족을 경고한다(주차 소진 후 주말 누락)', () => {
+        // 언경: 월·화 연차(2), 나머지 근무 없음 → 기대 근무일 5-2=3, 실제 0 → 경고
+        // (실제로는 주차·전체휴진으로 평일이 소진돼 주말 출근이 누락된 케이스를 단순화)
+        const annual = (name: string) => ({ date: '', name, type: '연차' as const });
+        const week = baseWeek({
+            1: { fullDayOff: [annual('언경')] },
+            2: { fullDayOff: [annual('언경')] },
+            3: { working: ['언경'] },
+            4: { working: ['언경'] },
+        });
+        const staff = [makeStaff({ name: '언경', is_weekday_fixed: true })];
+        const r = validateSchedule(week, staff, []);
+        // 근무 2일, 연차 2일 → 기대 3일이므로 1일 부족 → 경고
+        expect(msgs(r)).toContain('언경 2일 근무');
+        expect(msgs(r)).not.toContain('언경 연차 2일');
     });
 
     it('6일 초과 근무(휴무 부족)를 경고한다', () => {
