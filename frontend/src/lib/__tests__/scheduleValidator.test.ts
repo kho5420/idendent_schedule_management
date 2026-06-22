@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validateSchedule } from '../scheduleValidator';
-import type { DayAssignment, StaffRow, ScheduleSetting, CareerLevel } from '../../types';
+import type { DayAssignment, StaffRow, CareerLevel } from '../../types';
 
 // 한 주(2026-07-06 월 ~ 07-12 일) dow: 월1 화2 수3 목4 금5 토6 일0
 const WEEK_DATES: { date: string; dayOfWeek: number }[] = [
@@ -57,39 +57,14 @@ function makeStaff(over: Partial<StaffRow>): StaffRow {
     };
 }
 
-function setting(day_name: string, over: Partial<ScheduleSetting>): ScheduleSetting {
-    return {
-        id: 1,
-        day_name,
-        sort_order: 1,
-        min_staff_with_ortho: 0,
-        min_staff_without_ortho: 0,
-        min_staff_on_leave: 0,
-        has_night_shift: false,
-        ...over,
-    };
-}
-
 const msgs = (r: ReturnType<typeof validateSchedule>) => r[0].issues.map((i) => i.message);
 
 describe('validateSchedule', () => {
     it('이상 없는 주는 빈 issues를 반환한다', () => {
-        const r = validateSchedule(baseWeek(), [], []);
+        const r = validateSchedule(baseWeek(), []);
         expect(r).toHaveLength(1);
         expect(r[0].weekLabel).toBe('1주차');
         expect(r[0].issues).toEqual([]);
-    });
-
-    it('요일별 최소 인원 미달을 경고한다', () => {
-        const week = baseWeek({
-            4: {
-                isFullAttendance: false,
-                doctorAliases: ['오'],
-                working: ['a', 'b', 'c', 'd', 'e'],
-            },
-        });
-        const r = validateSchedule(week, [], [setting('목', { min_staff_without_ortho: 6 })]);
-        expect(msgs(r)).toContain('목요일 5명 (최소 6)');
     });
 
     it('교정일 교정 인원이 3명 미만이면 경고한다', () => {
@@ -102,7 +77,7 @@ describe('validateSchedule', () => {
                 working: ['a'],
             },
         });
-        const r = validateSchedule(week, [], []);
+        const r = validateSchedule(week, []);
         expect(msgs(r)).toContain('금요일 교정 2명 (최소 3)');
     });
 
@@ -115,7 +90,7 @@ describe('validateSchedule', () => {
                 hasTeamLeader: false,
             },
         });
-        const r = validateSchedule(week, [], []);
+        const r = validateSchedule(week, []);
         expect(msgs(r)).toContain('일요일 팀장 미배정');
     });
 
@@ -129,7 +104,7 @@ describe('validateSchedule', () => {
             },
         });
         const staff = [makeStaff({ name: '서이', career: '신규' })];
-        const r = validateSchedule(week, staff, []);
+        const r = validateSchedule(week, staff);
         expect(msgs(r)).toContain('일요일 신규 배정: 서이');
     });
 
@@ -143,7 +118,7 @@ describe('validateSchedule', () => {
                 nightShiftStaff: [],
             },
         });
-        const r = validateSchedule(week, [], []);
+        const r = validateSchedule(week, []);
         expect(msgs(r)).toContain('수요일 야간 인원 없음');
     });
 
@@ -155,7 +130,7 @@ describe('validateSchedule', () => {
             4: { working: ['혜수'] },
         });
         const staff = [makeStaff({ name: '혜수' })];
-        const r = validateSchedule(week, staff, []);
+        const r = validateSchedule(week, staff);
         expect(msgs(r)).toContain('혜수 4일 근무');
     });
 
@@ -174,7 +149,7 @@ describe('validateSchedule', () => {
             0: { fullDayOff: [jucha('예진')] },
         });
         const staff = [makeStaff({ name: '예진' })];
-        const r = validateSchedule(week, staff, []);
+        const r = validateSchedule(week, staff);
         expect(r[0].issues).toContainEqual({ severity: 'info', message: '예진 연차 2일' });
         expect(msgs(r)).not.toContain('예진 연차 4일');
         expect(r[0].issues.every((i) => i.severity !== 'warn')).toBe(true);
@@ -191,7 +166,7 @@ describe('validateSchedule', () => {
             4: { working: ['언경'] },
         });
         const staff = [makeStaff({ name: '언경', is_weekday_fixed: true })];
-        const r = validateSchedule(week, staff, []);
+        const r = validateSchedule(week, staff);
         // 근무 2일, 연차 2일 → 기대 3일이므로 1일 부족 → 경고
         expect(msgs(r)).toContain('언경 2일 근무');
         expect(msgs(r)).not.toContain('언경 연차 2일');
@@ -206,7 +181,7 @@ describe('validateSchedule', () => {
             5: { working: ['갑'] },
             6: { working: ['갑'] },
         });
-        const r = validateSchedule(week, [makeStaff({ name: '갑' })], []);
+        const r = validateSchedule(week, [makeStaff({ name: '갑' })]);
         expect(msgs(r)).toContain('갑 6일 근무 (휴무 부족)');
     });
 
@@ -216,7 +191,7 @@ describe('validateSchedule', () => {
             day({ date: '2026-07-07', dayOfWeek: 2, working: ['갑'] }),
             day({ date: '2026-07-08', dayOfWeek: 3, working: ['갑'] }),
         ];
-        const r = validateSchedule(partial, [makeStaff({ name: '갑' })], []);
+        const r = validateSchedule(partial, [makeStaff({ name: '갑' })]);
         expect(r[0].issues).toEqual([]);
     });
 });

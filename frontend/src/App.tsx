@@ -144,7 +144,7 @@ function MainPage() {
                 plannedOffDays
             );
             setDayAssignments(assignments);
-            setWeekValidations(validateSchedule(assignments, clinicStaff, scheduleSettings));
+            setWeekValidations(validateSchedule(assignments, clinicStaff));
         } catch (e) {
             setError(e instanceof Error ? e.message : '스케줄 생성 중 오류가 발생했습니다');
         } finally {

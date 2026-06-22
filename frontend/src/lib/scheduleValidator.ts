@@ -1,4 +1,4 @@
-import type { DayAssignment, StaffRow, ScheduleSetting } from '../types';
+import type { DayAssignment, StaffRow } from '../types';
 import { groupAssignmentsByWeek } from './weekGrouping';
 
 export type ValidationIssue = {
@@ -20,40 +20,13 @@ function staffKey(s: StaffRow): string {
     return s.alias ?? s.name;
 }
 
-function settingByDow(settings: ScheduleSetting[], dayOfWeek: number): ScheduleSetting | undefined {
-    return settings.find((s) => s.day_name === DAY_NAME_BY_DOW[dayOfWeek]);
-}
-
-/** 하루 단위 규칙 검사 (최소 인원·교정·일요일 팀장/신규·야간) */
-function checkDay(
-    d: DayAssignment,
-    clinicStaff: StaffRow[],
-    settings: ScheduleSetting[]
-): ValidationIssue[] {
+/** 하루 단위 규칙 검사 (교정·일요일 팀장/신규·야간) */
+function checkDay(d: DayAssignment, clinicStaff: StaffRow[]): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
     const dow = DAY_NAME_BY_DOW[d.dayOfWeek];
     const isClosureOrEmpty = d.working.length === 0;
 
-    // 1. 최소 인원 (전체출근일·야간분리일·휴진/빈날 제외)
-    if (!d.isFullAttendance && !d.hasNightShift && !isClosureOrEmpty) {
-        const setting = settingByDow(settings, d.dayOfWeek);
-        if (setting) {
-            const hasLeave = d.fullDayOff.length > 0;
-            const required = hasLeave
-                ? setting.min_staff_on_leave
-                : d.isOrthoDay
-                  ? setting.min_staff_with_ortho
-                  : setting.min_staff_without_ortho;
-            if (d.working.length < required) {
-                issues.push({
-                    severity: 'warn',
-                    message: `${dow}요일 ${d.working.length}명 (최소 ${required})`,
-                });
-            }
-        }
-    }
-
-    // 5. 교정일 교정 인원
+    // 교정일 교정 인원
     if (d.isOrthoDay && d.orthoStaffCount < ORTHO_MIN) {
         issues.push({
             severity: 'warn',
@@ -123,14 +96,13 @@ function checkWeeklyBalance(days: DayAssignment[], clinicStaff: StaffRow[]): Val
  */
 export function validateSchedule(
     assignments: DayAssignment[],
-    clinicStaff: StaffRow[],
-    scheduleSettings: ScheduleSetting[]
+    clinicStaff: StaffRow[]
 ): WeekValidation[] {
     const weeks = groupAssignmentsByWeek(assignments);
     return weeks.map((week, i) => {
         const days = week.filter((a): a is DayAssignment => a !== null);
         const issues: ValidationIssue[] = [];
-        for (const d of days) issues.push(...checkDay(d, clinicStaff, scheduleSettings));
+        for (const d of days) issues.push(...checkDay(d, clinicStaff));
         issues.push(...checkWeeklyBalance(days, clinicStaff));
         return { weekLabel: `${i + 1}주차`, issues };
     });
