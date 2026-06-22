@@ -339,12 +339,13 @@ export function planWeeklyOffDays(
         for (let si = 0; si < order.length; si++) {
             const s = order[si];
 
-            // 평일 주차를 2회 이상 명시 신청한 경우: 그 2회가 그 주 정기 휴무(평일1+주말1)를
-            // 모두 대체하므로 주말 주차는 배정하지 않는다 (주말은 정상 근무).
+            // 평일 휴무(명시 주차 + 평일 전체휴진)를 2회 소진하면 그 2회가 그 주 정기 휴무
+            // (평일1+주말1)를 모두 대체하므로 주말 휴무를 배정하지 않는다 (주말은 정상 근무).
+            // 전체휴진은 그 주 모두의 평일 휴무를 흡수하므로 함께 센다.
             const weekdayJuchaCount = week.weekdays.filter((d) =>
                 hasJucha(s, d, leaveRequests)
             ).length;
-            if (weekdayJuchaCount >= 2) continue;
+            if (weekdayJuchaCount + closureWeekdays.length >= 2) continue;
 
             const satJucha = week.saturday != null && hasJucha(s, week.saturday, leaveRequests);
             const sunJucha = week.sunday != null && hasJucha(s, week.sunday, leaveRequests);

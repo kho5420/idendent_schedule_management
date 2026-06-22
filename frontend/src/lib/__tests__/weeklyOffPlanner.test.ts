@@ -661,4 +661,24 @@ describe('planWeeklyOffDays', () => {
         expect(offs.has('2026-07-18')).toBe(false); // 토 근무
         expect(offs.has('2026-07-19')).toBe(true); // 일 휴무
     });
+
+    it('회전직원이 평일 명시 주차 + 평일 전체휴진으로 평일 휴무 2회를 소진하면 주말 모두 근무한다', () => {
+        const 예진 = makeStaff({ name: '예진' }); // 회전직원(평일고정 아님)
+        // 월(13) 명시 주차, 금(17) 전체휴진 → 평일 휴무 2회 소진 → 토·일 모두 근무
+        const week3Closure: DoctorDayInfo[] = [
+            makeDay('2026-07-13', 1),
+            makeDay('2026-07-14', 2),
+            makeDay('2026-07-15', 3),
+            makeDay('2026-07-16', 4),
+            { date: '2026-07-17', dayOfWeek: 5, doctorAliases: [], isFullAttendance: false },
+            makeDay('2026-07-18', 6),
+            makeDay('2026-07-19', 0),
+        ];
+        const leaves = [{ date: '2026-07-13', name: '예진', type: '주차' as const }];
+        const result = planWeeklyOffDays([예진], week3Closure, leaves, makeSettings());
+
+        const offs = result.get(예진.id)!;
+        expect(offs.has('2026-07-18')).toBe(false); // 토 근무
+        expect(offs.has('2026-07-19')).toBe(false); // 일 근무 (기존엔 토요일 자동휴무로 4일만 근무하던 버그)
+    });
 });
