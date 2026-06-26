@@ -36,7 +36,7 @@ describe('parseLeaveRequests', () => {
             { date: '2026-07-21', name: '혜수', type: '연차' },
             { date: '2026-07-22', name: '윤정', type: '연차' },
             { date: '2026-07-23', name: '윤정', type: '연차' },
-            { date: '2026-07-24', name: '언경', type: '반차' },
+            { date: '2026-07-24', name: '언경', type: '반차', half: '오후' },
             { date: '2026-07-26', name: '은경', type: '주차' },
         ]);
     });
@@ -84,6 +84,24 @@ describe('parseLeaveRequests', () => {
             { date: '2026-07-15', name: '언경', type: '주차' },
             { date: '2026-07-18', name: '성민', type: '주차' },
             { date: '2026-07-19', name: '성민', type: '연차' },
+        ]);
+    });
+
+    it('오전반차/오후반차는 오전·오후 구분(half)과 함께 추출한다', () => {
+        const rows: unknown[][] = [
+            ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'],
+            [20, 21, 22, 23, 24, 25, 26],
+            ['언경오전반차', '언경오후반차', '1.미연 오후반차', '언경반차', '', '', ''],
+        ];
+
+        const result = parseLeaveRequests(rows, { year: 2026, month: 7 });
+
+        expect(result).toEqual([
+            { date: '2026-07-20', name: '언경', type: '반차', half: '오전' },
+            { date: '2026-07-21', name: '언경', type: '반차', half: '오후' },
+            { date: '2026-07-22', name: '미연', type: '반차', half: '오후' },
+            // 구분 없는 '반차'는 오후반차로 간주
+            { date: '2026-07-23', name: '언경', type: '반차', half: '오후' },
         ]);
     });
 

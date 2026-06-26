@@ -55,6 +55,43 @@ describe('formatDayCell', () => {
         expect(cell).toBe('지수,혜수\n\n(2)\n\n주차:박민,혜수\n연차:미연\n반차:언경');
     });
 
+    it('오후반차가 있으면 (오전/오후) 형식으로 인원수를 나눠 표기한다', () => {
+        const cell = formatDayCell(
+            makeAssignment({
+                working: ['지수', '수현', '성민', '이은', '윤정', '예진', '언경', '서이'],
+                halfDayOff: [{ date: '2026-07-01', name: '언경', type: '반차', half: '오후' }],
+            })
+        );
+
+        // 오전 8명 전원 / 오후엔 언경이 빠져 7명
+        expect(cell).toBe('지수,수현,성민,이은\n윤정,예진,언경,서이\n\n(8/7)\n\n반차:언경');
+    });
+
+    it('오전반차가 있으면 오전 인원이 줄어 (오전/오후)로 표기한다', () => {
+        const cell = formatDayCell(
+            makeAssignment({
+                working: ['지수', '수현', '성민', '이은', '윤정', '예진', '언경', '서이'],
+                halfDayOff: [{ date: '2026-07-01', name: '언경', type: '반차', half: '오전' }],
+            })
+        );
+
+        expect(cell).toBe('지수,수현,성민,이은\n윤정,예진,언경,서이\n\n(7/8)\n\n반차:언경');
+    });
+
+    it('교정일에 반차가 있으면 일반 인원만 오전/오후로 나누고 교정 정원은 고정한다', () => {
+        const cell = formatDayCell(
+            makeAssignment({
+                working: ['지수', '수현', '성민', '이은', '윤정', '예진'],
+                isOrthoDay: true,
+                orthoStaffCount: 3,
+                halfDayOff: [{ date: '2026-07-01', name: '예진', type: '반차', half: '오후' }],
+            })
+        );
+
+        // 일반 3명(오전)/2명(오후), 교정 3명 고정
+        expect(cell).toBe('지수,수현,성민,이은\n윤정,예진\n\n(3+3/2+3)\n\n반차:예진');
+    });
+
     it('교정과 진료일에는 (일반+교정) 형식으로 인원수를 표기한다', () => {
         const cell = formatDayCell(
             makeAssignment({

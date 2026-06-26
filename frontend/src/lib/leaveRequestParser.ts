@@ -2,8 +2,9 @@ import type { ScheduleMonth, LeaveRequest, LeaveType } from '../types';
 
 const LEAVE_TYPES: LeaveType[] = ['연차', '반차', '주차'];
 
+// 이름은 최소 매칭(2,4?)으로 잡아 '언경오후반차' 같은 표기에서 '오전/오후'가 이름에 흡수되지 않도록 한다.
 const ENTRY_PATTERN = new RegExp(
-    `^\\s*\\d{0,2}\\.?\\s*([가-힣]{2,4})\\s*(${LEAVE_TYPES.join('|')})\\s*[-\\s]*(?:마감|적용완료|교정있음)?[-\\s]*$`
+    `^\\s*\\d{0,2}\\.?\\s*([가-힣]{2,4}?)\\s*(오전|오후)?\\s*(${LEAVE_TYPES.join('|')})\\s*[-\\s]*(?:마감|적용완료|교정있음)?[-\\s]*$`
 );
 
 function parseDayNumber(cell: unknown): number | null {
@@ -24,11 +25,18 @@ function parseDateRow(row: unknown[]): (number | null)[] | null {
     return dayNumbers;
 }
 
-function parseEntry(cell: unknown): { name: string; type: LeaveType } | null {
+function parseEntry(
+    cell: unknown
+): { name: string; type: LeaveType; half?: '오전' | '오후' } | null {
     if (typeof cell !== 'string') return null;
     const match = cell.match(ENTRY_PATTERN);
     if (!match) return null;
-    return { name: match[1], type: match[2] as LeaveType };
+    const half = match[2] as '오전' | '오후' | undefined;
+    const type = match[3] as LeaveType;
+    // 오전/오후는 반차에만 의미가 있고, 구분이 없는 '반차'는 오후반차로 간주한다.
+    return type === '반차'
+        ? { name: match[1], type, half: half ?? '오후' }
+        : { name: match[1], type };
 }
 
 export function parseLeaveRequests(rows: unknown[][], month: ScheduleMonth): LeaveRequest[] {
@@ -51,7 +59,7 @@ export function parseLeaveRequests(rows: unknown[][], month: ScheduleMonth): Lea
             if (!entry) continue;
 
             const date = `${month.year}-${String(month.month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            requests.push({ date, name: entry.name, type: entry.type });
+            requests.push({ date, ...entry });
         }
     }
 

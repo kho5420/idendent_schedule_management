@@ -18,6 +18,7 @@ export type LeaveRequest = {
     date: string; // "YYYY-MM-DD"
     name: string;
     type: LeaveType;
+    half?: '오전' | '오후'; // 반차일 때 오전/오후 구분 (시트에 '오전반차'/'오후반차'로 적힌 경우만)
 };
 
 export type DoctorDayInfo = {

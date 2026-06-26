@@ -26,13 +26,35 @@ function formatNameLines(names: string[]): string {
         .join('\n');
 }
 
-function formatCount(workingCount: number, isOrthoDay: boolean, orthoStaffCount: number): string {
-    if (isOrthoDay && orthoStaffCount > 0) {
-        // 교정일은 교정 인원을 정원(ORTHO_FIXED_COUNT)으로 고정 표기하고, 초과 교정 인원은 일반에 합산한다.
-        const orthoShown = Math.min(orthoStaffCount, ORTHO_FIXED_COUNT);
-        return `(${workingCount - orthoShown}+${orthoShown})`;
+function formatCount(assignment: DayAssignment): string {
+    const total = assignment.working.length;
+
+    // 교정일은 교정 인원을 정원(ORTHO_FIXED_COUNT)으로 고정 표기하고, 초과 교정 인원은 일반에 합산한다.
+    const orthoShown =
+        assignment.isOrthoDay && assignment.orthoStaffCount > 0
+            ? Math.min(assignment.orthoStaffCount, ORTHO_FIXED_COUNT)
+            : 0;
+
+    // 오전/오후 반차가 있으면 (오전 출근/오후 출근) 으로 나눠 표기한다.
+    // 출근 명단에 든 인원만 반영해 잘못된 차감을 막는다.
+    const workingSet = new Set(assignment.working);
+    const countHalfOff = (half: '오전' | '오후'): number =>
+        assignment.halfDayOff.filter((r) => r.half === half && workingSet.has(r.name)).length;
+    const amOff = countHalfOff('오전');
+    const pmOff = countHalfOff('오후');
+
+    if (amOff > 0 || pmOff > 0) {
+        // 교정일이면 교정 정원은 고정하고 일반 인원만 오전/오후로 나눈다 (예: 6+3/5+3).
+        if (orthoShown > 0) {
+            return `(${total - orthoShown - amOff}+${orthoShown}/${total - orthoShown - pmOff}+${orthoShown})`;
+        }
+        return `(${total - amOff}/${total - pmOff})`;
     }
-    return `(${workingCount})`;
+
+    if (orthoShown > 0) {
+        return `(${total - orthoShown}+${orthoShown})`;
+    }
+    return `(${total})`;
 }
 
 function formatAnnotationLine(label: string, requests: LeaveRequest[]): string | null {
@@ -83,14 +105,7 @@ export function formatDayCell(assignment: DayAssignment): string {
         ? [CLOSURE_LABEL]
         : assignment.hasNightShift
           ? [formatNightShiftCell(assignment)]
-          : [
-                formatNameLines(assignment.working),
-                formatCount(
-                    assignment.working.length,
-                    assignment.isOrthoDay,
-                    assignment.orthoStaffCount
-                ),
-            ];
+          : [formatNameLines(assignment.working), formatCount(assignment)];
 
     const annotations = formatAnnotations(assignment);
     if (annotations) blocks.push(annotations);
