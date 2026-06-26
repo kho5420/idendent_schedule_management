@@ -152,6 +152,7 @@ export function StaffBulkEditModal({ selectedStaff, onSave, onClose }: Props) {
                         일괄 편집 — {selectedStaff.length}명
                     </span>
                     <button
+                        aria-label="닫기"
                         onClick={onClose}
                         style={{
                             background: 'none',

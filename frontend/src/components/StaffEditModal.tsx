@@ -280,6 +280,7 @@ export function StaffEditModal({ staff, employeeTypes, onSave, onClose }: Props)
                     >
                         {/* 닫기 버튼 */}
                         <button
+                            aria-label="닫기"
                             onClick={onClose}
                             style={{
                                 position: 'absolute',

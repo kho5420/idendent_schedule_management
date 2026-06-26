@@ -687,3 +687,29 @@ body {
         min-width: 580px;
     }
 }
+
+/* ── 접근성 ──────────────────────────────────────────── */
+
+/* 키보드 포커스 링 — 마우스 클릭(:focus)에는 띄우지 않고 키보드 탐색에만 표시.
+   일부 입력이 inline `outline: none`을 쓰므로 !important로 덮어 항상 보이게 한다. */
+:focus-visible {
+    outline: 2px solid var(--color-accent-to) !important;
+    outline-offset: 2px;
+}
+
+/* 클릭 가능한 버튼에 포인터 커서 (비활성 제외) */
+button:not(:disabled) {
+    cursor: pointer;
+}
+
+/* 모션 최소화 선호 시 애니메이션·전환을 사실상 제거 */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

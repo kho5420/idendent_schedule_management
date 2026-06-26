@@ -50,6 +50,7 @@ export function ThemePanel({ isOpen, onClose }: Props) {
                         테마 선택
                     </span>
                     <button
+                        aria-label="닫기"
                         onClick={onClose}
                         style={{
                             background: 'none',

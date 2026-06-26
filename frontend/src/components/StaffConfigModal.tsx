@@ -69,6 +69,7 @@ export function StaffConfigModal({ isOpen, config, onChange, onClose }: Props) {
                         직원 설정
                     </span>
                     <button
+                        aria-label="닫기"
                         onClick={onClose}
                         style={{
                             background: 'none',
@@ -142,6 +143,7 @@ export function StaffConfigModal({ isOpen, config, onChange, onClose }: Props) {
                                     교정과
                                 </label>
                                 <button
+                                    aria-label="삭제"
                                     onClick={() => handleRemove(i)}
                                     style={{
                                         background: 'none',

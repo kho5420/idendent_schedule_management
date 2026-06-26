@@ -148,6 +148,7 @@ export function SheetGuideModal({ isOpen, onClose }: Props) {
                         📖 구글 시트 연동 설정 가이드
                     </span>
                     <button
+                        aria-label="닫기"
                         onClick={handleClose}
                         style={{
                             background: 'none',

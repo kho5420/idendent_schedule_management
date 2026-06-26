@@ -48,6 +48,7 @@ export function ChangelogModal({ isOpen, onClose }: Props) {
                         업데이트 내역
                     </span>
                     <button
+                        aria-label="닫기"
                         onClick={onClose}
                         style={{
                             background: 'none',
