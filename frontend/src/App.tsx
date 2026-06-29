@@ -6,6 +6,7 @@ import type {
     SheetConnection,
     ExcelConnection,
     DayAssignment,
+    StaffRow,
 } from './types';
 import { MonthSelector } from './components/MonthSelector';
 import { InputMethodCard } from './components/InputMethodCard';
@@ -23,6 +24,7 @@ import { fetchSheetRows } from './lib/sheetsApi';
 import { parseLeaveRequests } from './lib/leaveRequestParser';
 import { parseDoctorSchedule } from './lib/doctorScheduleParser';
 import { assignDailySchedule } from './lib/scheduleAssigner';
+import { applyTrade } from './lib/personnelTrade';
 import { validateSchedule, type WeekValidation } from './lib/scheduleValidator';
 import { planWeeklyOffDays } from './lib/weeklyOffPlanner';
 import { writeScheduleToNewTab } from './lib/sheetWriter';
@@ -53,6 +55,8 @@ function MainPage() {
     const [scheduleSheet, setScheduleSheet] = useState<SheetConnection>(null);
     const [leaveRequestSheet, setLeaveRequestSheet] = useState<SheetConnection>(null);
     const [dayAssignments, setDayAssignments] = useState<DayAssignment[] | null>(null);
+    // 인원 이동(트레이드) 편집 시 자격 판정·재검증에 쓰는 진료실 직원 명단
+    const [clinicStaffRoster, setClinicStaffRoster] = useState<StaffRow[]>([]);
     const [weekValidations, setWeekValidations] = useState<WeekValidation[] | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [seed, setSeed] = useState(0);
@@ -144,12 +148,21 @@ function MainPage() {
                 plannedOffDays
             );
             setDayAssignments(assignments);
+            setClinicStaffRoster(clinicStaff);
             setWeekValidations(validateSchedule(assignments, clinicStaff));
         } catch (e) {
             setError(e instanceof Error ? e.message : '스케줄 생성 중 오류가 발생했습니다');
         } finally {
             setIsGenerating(false);
         }
+    }
+
+    // 미리보기에서 같은 주 안 인원 이동 — From에서 빼고 To에 넣은 뒤 재검증
+    function handleTrade(fromDate: string, toDate: string, staffId: number) {
+        if (!dayAssignments) return;
+        const next = applyTrade(dayAssignments, fromDate, toDate, staffId, clinicStaffRoster);
+        setDayAssignments(next);
+        setWeekValidations(validateSchedule(next, clinicStaffRoster));
     }
 
     function handleDownloadExcel() {
@@ -524,6 +537,8 @@ function MainPage() {
                 <AssignmentPreview
                     assignments={dayAssignments}
                     validations={weekValidations ?? undefined}
+                    clinicStaff={clinicStaffRoster}
+                    onTrade={handleTrade}
                 />
             )}
 

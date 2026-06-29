@@ -1,5 +1,5 @@
-import { Fragment } from 'react';
-import type { DayAssignment } from '../types';
+import { Fragment, useState } from 'react';
+import type { DayAssignment, StaffRow } from '../types';
 import type { WeekValidation } from '../lib/scheduleValidator';
 import {
     formatDayCell,
@@ -8,15 +8,27 @@ import {
     CLOSURE_TEXT_HEX,
 } from '../lib/scheduleFormatter';
 import { groupAssignmentsByWeek } from '../lib/weekGrouping';
+import { PersonnelTradeModal } from './PersonnelTradeModal';
 
 interface Props {
     assignments: DayAssignment[];
     validations?: WeekValidation[];
+    // 둘 다 주어지면 셀 클릭으로 인원 이동(트레이드) 편집이 활성화된다
+    clinicStaff?: StaffRow[];
+    onTrade?: (fromDate: string, toDate: string, staffId: number) => void;
 }
 
 const DAY_HEADERS = ['월', '화', '수', '목', '금', '토', '일'];
 
-function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; col: number }) {
+function CalendarCell({
+    assignment,
+    col,
+    onSelect,
+}: {
+    assignment: DayAssignment | null;
+    col: number;
+    onSelect?: (date: string) => void;
+}) {
     const isWeekend = col >= 5; // 5=토, 6=일
     const tdStyle: React.CSSProperties = {
         width: `${100 / 7}%`,
@@ -41,6 +53,7 @@ function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; c
 
     const dayNum = parseInt(assignment.date.slice(-2), 10);
     const closure = isClosureDay(assignment);
+    const clickable = !!onSelect && !closure && assignment.working.length > 0;
     // 그날 출근 원장님 (스케줄 시트처럼 검증용 표시)
     const doctorLine = assignment.isFullAttendance
         ? '원장 전체출근'
@@ -55,7 +68,12 @@ function CalendarCell({ assignment, col }: { assignment: DayAssignment | null; c
           : 'var(--color-card)';
 
     return (
-        <td style={{ ...tdStyle, background: cellBg }}>
+        <td
+            className={clickable ? 'trade-cell' : undefined}
+            onClick={clickable ? () => onSelect!(assignment.date) : undefined}
+            title={clickable ? '클릭해 인원 이동' : undefined}
+            style={{ ...tdStyle, background: cellBg, cursor: clickable ? 'pointer' : undefined }}
+        >
             <div
                 style={{
                     fontSize: 12,
@@ -130,8 +148,10 @@ function ValidationRow({ validation }: { validation: WeekValidation }) {
     );
 }
 
-export function AssignmentPreview({ assignments, validations }: Props) {
+export function AssignmentPreview({ assignments, validations, clinicStaff, onTrade }: Props) {
     const weeks = groupAssignmentsByWeek(assignments);
+    const [fromDate, setFromDate] = useState<string | null>(null);
+    const editable = !!(onTrade && clinicStaff);
 
     return (
         <div
@@ -195,7 +215,12 @@ export function AssignmentPreview({ assignments, validations }: Props) {
                             <Fragment key={i}>
                                 <tr>
                                     {week.map((a, col) => (
-                                        <CalendarCell key={col} assignment={a} col={col} />
+                                        <CalendarCell
+                                            key={col}
+                                            assignment={a}
+                                            col={col}
+                                            onSelect={editable ? setFromDate : undefined}
+                                        />
                                     ))}
                                 </tr>
                                 {validations?.[i] && (
@@ -208,6 +233,15 @@ export function AssignmentPreview({ assignments, validations }: Props) {
                     </tbody>
                 </table>
             </div>
+            {editable && fromDate && (
+                <PersonnelTradeModal
+                    assignments={assignments}
+                    fromDate={fromDate}
+                    clinicStaff={clinicStaff!}
+                    onTrade={onTrade!}
+                    onClose={() => setFromDate(null)}
+                />
+            )}
         </div>
     );
 }

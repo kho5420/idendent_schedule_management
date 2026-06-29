@@ -34,7 +34,7 @@ function interleaveByCareer(staff: StaffRow[]): StaffRow[] {
     return interleaved;
 }
 
-function splitDayNightShift(workingStaff: StaffRow[]): { day: string[]; night: string[] } {
+export function splitDayNightShift(workingStaff: StaffRow[]): { day: string[]; night: string[] } {
     const night: StaffRow[] = workingStaff.filter((s) => s.is_night_fixed);
     const rest = workingStaff.filter((s) => !s.is_night_fixed);
 
