@@ -3,6 +3,14 @@ import { ORTHO_FIXED_COUNT } from './scheduleAssigner';
 
 const NAMES_PER_LINE = 4;
 
+/** 알바 글자색 — 미리보기·구글 시트가 같은 값을 쓴다 (알바는 색으로만 구분, 접미사 없음) */
+export const ALBA_COLOR = '#FF9900';
+
+/** 그날 출근 명단 = 정규 인원 + 알바(정규 뒤에 붙임) */
+export function rosterWithAlba(assignment: DayAssignment): string[] {
+    return [...assignment.working, ...(assignment.albaWorking ?? [])];
+}
+
 /** 평일 전체휴진 셀에 표기하는 문구 (출력 단계에서 배경색 칠할 때도 이 문구로 식별) */
 export const CLOSURE_LABEL = '전체 휴진';
 
@@ -27,9 +35,10 @@ function formatNameLines(names: string[]): string {
 }
 
 function formatCount(assignment: DayAssignment): string {
-    const total = assignment.working.length;
+    // 알바 포함 총 출근 인원 (알바는 정규 인원에 합산해 카운팅)
+    const total = assignment.working.length + (assignment.albaWorking?.length ?? 0);
 
-    // 교정일은 교정 인원을 정원(ORTHO_FIXED_COUNT)으로 고정 표기하고, 초과 교정 인원은 일반에 합산한다.
+    // 교정일은 교정 인원을 정원(ORTHO_FIXED_COUNT)으로 고정 표기하고, 나머지(알바 포함)는 일반에 합산한다.
     const orthoShown =
         assignment.isOrthoDay && assignment.orthoStaffCount > 0
             ? Math.min(assignment.orthoStaffCount, ORTHO_FIXED_COUNT)
@@ -105,7 +114,7 @@ export function formatDayCell(assignment: DayAssignment): string {
         ? [CLOSURE_LABEL]
         : assignment.hasNightShift
           ? [formatNightShiftCell(assignment)]
-          : [formatNameLines(assignment.working), formatCount(assignment)];
+          : [formatNameLines(rosterWithAlba(assignment)), formatCount(assignment)];
 
     const annotations = formatAnnotations(assignment);
     if (annotations) blocks.push(annotations);

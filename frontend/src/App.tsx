@@ -24,7 +24,7 @@ import { fetchSheetRows } from './lib/sheetsApi';
 import { parseLeaveRequests } from './lib/leaveRequestParser';
 import { parseDoctorSchedule } from './lib/doctorScheduleParser';
 import { assignDailySchedule } from './lib/scheduleAssigner';
-import { applyTrade } from './lib/personnelTrade';
+import { applyTrade, addAlba, removeAlba, moveAlba } from './lib/personnelTrade';
 import { validateSchedule, type WeekValidation } from './lib/scheduleValidator';
 import { planWeeklyOffDays } from './lib/weeklyOffPlanner';
 import { writeScheduleToNewTab } from './lib/sheetWriter';
@@ -38,6 +38,7 @@ import './index.css';
 
 const DOCTOR_EMPLOYEE_TYPE_IDS = [1, 2];
 const CLINIC_STAFF_EMPLOYEE_TYPE_ID = 6;
+const ALBA_EMPLOYEE_TYPE_ID = 7;
 
 function getDefaultMonth(): ScheduleMonth {
     const d = new Date();
@@ -57,6 +58,10 @@ function MainPage() {
     const [dayAssignments, setDayAssignments] = useState<DayAssignment[] | null>(null);
     // 인원 이동(트레이드) 편집 시 자격 판정·재검증에 쓰는 진료실 직원 명단
     const [clinicStaffRoster, setClinicStaffRoster] = useState<StaffRow[]>([]);
+    // 주말 알바 추가에 쓰는 알바(employee_type_id=7) 명단
+    const [albaRoster, setAlbaRoster] = useState<StaffRow[]>([]);
+    // 알바로 추가 가능한 후보 = 알바(7) + 진료실 인원(6) — 진료실 인원도 주말 알바 가능
+    const albaCandidates = [...albaRoster, ...clinicStaffRoster];
     const [weekValidations, setWeekValidations] = useState<WeekValidation[] | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
     const [seed, setSeed] = useState(0);
@@ -149,6 +154,7 @@ function MainPage() {
             );
             setDayAssignments(assignments);
             setClinicStaffRoster(clinicStaff);
+            setAlbaRoster(staff.filter((s) => s.employee_type_id === ALBA_EMPLOYEE_TYPE_ID));
             setWeekValidations(validateSchedule(assignments, clinicStaff));
         } catch (e) {
             setError(e instanceof Error ? e.message : '스케줄 생성 중 오류가 발생했습니다');
@@ -163,6 +169,20 @@ function MainPage() {
         const next = applyTrade(dayAssignments, fromDate, toDate, staffId, clinicStaffRoster);
         setDayAssignments(next);
         setWeekValidations(validateSchedule(next, clinicStaffRoster));
+    }
+
+    // 주말 알바 추가/삭제/이동 — albaWorking만 바뀌므로 검증(정규 인원 기준)은 그대로
+    function handleAddAlba(date: string, staffId: number) {
+        if (!dayAssignments) return;
+        setDayAssignments(addAlba(dayAssignments, date, staffId, albaCandidates));
+    }
+    function handleRemoveAlba(date: string, staffId: number) {
+        if (!dayAssignments) return;
+        setDayAssignments(removeAlba(dayAssignments, date, staffId, albaCandidates));
+    }
+    function handleMoveAlba(fromDate: string, toDate: string, staffId: number) {
+        if (!dayAssignments) return;
+        setDayAssignments(moveAlba(dayAssignments, fromDate, toDate, staffId, albaCandidates));
     }
 
     function handleDownloadExcel() {
@@ -538,7 +558,11 @@ function MainPage() {
                     assignments={dayAssignments}
                     validations={weekValidations ?? undefined}
                     clinicStaff={clinicStaffRoster}
+                    albaRoster={albaCandidates}
                     onTrade={handleTrade}
+                    onAddAlba={handleAddAlba}
+                    onRemoveAlba={handleRemoveAlba}
+                    onMoveAlba={handleMoveAlba}
                 />
             )}
 

@@ -34,6 +34,7 @@ export type DayAssignment = {
     doctorAliases: string[]; // 그날 출근하는 원장님 alias 코드 (전체출근이면 빈 배열)
     isFullAttendance: boolean; // 원장님 전체 출근 여부
     working: string[]; // 출근 인원 이름 (반차 포함)
+    albaWorking?: string[]; // 수동 추가된 알바(employee_type_id=7) 표시명 — 주말에만
     fullDayOff: LeaveRequest[]; // 연차/주차 (하루 휴무)
     halfDayOff: LeaveRequest[]; // 반차
     isOrthoDay: boolean; // 교정과 원장님(is_ortho) 진료일

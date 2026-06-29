@@ -164,6 +164,34 @@ describe('formatDayCell', () => {
         expect(cell).toBe('지수,혜수\n\n(2)');
     });
 
+    it('알바는 명단 끝에 붙고(접미사 없음) 인원수에 합산된다', () => {
+        const cell = formatDayCell(
+            makeAssignment({
+                dayOfWeek: 6,
+                working: ['지수', '혜수', '미연'],
+                albaWorking: ['민지'],
+            })
+        );
+
+        // 정규 3 + 알바 1 = 4, 알바 이름은 색으로만 구분(여기 문자열엔 그대로 '민지')
+        expect(cell).toBe('지수,혜수,미연,민지\n\n(4)');
+    });
+
+    it('교정일에 알바가 추가되면 알바는 교정 분해의 일반 쪽에 합산된다', () => {
+        const cell = formatDayCell(
+            makeAssignment({
+                dayOfWeek: 6,
+                working: ['윤정', '은경', '언경', '예진', '서이'],
+                isOrthoDay: true,
+                orthoStaffCount: 3,
+                albaWorking: ['연희', '주현', '요한'],
+            })
+        );
+
+        // 정규 5(교정 3 포함) + 알바 3 = 8 → 일반 5 + 교정 3 = (5+3). 이름은 4개씩 줄바꿈
+        expect(cell).toBe('윤정,은경,언경,예진\n서이,연희,주현,요한\n\n(5+3)');
+    });
+
     it('평일 전체휴진(진료·출근 없음)은 "전체 휴진"으로 표기한다', () => {
         const cell = formatDayCell(
             makeAssignment({

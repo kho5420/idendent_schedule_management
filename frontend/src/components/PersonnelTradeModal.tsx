@@ -1,18 +1,27 @@
 import { useState } from 'react';
 import type { DayAssignment, StaffRow } from '../types';
 import { groupAssignmentsByWeek } from '../lib/weekGrouping';
-import { isClosureDay } from '../lib/scheduleFormatter';
-import { eligibleMovers, displayName } from '../lib/personnelTrade';
+import { isClosureDay, ALBA_COLOR } from '../lib/scheduleFormatter';
+import { eligibleMovers, displayName, addableAlba } from '../lib/personnelTrade';
 
 interface Props {
     assignments: DayAssignment[];
     fromDate: string;
     clinicStaff: StaffRow[];
+    albaRoster: StaffRow[];
     onTrade: (fromDate: string, toDate: string, staffId: number) => void;
+    onAddAlba?: (date: string, staffId: number) => void;
+    onRemoveAlba?: (date: string, staffId: number) => void;
+    onMoveAlba?: (fromDate: string, toDate: string, staffId: number) => void;
     onClose: () => void;
 }
 
+function isWeekendDow(dow: number): boolean {
+    return dow === 0 || dow === 6;
+}
+
 const DOW_LABEL = ['일', '월', '화', '수', '목', '금', '토'];
+const ALBA_EMPLOYEE_TYPE_ID = 7;
 
 function dayNum(date: string): number {
     return parseInt(date.slice(-2), 10);
@@ -33,7 +42,11 @@ export function PersonnelTradeModal({
     assignments,
     fromDate,
     clinicStaff,
+    albaRoster,
     onTrade,
+    onAddAlba,
+    onRemoveAlba,
+    onMoveAlba,
     onClose,
 }: Props) {
     const [toDate, setToDate] = useState<string | null>(null);
@@ -49,6 +62,41 @@ export function PersonnelTradeModal({
 
     const to = toDate ? assignments.find((d) => d.date === toDate) : undefined;
     const movers = to ? eligibleMovers(from, to, clinicStaff) : [];
+
+    // ── 알바 (주말에만) ──
+    const showAlba = isWeekendDow(from.dayOfWeek) && !!onAddAlba;
+    const albaByName = new Map(albaRoster.map((s) => [displayName(s), s]));
+    const currentAlba = (from.albaWorking ?? [])
+        .map((n) => albaByName.get(n))
+        .filter((s): s is StaffRow => s != null);
+    const addable = addableAlba(from, albaRoster);
+    // 알바 전담(type 7) vs 진료실 인원(type 6) 구분
+    const addableAlbaOnly = addable.filter((s) => s.employee_type_id === ALBA_EMPLOYEE_TYPE_ID);
+    const addableClinic = addable.filter((s) => s.employee_type_id !== ALBA_EMPLOYEE_TYPE_ID);
+    // 같은 주의 반대 주말(토↔일) — 알바 이동 대상
+    const otherWeekend = week.find(
+        (d): d is DayAssignment =>
+            d != null && d.date !== fromDate && isWeekendDow(d.dayOfWeek) && !isClosureDay(d)
+    );
+
+    const renderAddChip = (s: StaffRow) => (
+        <button
+            key={s.id}
+            className="trade-pick-btn"
+            onClick={() => onAddAlba?.(fromDate, s.id)}
+            style={{
+                background: 'var(--color-card)',
+                border: '1px solid var(--color-border-hover)',
+                borderRadius: 8,
+                padding: '8px 12px',
+                fontSize: 13,
+                color: 'var(--color-text)',
+                cursor: 'pointer',
+            }}
+        >
+            + {displayName(s)}
+        </button>
+    );
 
     return (
         <div
@@ -114,6 +162,144 @@ export function PersonnelTradeModal({
                     표시됩니다.
                 </div>
 
+                {/* 알바 (주말에만) */}
+                {showAlba && (
+                    <div style={{ marginBottom: 18 }}>
+                        <div
+                            style={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: 'var(--color-text-sub)',
+                                marginBottom: 8,
+                            }}
+                        >
+                            알바
+                        </div>
+
+                        {currentAlba.length > 0 && (
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: 6,
+                                    marginBottom: 10,
+                                }}
+                            >
+                                {currentAlba.map((s) => (
+                                    <div
+                                        key={s.id}
+                                        style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            gap: 8,
+                                            padding: '8px 12px',
+                                            background: 'var(--color-bg)',
+                                            border: '1px solid var(--color-border)',
+                                            borderRadius: 8,
+                                        }}
+                                    >
+                                        <span
+                                            style={{
+                                                fontSize: 14,
+                                                fontWeight: 600,
+                                                color: ALBA_COLOR,
+                                            }}
+                                        >
+                                            {displayName(s)}
+                                        </span>
+                                        <div style={{ display: 'flex', gap: 6 }}>
+                                            {otherWeekend && onMoveAlba && (
+                                                <button
+                                                    className="trade-pick-btn"
+                                                    onClick={() =>
+                                                        onMoveAlba(
+                                                            fromDate,
+                                                            otherWeekend.date,
+                                                            s.id
+                                                        )
+                                                    }
+                                                    style={{
+                                                        background: 'var(--color-card)',
+                                                        border: '1px solid var(--color-border-hover)',
+                                                        borderRadius: 8,
+                                                        padding: '7px 10px',
+                                                        fontSize: 12,
+                                                        color: 'var(--color-text)',
+                                                        cursor: 'pointer',
+                                                        whiteSpace: 'nowrap',
+                                                    }}
+                                                >
+                                                    {dayNum(otherWeekend.date)}일(
+                                                    {DOW_LABEL[otherWeekend.dayOfWeek]})로 이동
+                                                </button>
+                                            )}
+                                            <button
+                                                className="trade-pick-btn"
+                                                aria-label="알바 삭제"
+                                                onClick={() => onRemoveAlba?.(fromDate, s.id)}
+                                                style={{
+                                                    background: 'none',
+                                                    border: '1px solid var(--border-danger)',
+                                                    borderRadius: 8,
+                                                    padding: '7px 12px',
+                                                    fontSize: 12,
+                                                    fontWeight: 600,
+                                                    color: 'var(--text-danger)',
+                                                    cursor: 'pointer',
+                                                }}
+                                            >
+                                                삭제
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {addable.length === 0 ? (
+                            <div style={{ fontSize: 12, color: 'var(--color-text-sub)' }}>
+                                추가할 수 있는 인원이 없습니다.
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                {addableAlbaOnly.length > 0 && (
+                                    <div>
+                                        <div
+                                            style={{
+                                                fontSize: 11,
+                                                color: 'var(--color-text-sub)',
+                                                marginBottom: 6,
+                                            }}
+                                        >
+                                            알바 전담
+                                        </div>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                                            {addableAlbaOnly.map(renderAddChip)}
+                                        </div>
+                                    </div>
+                                )}
+                                {addableClinic.length > 0 && (
+                                    <div>
+                                        <div
+                                            style={{
+                                                fontSize: 11,
+                                                color: 'var(--color-text-sub)',
+                                                marginBottom: 6,
+                                            }}
+                                        >
+                                            진료실 인원
+                                        </div>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                                            {addableClinic.map(renderAddChip)}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {/* To 날짜 선택 (같은 주) */}
                 <div
                     style={{
@@ -132,6 +318,7 @@ export function PersonnelTradeModal({
                         return (
                             <button
                                 key={d.date}
+                                className="trade-pick-btn"
                                 onClick={() => setToDate(d.date)}
                                 style={{
                                     minWidth: 56,
@@ -234,6 +421,7 @@ export function PersonnelTradeModal({
                                             ))}
                                         </div>
                                         <button
+                                            className="trade-pick-btn"
                                             onClick={() => onTrade(fromDate, to.date, s.id)}
                                             style={{
                                                 background:

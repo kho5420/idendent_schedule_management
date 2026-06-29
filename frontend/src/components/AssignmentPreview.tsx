@@ -6,6 +6,7 @@ import {
     isClosureDay,
     CLOSURE_BG_HEX,
     CLOSURE_TEXT_HEX,
+    ALBA_COLOR,
 } from '../lib/scheduleFormatter';
 import { groupAssignmentsByWeek } from '../lib/weekGrouping';
 import { PersonnelTradeModal } from './PersonnelTradeModal';
@@ -13,12 +14,35 @@ import { PersonnelTradeModal } from './PersonnelTradeModal';
 interface Props {
     assignments: DayAssignment[];
     validations?: WeekValidation[];
-    // 둘 다 주어지면 셀 클릭으로 인원 이동(트레이드) 편집이 활성화된다
+    // 아래 편집 props가 주어지면 셀 클릭으로 인원 이동·알바 편집이 활성화된다
     clinicStaff?: StaffRow[];
+    albaRoster?: StaffRow[];
     onTrade?: (fromDate: string, toDate: string, staffId: number) => void;
+    onAddAlba?: (date: string, staffId: number) => void;
+    onRemoveAlba?: (date: string, staffId: number) => void;
+    onMoveAlba?: (fromDate: string, toDate: string, staffId: number) => void;
 }
 
 const DAY_HEADERS = ['월', '화', '수', '목', '금', '토', '일'];
+
+/** 셀 텍스트에서 알바 이름(쉼표·줄바꿈으로 구분된 온전한 토큰)만 주황색으로 렌더 */
+function renderCellText(text: string, albaNames: string[]): React.ReactNode {
+    if (albaNames.length === 0) return text;
+    const set = new Set(albaNames);
+    const escaped = albaNames.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    // 이름이 한 항목 전체일 때만(앞뒤가 줄머리/줄끝/쉼표/줄바꿈) 색칠 — 부분 일치 방지
+    const re = new RegExp(`(?<![^\\n,])(${escaped.join('|')})(?![^\\n,])`, 'g');
+    const parts = text.split(re);
+    return parts.map((p, i) =>
+        set.has(p) ? (
+            <span key={i} style={{ color: ALBA_COLOR, fontWeight: 600 }}>
+                {p}
+            </span>
+        ) : (
+            <Fragment key={i}>{p}</Fragment>
+        )
+    );
+}
 
 function CalendarCell({
     assignment,
@@ -53,7 +77,8 @@ function CalendarCell({
 
     const dayNum = parseInt(assignment.date.slice(-2), 10);
     const closure = isClosureDay(assignment);
-    const clickable = !!onSelect && !closure && assignment.working.length > 0;
+    // 평일은 옮길 인원이 있어야, 주말은 알바 추가를 위해 비어 있어도 클릭 가능
+    const clickable = !!onSelect && !closure && (assignment.working.length > 0 || isWeekend);
     // 그날 출근 원장님 (스케줄 시트처럼 검증용 표시)
     const doctorLine = assignment.isFullAttendance
         ? '원장 전체출근'
@@ -110,7 +135,7 @@ function CalendarCell({
                     wordBreak: 'break-all',
                 }}
             >
-                {formatDayCell(assignment)}
+                {renderCellText(formatDayCell(assignment), assignment.albaWorking ?? [])}
             </pre>
         </td>
     );
@@ -129,8 +154,9 @@ function ValidationRow({ validation }: { validation: WeekValidation }) {
                 fontSize: 11,
                 lineHeight: 1.6,
                 borderBottom: '2px solid var(--color-border)',
-                background: ok ? '#f0fdf4' : '#fef2f2',
-                color: ok ? '#166534' : '#dc2626',
+                // 이상 없음은 테마 브랜드 표면색(tag), 경고는 위험색
+                background: ok ? 'var(--color-tag-bg)' : 'var(--surface-danger)',
+                color: ok ? 'var(--color-tag-text)' : 'var(--text-danger)',
             }}
         >
             <b>
@@ -148,7 +174,16 @@ function ValidationRow({ validation }: { validation: WeekValidation }) {
     );
 }
 
-export function AssignmentPreview({ assignments, validations, clinicStaff, onTrade }: Props) {
+export function AssignmentPreview({
+    assignments,
+    validations,
+    clinicStaff,
+    albaRoster,
+    onTrade,
+    onAddAlba,
+    onRemoveAlba,
+    onMoveAlba,
+}: Props) {
     const weeks = groupAssignmentsByWeek(assignments);
     const [fromDate, setFromDate] = useState<string | null>(null);
     const editable = !!(onTrade && clinicStaff);
@@ -238,7 +273,11 @@ export function AssignmentPreview({ assignments, validations, clinicStaff, onTra
                     assignments={assignments}
                     fromDate={fromDate}
                     clinicStaff={clinicStaff!}
+                    albaRoster={albaRoster ?? []}
                     onTrade={onTrade!}
+                    onAddAlba={onAddAlba}
+                    onRemoveAlba={onRemoveAlba}
+                    onMoveAlba={onMoveAlba}
                     onClose={() => setFromDate(null)}
                 />
             )}

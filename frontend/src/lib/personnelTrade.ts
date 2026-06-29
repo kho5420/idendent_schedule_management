@@ -97,3 +97,73 @@ export function applyTrade(
         return day;
     });
 }
+
+// ── 알바(employee_type_id=7) — 주말 수동 추가/삭제/이동 ──────────────
+
+/**
+ * 그날 알바로 추가 가능한 후보. candidates에는 알바(type 7)뿐 아니라 진료실 인원(type 6)도
+ * 넣을 수 있다(진료실 인원도 주말 알바가 가능). 제외: 사용 안 함·휴직·이미 알바로 추가됨·
+ * 이미 그날 정규 근무 중(중복 카운트 방지). id 기준 중복 제거.
+ */
+export function addableAlba(day: DayAssignment, candidates: StaffRow[]): StaffRow[] {
+    const alreadyAlba = new Set(day.albaWorking ?? []);
+    const working = new Set(day.working);
+    const seen = new Set<number>();
+    return candidates.filter((s) => {
+        if (seen.has(s.id)) return false;
+        seen.add(s.id);
+        if (s.use_yn !== 'Y' || s.is_on_leave) return false;
+        const name = displayName(s);
+        return !alreadyAlba.has(name) && !working.has(name);
+    });
+}
+
+/** 알바를 그날에 추가한 새 assignments 반환 (이미 있으면 그대로) */
+export function addAlba(
+    assignments: DayAssignment[],
+    date: string,
+    staffId: number,
+    albaRoster: StaffRow[]
+): DayAssignment[] {
+    const alba = albaRoster.find((s) => s.id === staffId);
+    if (!alba) return assignments;
+    const name = displayName(alba);
+    return assignments.map((day) => {
+        if (day.date !== date) return day;
+        const cur = day.albaWorking ?? [];
+        return cur.includes(name) ? day : { ...day, albaWorking: [...cur, name] };
+    });
+}
+
+/** 알바를 그날에서 제거한 새 assignments 반환 */
+export function removeAlba(
+    assignments: DayAssignment[],
+    date: string,
+    staffId: number,
+    albaRoster: StaffRow[]
+): DayAssignment[] {
+    const alba = albaRoster.find((s) => s.id === staffId);
+    if (!alba) return assignments;
+    const name = displayName(alba);
+    return assignments.map((day) =>
+        day.date === date
+            ? { ...day, albaWorking: (day.albaWorking ?? []).filter((n) => n !== name) }
+            : day
+    );
+}
+
+/** 알바를 From일에서 빼 To일로 옮긴다 (주말↔주말). */
+export function moveAlba(
+    assignments: DayAssignment[],
+    fromDate: string,
+    toDate: string,
+    staffId: number,
+    albaRoster: StaffRow[]
+): DayAssignment[] {
+    return addAlba(
+        removeAlba(assignments, fromDate, staffId, albaRoster),
+        toDate,
+        staffId,
+        albaRoster
+    );
+}

@@ -1,6 +1,6 @@
 import type { DayAssignment, ScheduleMonth } from '../types';
 import { buildScheduleGrid, pickTabName } from './scheduleGrid';
-import { CLOSURE_LABEL, CLOSURE_BG_HEX, CLOSURE_TEXT_HEX } from './scheduleFormatter';
+import { CLOSURE_LABEL, CLOSURE_BG_HEX, CLOSURE_TEXT_HEX, ALBA_COLOR } from './scheduleFormatter';
 
 const API = 'https://sheets.googleapis.com/v4/spreadsheets';
 
@@ -179,6 +179,70 @@ export async function applyClosureStyles(
     if (!res.ok) throw new Error(`구글 시트 API 오류 (${res.status})`);
 }
 
+function escapeRegExp(s: string): string {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * 셀 안의 알바 이름 글자만 주황색으로 칠한다 (rich text run).
+ * 알바는 색으로만 구분하므로(접미사 없음) 추가된 알바 이름 목록(albaNames)을 받아
+ * 쉼표·줄바꿈으로 구분된 온전한 토큰일 때만 색을 입히고, 그 뒤는 검정으로 복원한다.
+ */
+export async function applyAlbaStyles(
+    sheetId: string,
+    token: string,
+    tabSheetId: number,
+    grid: string[][],
+    albaNames: string[]
+): Promise<void> {
+    if (albaNames.length === 0) return;
+    const albaColor = hexToSheetColor(ALBA_COLOR);
+    const black = { red: 0, green: 0, blue: 0 };
+    const tokenRe = new RegExp(
+        `(?<![^\\n,])(?:${albaNames.map(escapeRegExp).join('|')})(?![^\\n,])`,
+        'g'
+    );
+    const requests: unknown[] = [];
+
+    grid.forEach((row, r) => {
+        row.forEach((val, c) => {
+            if (typeof val !== 'string') return;
+            const runs: { startIndex: number; format: { foregroundColor: object } }[] = [];
+            tokenRe.lastIndex = 0;
+            let m: RegExpExecArray | null;
+            while ((m = tokenRe.exec(val)) !== null) {
+                const end = m.index + m[0].length;
+                runs.push({ startIndex: m.index, format: { foregroundColor: albaColor } });
+                if (end < val.length) {
+                    runs.push({ startIndex: end, format: { foregroundColor: black } });
+                }
+            }
+            if (runs.length === 0) return;
+            requests.push({
+                updateCells: {
+                    start: { sheetId: tabSheetId, rowIndex: r, columnIndex: c },
+                    rows: [
+                        {
+                            values: [
+                                { userEnteredValue: { stringValue: val }, textFormatRuns: runs },
+                            ],
+                        },
+                    ],
+                    fields: 'userEnteredValue,textFormatRuns',
+                },
+            });
+        });
+    });
+
+    if (requests.length === 0) return;
+    const res = await fetch(`${API}/${sheetId}:batchUpdate`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requests }),
+    });
+    if (!res.ok) throw new Error(`구글 시트 API 오류 (${res.status})`);
+}
+
 /**
  * '기본틀' 탭을 복제(서식 유지)해 새 탭을 만들고 스케줄을 기록한다.
  * 복제본의 데이터 영역(A~H) 값만 비운 뒤 그리드를 써넣어, 서식은 유지하고
@@ -212,5 +276,7 @@ export async function writeScheduleToNewTab(
     await writeGrid(sheetId, token, tabName, grid);
     await setWrap(sheetId, token, newSheetId);
     await applyClosureStyles(sheetId, token, newSheetId, grid);
+    const albaNames = [...new Set(assignments.flatMap((a) => a.albaWorking ?? []))];
+    await applyAlbaStyles(sheetId, token, newSheetId, grid, albaNames);
     return tabName;
 }

@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { eligibleMovers, applyTrade, displayName } from '../personnelTrade';
+import {
+    eligibleMovers,
+    applyTrade,
+    displayName,
+    addableAlba,
+    addAlba,
+    removeAlba,
+    moveAlba,
+} from '../personnelTrade';
 import type { DayAssignment, StaffRow, CareerLevel } from '../../types';
 
 let nextId = 1;
@@ -162,5 +170,59 @@ describe('applyTrade', () => {
 
         expect(assignments[0].working).toEqual(['지수', '혜수']);
         expect(assignments[1].working).toEqual([]);
+    });
+});
+
+describe('알바 추가/삭제/이동', () => {
+    const 민지 = staff('민지', { employee_type_id: 7 });
+    const 해성 = staff('해성', { employee_type_id: 7 });
+    const 휴직알바 = staff('쉬는알바', { employee_type_id: 7, is_on_leave: true });
+    const albaRoster = [민지, 해성, 휴직알바];
+
+    function weekend() {
+        return [
+            day({ date: '2026-07-18', dayOfWeek: 6, working: ['지수', '혜수'] }), // 토
+            day({ date: '2026-07-19', dayOfWeek: 0, working: ['미연'] }), // 일
+        ];
+    }
+
+    it('addableAlba: 휴직 알바는 빼고, 이미 추가된 알바도 뺀다', () => {
+        const sat = day({ date: '2026-07-18', dayOfWeek: 6, albaWorking: ['민지'] });
+        expect(addableAlba(sat, albaRoster).map(displayName)).toEqual(['해성']);
+    });
+
+    it('addableAlba: 진료실 인원(type6)도 후보에 포함하되 그날 근무 중이면 제외', () => {
+        const 근무중 = staff('근무중', { employee_type_id: 6 });
+        const 쉬는중 = staff('쉬는중', { employee_type_id: 6 });
+        const candidates = [민지, 근무중, 쉬는중];
+        const sat = day({ date: '2026-07-18', dayOfWeek: 6, working: ['근무중'] });
+
+        // 근무중은 이미 정규 근무 → 제외, 쉬는중(off)·민지(알바)는 추가 가능
+        expect(addableAlba(sat, candidates).map(displayName)).toEqual(['민지', '쉬는중']);
+    });
+
+    it('addAlba: 해당 날짜 albaWorking에 추가한다', () => {
+        const next = addAlba(weekend(), '2026-07-18', 민지.id, albaRoster);
+        expect(next[0].albaWorking).toEqual(['민지']);
+        expect(next[1].albaWorking ?? []).toEqual([]);
+    });
+
+    it('addAlba: 이미 있으면 중복 추가하지 않는다', () => {
+        const once = addAlba(weekend(), '2026-07-18', 민지.id, albaRoster);
+        const twice = addAlba(once, '2026-07-18', 민지.id, albaRoster);
+        expect(twice[0].albaWorking).toEqual(['민지']);
+    });
+
+    it('removeAlba: 해당 날짜에서 제거한다', () => {
+        const added = addAlba(weekend(), '2026-07-18', 민지.id, albaRoster);
+        const removed = removeAlba(added, '2026-07-18', 민지.id, albaRoster);
+        expect(removed[0].albaWorking).toEqual([]);
+    });
+
+    it('moveAlba: 토→일로 옮기면 토에서 빠지고 일에 들어간다', () => {
+        const added = addAlba(weekend(), '2026-07-18', 민지.id, albaRoster);
+        const moved = moveAlba(added, '2026-07-18', '2026-07-19', 민지.id, albaRoster);
+        expect(moved[0].albaWorking).toEqual([]);
+        expect(moved[1].albaWorking).toEqual(['민지']);
     });
 });
