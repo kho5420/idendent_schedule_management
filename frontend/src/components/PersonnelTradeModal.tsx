@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { DayAssignment, StaffRow } from '../types';
 import { groupAssignmentsByWeek } from '../lib/weekGrouping';
 import { isClosureDay, ALBA_COLOR } from '../lib/scheduleFormatter';
@@ -50,6 +50,15 @@ export function PersonnelTradeModal({
     onClose,
 }: Props) {
     const [toDate, setToDate] = useState<string | null>(null);
+
+    // ESC로 모달 닫기
+    useEffect(() => {
+        function onKey(e: KeyboardEvent) {
+            if (e.key === 'Escape') onClose();
+        }
+        document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
+    }, [onClose]);
 
     const from = assignments.find((d) => d.date === fromDate);
     if (!from) return null;
