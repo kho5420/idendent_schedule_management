@@ -4,8 +4,8 @@
     /* 기본 테마 = Claude (따뜻한 크림 + 코랄) */
     --color-bg: #faf9f5;
     --color-card: #efe9de;
-    --color-border: #e6dfd8;
-    --color-border-hover: #d0c4b2;
+    --color-border: #d6cbb9;
+    --color-border-hover: #bdad96;
     --color-accent-from: #cc785c;
     --color-accent-to: #a9583e;
     --color-on-accent: #ffffff;
@@ -56,8 +56,8 @@
     --border-info: #b3d8d0;
     --border-warning: #e6cf97;
     --border-indigo: #b3d8d0;
-    --border-neutral: #e6dfd8;
-    --border-neutral-soft: #ebe6df;
+    --border-neutral: #d6cbb9;
+    --border-neutral-soft: #e0d6c7;
 
     /* 의미 기반 텍스트 */
     --text-danger: #c64545;
