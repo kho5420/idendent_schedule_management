@@ -6,7 +6,8 @@ export interface ThemeMeta {
 }
 
 export const THEMES = [
-    { id: 'default', label: '기본', swatch: ['#f0fdf4', '#ffffff', '#16a34a'] },
+    { id: 'default', label: 'Claude', swatch: ['#faf9f5', '#efe9de', '#cc785c'] },
+    { id: 'mint', label: '민트', swatch: ['#f0fdf4', '#ffffff', '#16a34a'] },
     { id: 'spotify', label: 'Spotify', swatch: ['#121212', '#181818', '#1ed760'] },
     { id: 'snowflake', label: 'Snowflake', swatch: ['#f5f8fa', '#ffffff', '#29b5e8'] },
     { id: 'posthog', label: 'PostHog', swatch: ['#eeefe9', '#ffffff', '#f7a501'] },
