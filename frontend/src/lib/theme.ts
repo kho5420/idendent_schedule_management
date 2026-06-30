@@ -6,11 +6,11 @@ export interface ThemeMeta {
 }
 
 export const THEMES = [
-    { id: 'default', label: 'Claude', swatch: ['#faf9f5', '#efe9de', '#cc785c'] },
+    { id: 'default', label: 'PostHog', swatch: ['#eeefe9', '#ffffff', '#f7a501'] },
+    { id: 'claude', label: 'Claude', swatch: ['#faf9f5', '#efe9de', '#cc785c'] },
     { id: 'mint', label: '민트', swatch: ['#f0fdf4', '#ffffff', '#16a34a'] },
     { id: 'spotify', label: 'Spotify', swatch: ['#121212', '#181818', '#1ed760'] },
     { id: 'snowflake', label: 'Snowflake', swatch: ['#f5f8fa', '#ffffff', '#29b5e8'] },
-    { id: 'posthog', label: 'PostHog', swatch: ['#eeefe9', '#ffffff', '#f7a501'] },
     { id: 'bmw', label: 'BMW M', swatch: ['#000000', '#1a1a1a', '#1c69d4'] },
 ] as const satisfies readonly ThemeMeta[];
 

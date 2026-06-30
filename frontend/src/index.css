@@ -1,80 +1,80 @@
 @import 'tailwindcss';
 
 :root {
-    /* 기본 테마 = Claude (따뜻한 크림 + 코랄) */
-    --color-bg: #faf9f5;
-    --color-card: #efe9de;
-    --color-border: #d6cbb9;
-    --color-border-hover: #bdad96;
-    --color-accent-from: #cc785c;
-    --color-accent-to: #a9583e;
-    --color-on-accent: #ffffff;
-    --color-text: #141413;
-    --color-text-sub: #6c6a64;
-    --color-success: #5db872;
-    --color-tag-bg: #e8e0d2;
-    --color-tag-text: #3d3d3a;
+    /* 기본 테마 = PostHog (따뜻한 크림 + 노란 CTA) */
+    --color-bg: #eeefe9;
+    --color-card: #ffffff;
+    --color-border: #bfc1b7;
+    --color-border-hover: #9b9c92;
+    --color-accent-from: #f7a501;
+    --color-accent-to: #dd9001;
+    --color-on-accent: #23251d;
+    --color-text: #23251d;
+    --color-text-sub: #6c6e63;
+    --color-success: #2c8c66;
+    --color-tag-bg: #e5e7e0;
+    --color-tag-text: #4d4f46;
 
     /* 형태 토큰 (테마별로 덮어씀) */
-    --radius-btn: 8px;
-    --radius-card: 12px;
+    --radius-btn: 6px;
+    --radius-card: 8px;
     --radius-chip: 9999px;
-    --shadow-card: rgba(20, 20, 19, 0.08) 0px 1px 3px;
+    --shadow-card: none;
     --btn-transform: none;
     --btn-tracking: normal;
     --font-ui:
-        StyreneB, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Pretendard Variable',
+        'IBM Plex Sans', Inter, -apple-system, BlinkMacSystemFont, 'Pretendard Variable',
         Pretendard, 'Noto Sans KR', system-ui, sans-serif;
 
     /* 의미 기반 표면 (테마별로 덮어씀) */
-    --surface-danger: #f6e3e0;
-    --surface-danger-strong: #efd2cd;
-    --surface-danger-soft: #faf0ee;
-    --surface-success: #e2f1e6;
-    --surface-success-soft: #eef6f0;
-    --surface-info: #e3eef0;
-    --surface-warning: #f7eed6;
-    --surface-warning-strong: #f1e3bb;
-    --surface-weekend: #f6e3e0;
-    --surface-weekend-row: #f3ece1;
-    --surface-indigo: #e3eef0;
-    --surface-indigo-soft: #eef4f5;
-    --surface-purple: #ece6f0;
-    --surface-neutral: #faf9f5;
-    --surface-neutral-soft: #f5f0e8;
-    --surface-disabled: #e6dfd8;
-    --surface-frost: rgba(255, 255, 255, 0.5);
+    --surface-danger: #f7d6d3;
+    --surface-danger-strong: #efc3bf;
+    --surface-danger-soft: #fbe8e6;
+    --surface-success: #d9eddf;
+    --surface-success-soft: #e8f3ec;
+    --surface-info: #dceaf6;
+    --surface-warning: #fbeacb;
+    --surface-warning-strong: #f6dca8;
+    --surface-weekend: #f7d6d3;
+    --surface-weekend-row: #f3ead9;
+    --surface-indigo: #dceaf6;
+    --surface-indigo-soft: #e8f1f9;
+    --surface-purple: #e7d8ee;
+    --surface-neutral: #e5e7e0;
+    --surface-neutral-soft: #eceee7;
+    --surface-disabled: #e5e7e0;
+    --surface-frost: rgba(255, 255, 255, 0.55);
 
     /* 모달 헤더 그라데이션 (테마 브랜드색) */
-    --surface-header-from: #f3e3db;
-    --surface-header-mid: #eeded3;
-    --surface-header-to: #e8d5c8;
+    --surface-header-from: #f3ecdd;
+    --surface-header-mid: #f1e6cd;
+    --surface-header-to: #ecd9ad;
 
     /* 의미 기반 테두리 */
-    --border-danger: #e2b3ad;
-    --border-success: #b3dcbf;
-    --border-info: #b3d8d0;
-    --border-warning: #e6cf97;
-    --border-indigo: #b3d8d0;
-    --border-neutral: #d6cbb9;
-    --border-neutral-soft: #e0d6c7;
+    --border-danger: #e8a8a2;
+    --border-success: #b3d8c2;
+    --border-info: #b8d4ec;
+    --border-warning: #e6c48f;
+    --border-indigo: #b8d4ec;
+    --border-neutral: #bfc1b7;
+    --border-neutral-soft: #dcdfd2;
 
     /* 의미 기반 텍스트 */
-    --text-danger: #c64545;
-    --text-danger-strong: #c64545;
-    --text-success: #3a7d52;
-    --text-info: #a9583e;
-    --text-info-strong: #a9583e;
-    --text-warning: #946f10;
-    --text-warning-badge: #946f10;
-    --text-orange: #b3651f;
-    --text-purple: #7a4ea0;
-    --text-indigo: #a9583e;
-    --text-indigo-strong: #a9583e;
-    --text-strong: #141413;
-    --text-neutral: #6c6a64;
-    --text-neutral-sub: #8e8b82;
-    --text-neutral-strong: #252523;
+    --text-danger: #cd4239;
+    --text-danger-strong: #cd4239;
+    --text-success: #2c8c66;
+    --text-info: #1078a3;
+    --text-info-strong: #1d4ed8;
+    --text-warning: #b17816;
+    --text-warning-badge: #b17816;
+    --text-orange: #b17816;
+    --text-purple: #7c44a6;
+    --text-indigo: #1d4ed8;
+    --text-indigo-strong: #1d4ed8;
+    --text-strong: #23251d;
+    --text-neutral: #6c6e63;
+    --text-neutral-sub: #9b9c92;
+    --text-neutral-strong: #33342d;
 }
 
 body {
@@ -298,77 +298,77 @@ body {
     --text-neutral-strong: #1a2b3c;
 }
 
-[data-theme='posthog'] {
-    --color-bg: #eeefe9;
-    --color-card: #ffffff;
-    --color-border: #bfc1b7;
-    --color-border-hover: #9b9c92;
-    --color-accent-from: #f7a501;
-    --color-accent-to: #dd9001;
-    --color-on-accent: #23251d;
-    --color-text: #23251d;
-    --color-text-sub: #6c6e63;
-    --color-success: #2c8c66;
-    --color-tag-bg: #e5e7e0;
-    --color-tag-text: #4d4f46;
+[data-theme='claude'] {
+    --color-bg: #faf9f5;
+    --color-card: #efe9de;
+    --color-border: #d6cbb9;
+    --color-border-hover: #bdad96;
+    --color-accent-from: #cc785c;
+    --color-accent-to: #a9583e;
+    --color-on-accent: #ffffff;
+    --color-text: #141413;
+    --color-text-sub: #6c6a64;
+    --color-success: #5db872;
+    --color-tag-bg: #e8e0d2;
+    --color-tag-text: #3d3d3a;
 
-    --radius-btn: 6px;
-    --radius-card: 8px;
+    --radius-btn: 8px;
+    --radius-card: 12px;
     --radius-chip: 9999px;
-    --shadow-card: none;
+    --shadow-card: rgba(20, 20, 19, 0.08) 0px 1px 3px;
     --font-ui:
-        'IBM Plex Sans', Inter, -apple-system, BlinkMacSystemFont, 'Pretendard Variable',
+        StyreneB, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Pretendard Variable',
         Pretendard, 'Noto Sans KR', system-ui, sans-serif;
 
-    /* 의미 기반 표면 — 크림/올리브 톤 */
-    --surface-danger: #f7d6d3;
-    --surface-danger-strong: #efc3bf;
-    --surface-danger-soft: #fbe8e6;
-    --surface-success: #d9eddf;
-    --surface-success-soft: #e8f3ec;
-    --surface-info: #dceaf6;
-    --surface-warning: #fbeacb;
-    --surface-warning-strong: #f6dca8;
-    --surface-weekend: #f7d6d3;
-    --surface-weekend-row: #f3ead9;
-    --surface-indigo: #dceaf6;
-    --surface-indigo-soft: #e8f1f9;
-    --surface-purple: #e7d8ee;
-    --surface-neutral: #e5e7e0;
-    --surface-neutral-soft: #eceee7;
-    --surface-disabled: #e5e7e0;
-    --surface-frost: rgba(255, 255, 255, 0.55);
+    /* 의미 기반 표면 — 크림/코랄 톤 */
+    --surface-danger: #f6e3e0;
+    --surface-danger-strong: #efd2cd;
+    --surface-danger-soft: #faf0ee;
+    --surface-success: #e2f1e6;
+    --surface-success-soft: #eef6f0;
+    --surface-info: #e3eef0;
+    --surface-warning: #f7eed6;
+    --surface-warning-strong: #f1e3bb;
+    --surface-weekend: #f6e3e0;
+    --surface-weekend-row: #f3ece1;
+    --surface-indigo: #e3eef0;
+    --surface-indigo-soft: #eef4f5;
+    --surface-purple: #ece6f0;
+    --surface-neutral: #faf9f5;
+    --surface-neutral-soft: #f5f0e8;
+    --surface-disabled: #e6dfd8;
+    --surface-frost: rgba(255, 255, 255, 0.5);
 
-    /* 모달 헤더 그라데이션 — 크림/골드 톤 */
-    --surface-header-from: #f3ecdd;
-    --surface-header-mid: #f1e6cd;
-    --surface-header-to: #ecd9ad;
+    /* 모달 헤더 그라데이션 — 크림/코랄 톤 */
+    --surface-header-from: #f3e3db;
+    --surface-header-mid: #eeded3;
+    --surface-header-to: #e8d5c8;
 
-    /* 의미 기반 테두리 — 올리브 톤 */
-    --border-danger: #e8a8a2;
-    --border-success: #b3d8c2;
-    --border-info: #b8d4ec;
-    --border-warning: #e6c48f;
-    --border-indigo: #b8d4ec;
-    --border-neutral: #bfc1b7;
-    --border-neutral-soft: #dcdfd2;
+    /* 의미 기반 테두리 — 크림 톤 */
+    --border-danger: #e2b3ad;
+    --border-success: #b3dcbf;
+    --border-info: #b3d8d0;
+    --border-warning: #e6cf97;
+    --border-indigo: #b3d8d0;
+    --border-neutral: #d6cbb9;
+    --border-neutral-soft: #e0d6c7;
 
-    /* 의미 기반 텍스트 — 올리브/세만틱 */
-    --text-danger: #cd4239;
-    --text-danger-strong: #cd4239;
-    --text-success: #2c8c66;
-    --text-info: #1078a3;
-    --text-info-strong: #1d4ed8;
-    --text-warning: #b17816;
-    --text-warning-badge: #b17816;
-    --text-orange: #b17816;
-    --text-purple: #7c44a6;
-    --text-indigo: #1d4ed8;
-    --text-indigo-strong: #1d4ed8;
-    --text-strong: #23251d;
-    --text-neutral: #6c6e63;
-    --text-neutral-sub: #9b9c92;
-    --text-neutral-strong: #33342d;
+    /* 의미 기반 텍스트 — 코랄/세만틱 */
+    --text-danger: #c64545;
+    --text-danger-strong: #c64545;
+    --text-success: #3a7d52;
+    --text-info: #a9583e;
+    --text-info-strong: #a9583e;
+    --text-warning: #946f10;
+    --text-warning-badge: #946f10;
+    --text-orange: #b3651f;
+    --text-purple: #7a4ea0;
+    --text-indigo: #a9583e;
+    --text-indigo-strong: #a9583e;
+    --text-strong: #141413;
+    --text-neutral: #6c6a64;
+    --text-neutral-sub: #8e8b82;
+    --text-neutral-strong: #252523;
 }
 
 [data-theme='bmw'] {
