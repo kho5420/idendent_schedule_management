@@ -446,8 +446,8 @@ function MainPage() {
                 <>
                     <div
                         style={{
-                            background: 'var(--surface-success-soft)',
-                            border: '1px solid var(--border-success)',
+                            background: 'var(--color-tag-bg)',
+                            border: '1px solid var(--color-border)',
                             borderRadius: 8,
                             padding: '10px 12px',
                             marginBottom: 12,
