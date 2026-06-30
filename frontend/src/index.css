@@ -1,80 +1,80 @@
 @import 'tailwindcss';
 
 :root {
-    /* 기본 테마 = PostHog (따뜻한 크림 + 노란 CTA) */
-    --color-bg: #eeefe9;
+    /* 기본 테마 = Apple (화이트/파치먼트 + 액션 블루) */
+    --color-bg: #f5f5f7;
     --color-card: #ffffff;
-    --color-border: #bfc1b7;
-    --color-border-hover: #9b9c92;
-    --color-accent-from: #f7a501;
-    --color-accent-to: #dd9001;
-    --color-on-accent: #23251d;
-    --color-text: #23251d;
-    --color-text-sub: #6c6e63;
-    --color-success: #2c8c66;
-    --color-tag-bg: #e5e7e0;
-    --color-tag-text: #4d4f46;
+    --color-border: #cbcbd1;
+    --color-border-hover: #b4b4bb;
+    --color-accent-from: #0071e3;
+    --color-accent-to: #0066cc;
+    --color-on-accent: #ffffff;
+    --color-text: #1d1d1f;
+    --color-text-sub: #6e6e73;
+    --color-success: #248a3d;
+    --color-tag-bg: #e8e8ed;
+    --color-tag-text: #3a3a3c;
 
     /* 형태 토큰 (테마별로 덮어씀) */
-    --radius-btn: 6px;
-    --radius-card: 8px;
+    --radius-btn: 9999px;
+    --radius-card: 18px;
     --radius-chip: 9999px;
     --shadow-card: none;
     --btn-transform: none;
     --btn-tracking: normal;
     --font-ui:
-        'IBM Plex Sans', Inter, -apple-system, BlinkMacSystemFont, 'Pretendard Variable',
-        Pretendard, 'Noto Sans KR', system-ui, sans-serif;
+        system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', Inter, 'Pretendard Variable',
+        Pretendard, 'Noto Sans KR', sans-serif;
 
     /* 의미 기반 표면 (테마별로 덮어씀) */
-    --surface-danger: #f7d6d3;
-    --surface-danger-strong: #efc3bf;
-    --surface-danger-soft: #fbe8e6;
-    --surface-success: #d9eddf;
-    --surface-success-soft: #e8f3ec;
-    --surface-info: #dceaf6;
-    --surface-warning: #fbeacb;
-    --surface-warning-strong: #f6dca8;
-    --surface-weekend: #f7d6d3;
-    --surface-weekend-row: #f3ead9;
-    --surface-indigo: #dceaf6;
-    --surface-indigo-soft: #e8f1f9;
-    --surface-purple: #e7d8ee;
-    --surface-neutral: #e5e7e0;
-    --surface-neutral-soft: #eceee7;
-    --surface-disabled: #e5e7e0;
-    --surface-frost: rgba(255, 255, 255, 0.55);
+    --surface-danger: #ffe5e3;
+    --surface-danger-strong: #ffd9d6;
+    --surface-danger-soft: #fff2f1;
+    --surface-success: #e3f5e9;
+    --surface-success-soft: #eef8f1;
+    --surface-info: #e3f0fb;
+    --surface-warning: #fff4e0;
+    --surface-warning-strong: #ffe9c2;
+    --surface-weekend: #ffecea;
+    --surface-weekend-row: #f3f3f5;
+    --surface-indigo: #e3f0fb;
+    --surface-indigo-soft: #eef5fc;
+    --surface-purple: #efe9f8;
+    --surface-neutral: #f0f0f3;
+    --surface-neutral-soft: #e8e8ed;
+    --surface-disabled: #e8e8ed;
+    --surface-frost: rgba(255, 255, 255, 0.6);
 
     /* 모달 헤더 그라데이션 (테마 브랜드색) */
-    --surface-header-from: #f3ecdd;
-    --surface-header-mid: #f1e6cd;
-    --surface-header-to: #ecd9ad;
+    --surface-header-from: #f5f5f7;
+    --surface-header-mid: #ededf1;
+    --surface-header-to: #e6e6eb;
 
     /* 의미 기반 테두리 */
-    --border-danger: #e8a8a2;
-    --border-success: #b3d8c2;
-    --border-info: #b8d4ec;
-    --border-warning: #e6c48f;
-    --border-indigo: #b8d4ec;
-    --border-neutral: #bfc1b7;
-    --border-neutral-soft: #dcdfd2;
+    --border-danger: #f3b0ab;
+    --border-success: #aedcbf;
+    --border-info: #aacdf0;
+    --border-warning: #f0d49a;
+    --border-indigo: #aacdf0;
+    --border-neutral: #cbcbd1;
+    --border-neutral-soft: #dededf;
 
     /* 의미 기반 텍스트 */
-    --text-danger: #cd4239;
-    --text-danger-strong: #cd4239;
-    --text-success: #2c8c66;
-    --text-info: #1078a3;
-    --text-info-strong: #1d4ed8;
-    --text-warning: #b17816;
-    --text-warning-badge: #b17816;
-    --text-orange: #b17816;
-    --text-purple: #7c44a6;
-    --text-indigo: #1d4ed8;
-    --text-indigo-strong: #1d4ed8;
-    --text-strong: #23251d;
-    --text-neutral: #6c6e63;
-    --text-neutral-sub: #9b9c92;
-    --text-neutral-strong: #33342d;
+    --text-danger: #d70015;
+    --text-danger-strong: #d70015;
+    --text-success: #248a3d;
+    --text-info: #0066cc;
+    --text-info-strong: #0066cc;
+    --text-warning: #9a6700;
+    --text-warning-badge: #9a6700;
+    --text-orange: #b45309;
+    --text-purple: #7a3ea0;
+    --text-indigo: #0066cc;
+    --text-indigo-strong: #0066cc;
+    --text-strong: #1d1d1f;
+    --text-neutral: #6e6e73;
+    --text-neutral-sub: #8e8e93;
+    --text-neutral-strong: #333333;
 }
 
 body {
@@ -296,6 +296,75 @@ body {
     --text-neutral: #5b6b7b;
     --text-neutral-sub: #8a98a6;
     --text-neutral-strong: #1a2b3c;
+}
+
+[data-theme='posthog'] {
+    --color-bg: #eeefe9;
+    --color-card: #ffffff;
+    --color-border: #bfc1b7;
+    --color-border-hover: #9b9c92;
+    --color-accent-from: #f7a501;
+    --color-accent-to: #dd9001;
+    --color-on-accent: #23251d;
+    --color-text: #23251d;
+    --color-text-sub: #6c6e63;
+    --color-success: #2c8c66;
+    --color-tag-bg: #e5e7e0;
+    --color-tag-text: #4d4f46;
+
+    --radius-btn: 6px;
+    --radius-card: 8px;
+    --radius-chip: 9999px;
+    --shadow-card: none;
+    --font-ui:
+        'IBM Plex Sans', Inter, -apple-system, BlinkMacSystemFont, 'Pretendard Variable',
+        Pretendard, 'Noto Sans KR', system-ui, sans-serif;
+
+    --surface-danger: #f7d6d3;
+    --surface-danger-strong: #efc3bf;
+    --surface-danger-soft: #fbe8e6;
+    --surface-success: #d9eddf;
+    --surface-success-soft: #e8f3ec;
+    --surface-info: #dceaf6;
+    --surface-warning: #fbeacb;
+    --surface-warning-strong: #f6dca8;
+    --surface-weekend: #f7d6d3;
+    --surface-weekend-row: #f3ead9;
+    --surface-indigo: #dceaf6;
+    --surface-indigo-soft: #e8f1f9;
+    --surface-purple: #e7d8ee;
+    --surface-neutral: #e5e7e0;
+    --surface-neutral-soft: #eceee7;
+    --surface-disabled: #e5e7e0;
+    --surface-frost: rgba(255, 255, 255, 0.55);
+
+    --surface-header-from: #f3ecdd;
+    --surface-header-mid: #f1e6cd;
+    --surface-header-to: #ecd9ad;
+
+    --border-danger: #e8a8a2;
+    --border-success: #b3d8c2;
+    --border-info: #b8d4ec;
+    --border-warning: #e6c48f;
+    --border-indigo: #b8d4ec;
+    --border-neutral: #bfc1b7;
+    --border-neutral-soft: #dcdfd2;
+
+    --text-danger: #cd4239;
+    --text-danger-strong: #cd4239;
+    --text-success: #2c8c66;
+    --text-info: #1078a3;
+    --text-info-strong: #1d4ed8;
+    --text-warning: #b17816;
+    --text-warning-badge: #b17816;
+    --text-orange: #b17816;
+    --text-purple: #7c44a6;
+    --text-indigo: #1d4ed8;
+    --text-indigo-strong: #1d4ed8;
+    --text-strong: #23251d;
+    --text-neutral: #6c6e63;
+    --text-neutral-sub: #9b9c92;
+    --text-neutral-strong: #33342d;
 }
 
 [data-theme='claude'] {
