@@ -191,6 +191,19 @@ describe('알바 추가/삭제/이동', () => {
         expect(addableAlba(sat, albaRoster).map(displayName)).toEqual(['해성']);
     });
 
+    it('addableAlba: 그날 명시적 연차/주차가 있는 인원은 제외', () => {
+        const 연차자 = staff('연차자', { employee_type_id: 6 });
+        const candidates = [민지, 연차자];
+        const sat = day({
+            date: '2026-07-18',
+            dayOfWeek: 6,
+            working: [],
+            fullDayOff: [{ date: '2026-07-18', name: '연차자', type: '연차' }],
+        });
+
+        expect(addableAlba(sat, candidates).map(displayName)).toEqual(['민지']);
+    });
+
     it('addableAlba: 진료실 인원(type6)도 후보에 포함하되 그날 근무 중이면 제외', () => {
         const 근무중 = staff('근무중', { employee_type_id: 6 });
         const 쉬는중 = staff('쉬는중', { employee_type_id: 6 });

@@ -108,13 +108,14 @@ export function applyTrade(
 export function addableAlba(day: DayAssignment, candidates: StaffRow[]): StaffRow[] {
     const alreadyAlba = new Set(day.albaWorking ?? []);
     const working = new Set(day.working);
+    const onLeave = new Set(day.fullDayOff.map((r) => r.name)); // 그날 명시적 연차/주차
     const seen = new Set<number>();
     return candidates.filter((s) => {
         if (seen.has(s.id)) return false;
         seen.add(s.id);
         if (s.use_yn !== 'Y' || s.is_on_leave) return false;
         const name = displayName(s);
-        return !alreadyAlba.has(name) && !working.has(name);
+        return !alreadyAlba.has(name) && !working.has(name) && !onLeave.has(name);
     });
 }
 
